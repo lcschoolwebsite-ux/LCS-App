@@ -2,5 +2,8 @@ backend/.env
 backend/node_modules/
 frontend/node_modules/
 frontend/dist/
+frontend/lint.json
+frontend/lint_output.txt
+frontend/screenshot.png
 Student Details 2026-27.xlsx
 .DS_Store
