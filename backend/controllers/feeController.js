@@ -1,12 +1,20 @@
 const Razorpay = require("razorpay");
 const crypto   = require("crypto");
 const Fee      = require("../models/Fee");
-const { getIO } = require("../utils/socket");
 
-const rzp = new Razorpay({
-  key_id:     process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const hasRazorpayCredentials = () =>
+  Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+
+const getRazorpayClient = () => {
+  if (!hasRazorpayCredentials()) {
+    throw new Error("Online fee payment is not configured on the server");
+  }
+
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+};
 
 exports.getStudentFee = async (req, res) => {
   try {
@@ -18,13 +26,13 @@ exports.getStudentFee = async (req, res) => {
 exports.createOrder = async (req, res) => {
   try {
     const { amount, studentId } = req.body;
-    const order = await rzp.orders.create({
+    const order = await getRazorpayClient().orders.create({
       amount:   amount * 100,
       currency: "INR",
       receipt:  `rcpt_${Date.now()}`,
       notes:    { studentId }
     });
-    res.json(order);
+    res.json({ ...order, keyId: process.env.RAZORPAY_KEY_ID });
   } catch (e) { res.status(500).json({ message: e.message }); }
 };
 
@@ -33,6 +41,10 @@ exports.verifyPayment = async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, studentId, amount } = req.body;
 
     const body      = razorpay_order_id + "|" + razorpay_payment_id;
+    if (!hasRazorpayCredentials()) {
+      return res.status(500).json({ message: "Online fee payment is not configured on the server" });
+    }
+
     const expected  = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
                             .update(body).digest("hex");
 
