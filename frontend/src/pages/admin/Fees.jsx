@@ -1,0 +1,367 @@
+import React, { useState, useEffect } from "react";
+import api from "../../api/axios";
+import SectionTitle from "../../components/SectionTitle";
+import Modal from "../../components/Modal";
+
+export default function Fees() {
+  const [stats, setStats] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [selectedFee, setSelectedFee] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [academicYears, setAcademicYears] = useState([]);
+  const [activeAY, setActiveAY] = useState("");
+  const [classes, setClasses] = useState([]);
+  const [filters, setFilters] = useState({ classId: "", search: "", status: "" });
+  const [error, setError] = useState("");
+  
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({
+    amount: "", method: "Cash", paidDate: new Date().toISOString().split('T')[0], note: "School Fee Payment"
+  });
+
+  const formatClass = cls => {
+    if (!cls) return "No class";
+    return `${cls.name || ""}${cls.section || ""}`.trim() || "No class";
+  };
+
+  const fetchSetupData = async () => {
+    setLoading(true);
+    try {
+      const [ayRes, clRes] = await Promise.all([
+        api.get("/academic-years"),
+        api.get("/classes")
+      ]);
+      setAcademicYears(ayRes.data);
+      setClasses(clRes.data);
+      const active = ayRes.data.find(y => y.isActive);
+      if (!activeAY) setActiveAY(active?._id || ayRes.data[0]?._id || "");
+    } catch (e) {
+      setError(e.response?.data?.message || "Unable to load fee setup data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFeeData = async () => {
+    if (!activeAY) return;
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams({
+        academicYear: activeAY,
+        classId: filters.classId,
+        search: filters.search,
+        status: filters.status
+      });
+
+      const [feeRes, statsRes] = await Promise.all([
+        api.get(`/student-fees?${params.toString()}`),
+        api.get(`/student-fees/stats?academicYear=${activeAY}&classId=${filters.classId}`)
+      ]);
+
+      setStudents(feeRes.data);
+      setStats(statsRes.data);
+      setSelectedFee(current => {
+        if (!current) return null;
+        return feeRes.data.find(fee => fee._id === current._id) || null;
+      });
+    } catch (e) {
+      setError(e.response?.data?.message || "Unable to load fee records.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSetupData();
+  }, []);
+
+  useEffect(() => {
+    fetchFeeData();
+  }, [activeAY, filters.classId, filters.status, filters.search]);
+
+  const handleRecordPayment = async () => {
+    if (!paymentForm.amount || paymentForm.amount <= 0) return alert("Enter valid amount");
+    if (Number(paymentForm.amount) > Number(selectedFee?.totalDue || 0)) return alert("Payment cannot be more than total due");
+    try {
+      await api.post("/student-fees/record-flexible-payment", {
+        studentFeeId: selectedFee._id,
+        ...paymentForm
+      });
+      alert("Payment recorded successfully!");
+      setIsPaymentModalOpen(false);
+      // Refresh
+      const { data } = await api.get(`/student-fees/student/${selectedFee.student?._id}?academicYear=${activeAY}`);
+      setSelectedFee(data);
+      fetchFeeData();
+      setPaymentForm({
+        amount: "", method: "Cash", paidDate: new Date().toISOString().split('T')[0], note: "School Fee Payment"
+      });
+    } catch (e) { alert(e.response?.data?.message || "Failed to record payment"); }
+  };
+
+  return (
+    <div>
+      <SectionTitle title="Fee Management" subtitle="Track collections and record offline payments." />
+
+      {error && <div style={s.errorBox}>{error}</div>}
+
+      {/* Stats Bar */}
+      {stats && (
+        <div style={s.statsBar}>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Expected</div>
+            <div style={s.statValue}>₹{Number(stats.totalFeeExpected || 0).toLocaleString()}</div>
+          </div>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Collected</div>
+            <div style={s.statValue}>₹{Number(stats.totalCollected || 0).toLocaleString()}</div>
+          </div>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Total Due</div>
+            <div style={{...s.statValue, color: '#ef4444'}}>₹{Number(stats.totalDue || 0).toLocaleString()}</div>
+          </div>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Paid Students</div>
+            <div style={s.statValue}>{stats.paidCount}</div>
+          </div>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Partial</div>
+            <div style={s.statValue}>{stats.partialCount}</div>
+          </div>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Unpaid</div>
+            <div style={s.statValue}>{stats.unpaidCount}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div style={s.filterRow}>
+        <select style={s.input} value={activeAY} onChange={e => setActiveAY(e.target.value)}>
+          {academicYears.map(y => <option key={y._id} value={y._id}>{y.year}</option>)}
+        </select>
+        <select style={s.input} value={filters.classId} onChange={e => setFilters({...filters, classId: e.target.value})}>
+          <option value="">All Classes</option>
+          {classes.map(c => <option key={c._id} value={c._id}>{formatClass(c)}</option>)}
+        </select>
+        <select style={s.input} value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})}>
+          <option value="">All Status</option>
+          <option value="Paid">Paid</option>
+          <option value="Partial">Partial</option>
+          <option value="Unpaid">Unpaid</option>
+        </select>
+        <input 
+          style={{...s.input, flex: 1}} 
+          placeholder="Search student or SAT code..." 
+          value={filters.search} 
+          onChange={e => setFilters({...filters, search: e.target.value})}
+        />
+      </div>
+
+      <div style={s.mainGrid}>
+        {/* Left List */}
+        <div style={s.listPanel}>
+          {loading && <div style={s.emptyBox}>Loading fee records...</div>}
+          {!loading && students.length === 0 && (
+            <div style={s.emptyBox}>
+              No fee records found. Set up fee structure for a class, then make sure students are assigned to that academic year.
+            </div>
+          )}
+          {!loading && students.map(fee => (
+            <div 
+              key={fee._id} 
+              onClick={() => setSelectedFee(fee)}
+              style={{
+                ...s.studentCard, 
+                borderLeft: `5px solid ${fee.overallStatus === "Paid" ? "#10b981" : fee.overallStatus === "Partial" ? "#f59e0b" : "#ef4444"}`,
+                background: selectedFee?._id === fee._id ? "var(--gold-pale)" : "white"
+              }}
+            >
+              <div style={s.studentInfo}>
+                <div style={s.avatar}>{fee.student?.name?.[0]}</div>
+                <div>
+                  <div style={s.studentName}>{fee.student?.name}</div>
+                  <div style={s.studentSub}>{fee.student?.satCode} • {formatClass(fee.student?.class)}</div>
+                </div>
+              </div>
+              <div style={s.feeShortInfo}>
+                <div style={{...s.statusBadge, ...(fee.overallStatus === "Paid" ? s.bgPaid : fee.overallStatus === "Partial" ? s.bgPartial : s.bgUnpaid)}}>
+                  {fee.overallStatus}
+                </div>
+                <div style={s.dueText}>Due: ₹{Number(fee.totalDue || 0).toLocaleString()}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Right Detail */}
+        <div style={s.detailPanel}>
+          {selectedFee ? (
+            <div style={{animation: 'fadeIn 0.3s ease'}}>
+               <div style={s.detailHeader}>
+                  <div style={s.largeAvatar}>{selectedFee.student?.name?.[0]}</div>
+                  <div style={{flex: 1}}>
+                    <h2 style={s.detailName}>{selectedFee.student?.name}</h2>
+                    <p style={s.detailSub}>{selectedFee.student?.satCode} • {formatClass(selectedFee.student?.class)}</p>
+                    <div style={{...s.statusBadge, ...(selectedFee.overallStatus === "Paid" ? s.bgPaid : selectedFee.overallStatus === "Partial" ? s.bgPartial : s.bgUnpaid)}}>
+                      Overall Status: {selectedFee.overallStatus}
+                    </div>
+                  </div>
+                  <button onClick={() => setIsPaymentModalOpen(true)} style={s.btnMainRecord} disabled={selectedFee.totalDue <= 0}>
+                    <i className="fa-solid fa-plus-circle"></i> Record Payment
+                  </button>
+               </div>
+
+               <div style={s.detailMetrics}>
+                  <div style={s.metricBox}>
+                    <div style={s.metricLabel}>Annual Total</div>
+                    <div style={s.metricValue}>₹{Number(selectedFee.totalAnnualFee || 0).toLocaleString()}</div>
+                  </div>
+                  <div style={s.metricBox}>
+                    <div style={s.metricLabel}>Total Paid</div>
+                    <div style={{...s.metricValue, color: '#10b981'}}>₹{Number(selectedFee.totalPaid || 0).toLocaleString()}</div>
+                  </div>
+                  <div style={s.metricBox}>
+                    <div style={s.metricLabel}>Total Due</div>
+                    <div style={{...s.metricValue, color: '#ef4444'}}>₹{Number(selectedFee.totalDue || 0).toLocaleString()}</div>
+                  </div>
+               </div>
+
+               <div style={s.sectionTitle}>Transaction History</div>
+               {selectedFee.terms.filter(t => t.status === "Paid").length > 0 ? (
+                 <table style={s.table}>
+                    <thead>
+                      <tr>
+                        <th style={s.th}>Description</th>
+                        <th style={s.th}>Amount</th>
+                        <th style={s.th}>Method</th>
+                        <th style={s.th}>Date</th>
+                        <th style={s.th}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedFee.terms.filter(t => t.status === "Paid").reverse().map((term, idx) => (
+                        <tr key={idx}>
+                          <td style={s.td}>{term.termName}</td>
+                          <td style={s.td}>₹{Number(term.paidAmount || 0).toLocaleString()}</td>
+                          <td style={s.td}>{term.method}</td>
+                          <td style={s.td}>{term.paidDate}</td>
+                          <td style={s.td}>
+                            <button style={s.btnReceipt} onClick={() => alert("Receipt View Pending")}>
+                              <i className="fa-solid fa-file-invoice"></i> Receipt
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                 </table>
+               ) : (
+                 <div style={s.noPlanBox}>
+                    <i className="fa-solid fa-receipt" style={{fontSize: '2rem', marginBottom: '10px'}}></i>
+                    <p>No payments recorded yet.</p>
+                 </div>
+               )}
+            </div>
+          ) : (
+            <div style={s.placeholder}>Select a student to manage fees</div>
+          )}
+        </div>
+      </div>
+
+      <Modal 
+        isOpen={isPaymentModalOpen} 
+        onClose={() => setIsPaymentModalOpen(false)}
+        title={`Record Payment — ${selectedFee?.student?.name}`}
+        footer={
+          <div style={{display: 'flex', gap: '12px', width: '100%'}}>
+            <button onClick={() => setIsPaymentModalOpen(false)} style={s.btnCancel}>Cancel</button>
+            <button onClick={handleRecordPayment} style={s.btnConfirm}>Confirm & Save</button>
+          </div>
+        }
+      >
+        <div style={s.modalForm}>
+          <div style={s.formGroup}>
+            <label style={s.fLabel}>Amount to Pay (₹)</label>
+            <input 
+              type="number" 
+              style={s.input} 
+              placeholder={`Max: ₹${selectedFee?.totalDue}`}
+              value={paymentForm.amount} 
+              onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} 
+            />
+          </div>
+          <div style={s.formGroup}>
+            <label style={s.fLabel}>Payment Method</label>
+            <select style={s.input} value={paymentForm.method} onChange={e => setPaymentForm({...paymentForm, method: e.target.value})}>
+              <option>Cash</option>
+              <option>Cheque</option>
+              <option>DD</option>
+              <option>Bank Transfer</option>
+            </select>
+          </div>
+          <div style={s.formGroup}>
+            <label style={s.fLabel}>Date of Payment</label>
+            <input type="date" style={s.input} value={paymentForm.paidDate} onChange={e => setPaymentForm({...paymentForm, paidDate: e.target.value})} />
+          </div>
+          <div style={s.formGroup}>
+            <label style={s.fLabel}>Note / Description</label>
+            <input 
+              type="text" 
+              style={s.input} 
+              placeholder="e.g. 1st Installment"
+              value={paymentForm.note} 
+              onChange={e => setPaymentForm({...paymentForm, note: e.target.value})} 
+            />
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+const s = {
+  errorBox: { background: "var(--danger-bg)", color: "var(--danger-text)", border: "1px solid var(--danger-text)", padding: "12px 16px", borderRadius: "10px", fontWeight: "800", marginBottom: "1rem" },
+  statsBar: { background: "var(--navy)", borderTop: "4px solid var(--gold)", padding: "24px", borderRadius: "16px", display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "10px", marginBottom: "2rem", boxShadow: "var(--shadow-md)" },
+  statBox: { textAlign: "center", borderRight: "1px solid rgba(255,255,255,0.1)" },
+  statLabel: { fontSize: "0.7rem", color: "var(--gold-light)", textTransform: "uppercase", fontWeight: "700", marginBottom: "4px" },
+  statValue: { fontSize: "1.2rem", color: "var(--white)", fontWeight: "800" },
+  filterRow: { display: "flex", gap: "16px", marginBottom: "2rem" },
+  input: { padding: "12px", borderRadius: "10px", border: "1.5px solid var(--border)", background: "white", color: "var(--navy)", fontWeight: "600", width: '100%' },
+  mainGrid: { display: "grid", gridTemplateColumns: "380px 1fr", gap: "24px", height: "calc(100vh - 350px)" },
+  listPanel: { background: "var(--white)", borderRadius: "16px", overflowY: "auto", border: "1px solid var(--border)", padding: "10px" },
+  emptyBox: { padding: "28px", textAlign: "center", color: "var(--text-muted)", fontWeight: "700", lineHeight: 1.5 },
+  studentCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderRadius: "12px", borderTop: "1px solid var(--border)", borderRight: "1px solid var(--border)", borderBottom: "1px solid var(--border)", marginBottom: "10px", cursor: "pointer", transition: "0.2s" },
+  avatar: { width: "40px", height: "40px", borderRadius: "50%", background: "var(--gold-pale)", color: "var(--navy)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800" },
+  studentInfo: { display: "flex", gap: "12px", alignItems: "center" },
+  studentName: { fontSize: "0.95rem", fontWeight: "700", color: "var(--navy)" },
+  studentSub: { fontSize: "0.75rem", color: "var(--text-muted)" },
+  feeShortInfo: { textAlign: "right" },
+  statusBadge: { fontSize: "0.65rem", padding: "4px 10px", borderRadius: "20px", fontWeight: "800", textTransform: "uppercase", display: "inline-block" },
+  bgPaid: { background: "#dcfce7", color: "#166534" },
+  bgPartial: { background: "#fef3c7", color: "#92400e" },
+  bgUnpaid: { background: "#fee2e2", color: "#991b1b" },
+  dueText: { fontSize: "0.8rem", color: "#ef4444", fontWeight: "700", marginTop: "4px" },
+  detailPanel: { background: "var(--white)", borderRadius: "16px", border: "1px solid var(--border)", overflowY: "auto", padding: "32px" },
+  detailHeader: { display: "flex", gap: "24px", alignItems: "center", paddingBottom: "24px", borderBottom: "1px solid var(--border)", marginBottom: "24px" },
+  largeAvatar: { width: "80px", height: "80px", borderRadius: "50%", background: "var(--navy)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.5rem", fontWeight: "800", border: "4px solid var(--gold-pale)" },
+  detailName: { fontSize: "1.8rem", color: "var(--navy)", margin: 0, fontFamily: "var(--font-heading)" },
+  detailSub: { color: "var(--text-muted)", marginBottom: "12px" },
+  btnMainRecord: { background: "var(--navy)", color: "var(--gold-light)", border: "none", padding: "12px 20px", borderRadius: "30px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" },
+  detailMetrics: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", marginBottom: "32px" },
+  metricBox: { padding: "20px", borderRadius: "16px", background: "var(--light-bg)", textAlign: "center", border: "1px solid var(--border)" },
+  metricLabel: { fontSize: "0.75rem", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" },
+  metricValue: { fontSize: "1.5rem", fontWeight: "900", color: "var(--navy)" },
+  sectionTitle: { fontSize: "1rem", fontWeight: "800", color: "var(--gold)", textTransform: "uppercase", marginBottom: "16px" },
+  table: { width: "100%", borderCollapse: "collapse" },
+  th: { textAlign: "left", padding: "12px", fontSize: "0.75rem", textTransform: "uppercase", color: "var(--text-muted)", borderBottom: "2px solid var(--border)" },
+  td: { padding: "16px 12px", borderBottom: "1px solid var(--border)", fontSize: "0.95rem" },
+  btnReceipt: { background: "var(--light-bg)", color: "var(--navy)", border: "1px solid var(--navy)", padding: "8px 16px", borderRadius: "20px", fontWeight: "700", fontSize: "0.8rem", cursor: "pointer" },
+  noPlanBox: { padding: '40px', textAlign: 'center', background: 'var(--gold-pale)', borderRadius: '16px', border: '1px solid var(--gold)', color: 'var(--navy-dark)', marginTop: '20px' },
+  placeholder: { height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "1.2rem", fontStyle: "italic" },
+  modalForm: { display: "flex", flexDirection: "column", gap: "20px" },
+  formGroup: { display: "flex", flexDirection: "column", gap: "8px" },
+  fLabel: { fontSize: "0.75rem", fontWeight: "800", color: "var(--gold)", textTransform: "uppercase" },
+  btnCancel: { padding: "12px 24px", borderRadius: "30px", border: "none", background: "var(--light-bg)", color: "var(--text-muted)", fontWeight: "700", cursor: "pointer" },
+  btnConfirm: { flex: 1, padding: "12px 24px", borderRadius: "30px", border: "none", background: "linear-gradient(135deg, var(--gold), var(--gold-light))", color: "var(--navy-dark)", fontWeight: "800", cursor: "pointer" }
+};

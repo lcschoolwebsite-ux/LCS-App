@@ -1,0 +1,528 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@300;400;500;600;700&family=Oswald:wght@600;700&family=Playfair+Display:wght@400;600;700;800&display=swap');
+
+:root {
+  /* Loretto Central School Design System */
+  --navy: #0e6b6b;
+  --navy-dark: #094f4f;
+  --gold: #c8960c;
+  --gold-light: #e8b020;
+  --gold-pale: #f5e6c0;
+  --white: #ffffff;
+  --light-bg: #f9f6ef;
+  --text: #1a2e2e;
+  --text-muted: #5a6e6e;
+  --border: #e2d5b0;
+
+  /* Status Colors */
+  --success-bg: #e6f4ea;
+  --success-text: #137333;
+  --danger-bg: #fce8e6;
+  --danger-text: #c5221f;
+  --warning-bg: #fef7e0;
+  --warning-text: #b06000;
+  --info-bg: #e8f0fe;
+  --info-text: #1a73e8;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Nunito', sans-serif;
+  --font-stats: 'Oswald', sans-serif;
+  --font-counter: 'Bebas Neue', sans-serif;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --header-height: 64px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(14,107,107,0.06);
+  --shadow-md: 0 4px 20px rgba(14,107,107,0.08);
+  --shadow-lg: 0 12px 40px rgba(14,107,107,0.16);
+  
+  /* Transitions */
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--light-bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--navy);
+  font-weight: 700;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: var(--transition);
+}
+
+input, select, textarea {
+  font-family: var(--font-body);
+  outline: none;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--gold-pale);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--navy);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--navy-dark);
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes heroFadeUp {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0.5); }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ringPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes particleRise {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(-120px); opacity: 0; }
+}
+
+@keyframes lineGrow {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.2; transform: scale(0.6); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.2; transform: scale(0.6); }
+}
+
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes morphBlob {
+  0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+}
+
+@keyframes spinSlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spinReverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes floatOrbA {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes glitchTitle {
+  0% { transform: skewX(0); }
+  2% { transform: skewX(-3deg); }
+  4% { transform: skewX(3deg); }
+  6% { transform: skewX(0); }
+  100% { transform: skewX(0); }
+}
+
+@keyframes miniCardFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes heroImgZoom {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@keyframes gridFloat {
+  0% { transform: perspective(1000px) rotateX(60deg) translateY(0); }
+  100% { transform: perspective(1000px) rotateX(60deg) translateY(100px); }
+}
+
+@keyframes aboutImgFloat {
+  0% { transform: translateY(0) rotate(0.4deg); }
+  50% { transform: translateY(-14px) rotate(-0.4deg); }
+  100% { transform: translateY(0) rotate(0.4deg); }
+}
+
+@keyframes badgeCardBounce {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  70% { transform: scale(1.12) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes lineExpandA {
+  0% { width: 0; }
+  100% { width: 60px; }
+}
+
+@keyframes pulseBorderA {
+  0% { box-shadow: 0 0 0 0 rgba(200, 150, 12, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(200, 150, 12, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(200, 150, 12, 0); }
+}
+
+/* Global Utilities */
+.text-navy { color: var(--navy); }
+.text-gold { color: var(--gold); }
+.bg-navy { background-color: var(--navy); }
+.bg-gold { background-color: var(--gold); }
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--navy), var(--navy-dark));
+  color: var(--white);
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(14, 107, 107, 0.3);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light), #f5c842);
+  background-size: 200% auto;
+  color: var(--navy-dark);
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-weight: 800;
+  position: relative;
+  overflow: hidden;
+  animation: shimmer 3s linear infinite;
+}
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(200, 150, 12, 0.3);
+}
+
+.btn-outline {
+  border: 1.5px solid var(--navy);
+  color: var(--navy);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+.btn-outline:hover {
+  background: var(--navy);
+  color: var(--white);
+}
+
+/* Inputs */
+.input-field {
+  border: 1.5px solid var(--border);
+  border-radius: 11px;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  width: 100%;
+  transition: var(--transition);
+  background: var(--white);
+}
+.input-field:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(14, 107, 107, 0.15);
+  transform: translateY(-2px);
+  background: rgba(14, 107, 107, 0.02);
+}
+
+/* Empty States */
+.empty-state {
+  border: 2px dashed var(--border);
+  background: rgba(14, 107, 107, 0.02);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Student portal responsive layout */
+.student-dashboard-grid,
+.student-quick-grid,
+.student-news-grid,
+.student-fee-options,
+.student-attendance-stats,
+.student-profile-grid,
+.student-report-info-grid {
+  min-width: 0;
+}
+
+.student-card,
+.student-polaroid-card,
+.student-fee-main-card,
+.student-fee-option-card,
+.student-profile-card,
+.student-table-card,
+.student-report-card {
+  min-width: 0;
+}
+
+.student-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.student-table-wrap table {
+  min-width: 640px;
+}
+
+.student-week-attendance-table {
+  min-width: 0 !important;
+}
+
+@media (max-width: 1180px) {
+  .student-dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .student-fee-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .student-attendance-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .student-profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .student-header-right {
+    gap: 12px !important;
+  }
+
+  .student-search-input {
+    width: 140px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .student-shell {
+    display: block !important;
+  }
+
+  .student-sidebar {
+    display: none !important;
+  }
+
+  .student-mobile-topbar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
+    border-bottom: 1px solid rgba(200, 150, 12, 0.28);
+    padding: 12px 16px;
+  }
+
+  .student-mobile-nav {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    background: linear-gradient(135deg, #051a1a 0%, #0a5d5d 100%);
+    border-bottom: 3px solid var(--gold);
+    padding: 0 16px 12px;
+  }
+
+  .student-mobile-nav a {
+    justify-content: center;
+    gap: 6px !important;
+    min-width: 0;
+    padding: 8px 6px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .student-mobile-nav a span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .student-main {
+    margin-left: 0 !important;
+  }
+
+  .student-header {
+    position: sticky !important;
+    top: 0 !important;
+    height: auto !important;
+    padding: 12px 16px !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+
+  .student-header-right {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    margin-left: auto;
+  }
+
+  .student-search {
+    display: none !important;
+  }
+
+  .student-breadcrumb {
+    display: none !important;
+  }
+
+  .student-content {
+    padding: 16px 14px 24px !important;
+  }
+
+  .student-dashboard-grid,
+  .student-quick-grid,
+  .student-news-grid,
+  .student-fee-options,
+  .student-attendance-stats,
+  .student-profile-grid,
+  .student-report-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .student-card,
+  .student-polaroid-card,
+  .student-fee-main-card,
+  .student-fee-option-card,
+  .student-profile-card,
+  .student-report-card {
+    border-radius: 14px !important;
+    padding: 20px !important;
+  }
+
+  .student-badge-row,
+  .student-fee-card-top,
+  .student-fee-stats,
+  .student-fee-progress,
+  .student-profile-header,
+  .student-attendance-card-header,
+  .student-report-header,
+  .student-report-summary,
+  .student-report-signatures {
+    align-items: stretch !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
+  .student-fee-main-card {
+    margin-bottom: 28px !important;
+  }
+
+  .student-fee-option-card {
+    text-align: left !important;
+    align-items: flex-start !important;
+  }
+
+  .student-print-actions {
+    justify-content: stretch !important;
+  }
+
+  .student-print-actions button {
+    width: 100%;
+  }
+
+  .student-report-card {
+    overflow: visible !important;
+  }
+
+  .student-report-card h1 {
+    font-size: 1.45rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .student-report-signatures > div {
+    width: 100% !important;
+  }
+
+  .student-attendance-week-controls {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    width: 100%;
+  }
+
+  .student-attendance-week-controls input {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .student-content {
+    padding: 14px !important;
+  }
+
+  .student-card,
+  .student-polaroid-card,
+  .student-fee-main-card,
+  .student-fee-option-card,
+  .student-profile-card,
+  .student-report-card {
+    padding: 16px !important;
+  }
+}

@@ -1,0 +1,6 @@
+backend/.env
+backend/node_modules/
+frontend/node_modules/
+frontend/dist/
+Student Details 2026-27.xlsx
+.DS_Store
