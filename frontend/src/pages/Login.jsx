@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import AppFooter from "../components/AppFooter";
 
@@ -106,22 +106,20 @@ export default function Login() {
         <p style={s.tagline}>love through service</p>
 
         <div style={s.roleSwitcher}>
-          {["admin", "teacher", "student"].map(r => (
+          {["admin", "teacher"].map(r => (
             <button key={r} onClick={() => setRole(r)} style={{...s.roleBtn, ...(role === r ? s.activeRoleBtn : {})}}>
               {r.charAt(0).toUpperCase() + r.slice(1)}
             </button>
           ))}
         </div>
 
-        <p style={s.hintText}>
-          {role === "student" ? "Enter SATS No. and Mobile No. 1" : "Enter your Username and Password"}
-        </p>
+        <p style={s.hintText}>Use your staff credentials to continue. Students have a dedicated login page.</p>
 
         <form onSubmit={handleLogin} style={s.form}>
           <input
             style={s.input}
             type="text"
-            placeholder={role === "student" ? "SATS No." : "Username"}
+            placeholder="Username"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
@@ -129,7 +127,7 @@ export default function Login() {
           <input
             style={s.input}
             type="password"
-            placeholder={role === "student" ? "Mobile No. 1" : "Password"}
+            placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -138,6 +136,11 @@ export default function Login() {
             {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : "Sign In"}
           </button>
         </form>
+
+        <div style={s.studentLinkWrap}>
+          <span style={s.studentLinkText}>Student?</span>
+          <Link to="/student-login" style={s.studentLink}>Go to student login</Link>
+        </div>
 
         {error && <div style={s.errorBadge}>{error}</div>}
       </div>
@@ -160,5 +163,8 @@ const s = {
   form: { display: "flex", flexDirection: "column", gap: "16px" },
   input: { background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.15)", color: "var(--white)", borderRadius: "12px", padding: "14px 18px", fontSize: "0.95rem", fontFamily: "var(--font-body)", transition: "var(--transition)" },
   submitBtn: { background: "linear-gradient(135deg, #c8960c, #e8b020, #f5c842)", backgroundSize: "200% auto", color: "var(--navy-dark)", fontWeight: "800", borderRadius: "50px", padding: "15px", fontSize: "1rem", marginTop: "8px", animation: "shimmer 3s linear infinite", boxShadow: "0 8px 20px rgba(200,150,12,0.3)" },
+  studentLinkWrap: { marginTop: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", flexWrap: "wrap" },
+  studentLinkText: { color: "rgba(255,255,255,0.55)", fontSize: "0.8rem" },
+  studentLink: { color: "var(--gold-light)", fontSize: "0.82rem", fontWeight: "700", textDecoration: "underline", textUnderlineOffset: "3px" },
   errorBadge: { background: "var(--danger-bg)", color: "var(--danger-text)", border: "1px solid var(--danger-text)", padding: "6px 16px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "700", marginTop: "20px", display: "inline-block" }
 };

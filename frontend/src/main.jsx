@@ -10,10 +10,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>,
 )
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('SW registered'))
-      .catch(err => console.log('SW failed:', err));
-  });
-}
+// Service worker registration is intentionally disabled here.
+// The previous cache-first SW could keep serving stale bundles after deploys,
+// which makes the portal appear as a blank page until the cache is cleared.

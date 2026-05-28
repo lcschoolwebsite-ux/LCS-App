@@ -1,25 +1,19 @@
-const CACHE_NAME = "lcsms-v1";
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/static/js/main.chunk.js",
-  "/static/css/main.chunk.css"
-];
-
 self.addEventListener("install", event => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key))))
+  );
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    Promise.all([
+      caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))),
+      self.registration.unregister(),
+    ]).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.url.includes("/api/")) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-  } else {
-    event.respondWith(
-      caches.match(event.request).then(response => response || fetch(event.request))
-    );
-  }
+  event.respondWith(fetch(event.request));
 });
