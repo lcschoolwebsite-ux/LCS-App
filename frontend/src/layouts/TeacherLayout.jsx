@@ -70,9 +70,36 @@ export default function TeacherLayout() {
   const currentPathLabel = allMenuItems.find(i => i.path === location.pathname)?.label || "Dashboard";
 
   return (
-    <div style={s.container}>
+    <div style={s.container} className="teacher-shell">
+      <div style={s.mobileTopbar} className="teacher-mobile-topbar">
+        <div style={s.mobileBrand}>
+          <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
+          <div>
+            <h1 style={s.mobileSchoolName}>Loretto Central</h1>
+            <p style={s.mobileUserLine}>{user?.name || "Teacher"} · Teacher Portal</p>
+          </div>
+        </div>
+        <button onClick={handleLogout} style={s.mobileLogout} aria-label="Logout">
+          <i className="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+
+      <nav style={s.mobileNav} className="teacher-mobile-nav" aria-label="Teacher navigation">
+        {MENU_GROUPS.flatMap(group => group.items)
+          .filter(item => allowTeacherStudentCreation || item.path !== "/teacher/students/add")
+          .map(item => {
+            const isActive = item.path === "/teacher" ? location.pathname === item.path : location.pathname.startsWith(item.path);
+            return (
+              <Link key={item.path} to={item.path} style={{ ...s.mobileNavItem, ...(isActive ? s.activeMobileNavItem : {}) }}>
+                <i className={item.icon}></i>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+      </nav>
+
       {/* Sidebar */}
-      <aside style={s.sidebar}>
+      <aside style={s.sidebar} className="teacher-sidebar">
         <div style={s.logoArea}>
           <img src="/logo.png" alt="Logo" style={s.logoImg} />
           <div>
@@ -89,7 +116,7 @@ export default function TeacherLayout() {
           </div>
         </div>
 
-        <nav style={s.nav}>
+        <nav style={s.nav} className="teacher-nav">
           {MENU_GROUPS.map((group, gIdx) => (
             <div key={gIdx} style={s.navGroup}>
               <div style={s.groupLabel}>{group.label}</div>
@@ -115,15 +142,15 @@ export default function TeacherLayout() {
       </aside>
 
       {/* Main Content */}
-      <main style={s.main}>
+      <main style={s.main} className="teacher-main">
         {/* Top Header */}
-        <header style={s.header}>
+        <header style={s.header} className="teacher-header">
           <div>
             <h2 style={s.pageTitle}>{currentPathLabel}</h2>
             <div style={s.breadcrumb}>Teacher Portal / {currentPathLabel}</div>
           </div>
           
-          <div style={s.headerRight}>
+          <div style={s.headerRight} className="teacher-header-right">
             <button style={s.bellBtn}>
               <i className="fa-regular fa-bell"></i>
             </button>
@@ -132,7 +159,7 @@ export default function TeacherLayout() {
           </div>
         </header>
 
-        <section style={s.content}>
+        <section style={s.content} className="teacher-content">
           <Suspense fallback={<div style={s.loading}><i className="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
@@ -162,6 +189,16 @@ const s = {
   logoImg: { width: "50px", height: "50px", objectFit: "contain" },
   schoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1.1rem", margin: 0, lineHeight: 1.2 },
   tagline: { color: "var(--gold-light)", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.05em", margin: "4px 0 0 0" },
+
+  mobileTopbar: { display: "none" },
+  mobileBrand: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 },
+  mobileLogo: { width: "42px", height: "42px", objectFit: "contain", flex: "0 0 auto" },
+  mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1rem", lineHeight: 1.1, margin: 0 },
+  mobileUserLine: { color: "var(--gold-light)", fontSize: "0.72rem", fontWeight: "800", margin: "3px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "240px" },
+  mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
+  mobileNav: { display: "none" },
+  mobileNavItem: { display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "999px", color: "rgba(255,255,255,0.72)", fontSize: "0.78rem", fontWeight: "800", whiteSpace: "nowrap", flex: "0 0 auto", border: "1px solid rgba(255,255,255,0.08)" },
+  activeMobileNavItem: { background: "var(--gold)", color: "var(--navy-dark)", border: "1px solid var(--gold)", boxShadow: "0 6px 16px rgba(0,0,0,0.2)" },
   
   userInfoCard: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(200,150,12,0.2)", borderRadius: "12px", padding: "12px", margin: "0 20px 20px 20px", display: "flex", alignItems: "center", gap: "12px" },
   avatar: { width: "40px", height: "40px", borderRadius: "50%", background: "linear-gradient(135deg, var(--gold), var(--gold-light))", color: "var(--navy-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "1.1rem" },
@@ -180,7 +217,7 @@ const s = {
   logoutBtn: { width: "100%", padding: "10px", background: "transparent", border: "1px solid transparent", color: "rgba(255,255,255,0.6)", borderRadius: "8px", fontWeight: "600", cursor: "pointer", transition: "var(--transition)", fontSize: "0.85rem" },
 
   /* Header Styles */
-  main: { flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column" },
+  main: { flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minWidth: 0 },
   header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 90 },
   pageTitle: { fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1.3rem", margin: 0, fontWeight: "700" },
   breadcrumb: { color: "var(--text-muted)", fontSize: "0.78rem", marginTop: "2px" },

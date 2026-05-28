@@ -6,7 +6,6 @@ const AcademicYear = require("./models/AcademicYear");
 
 const ADMIN_USER = {
   username: "admin",
-  password: "Admin@1234",
   role: "admin",
   name: "Administrator"
 };
@@ -26,7 +25,10 @@ async function seed() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log("Connected to MongoDB");
 
-  const passwordHash = await bcrypt.hash(ADMIN_USER.password, 10);
+  const passwordHash = await bcrypt.hash(
+    process.env.ADMIN_PASSWORD || "Admin@1234",
+    10
+  );
 
   const admin = await User.findOneAndUpdate(
     { username: ADMIN_USER.username },
