@@ -144,8 +144,7 @@ export default function Announcements() {
               <span style={s.newsDate}>{new Date(ann.createdAt).toLocaleDateString()}</span>
               <span style={s.newsCat}>{getAudienceLabel(ann)}</span>
             </div>
-            <h3 style={s.newsTitle}>{ann.title}</h3>
-            <p style={s.newsExcerpt}>{ann.content}</p>
+            <div style={s.noticeText}>{formatNoticeText(ann)}</div>
             <div style={s.newsActions}>
               <button style={s.actionBtnGold} onClick={()=>handlePin(ann._id)}><i className="fa-solid fa-star"></i></button>
               <button style={s.actionBtnRed} onClick={()=>handleDelete(ann._id)}><i className="fa-solid fa-trash"></i></button>
@@ -161,8 +160,7 @@ export default function Announcements() {
               <span style={s.newsDate}>{new Date(ann.createdAt).toLocaleDateString()}</span>
               <span style={s.newsCat}>{getAudienceLabel(ann)}</span>
             </div>
-            <h3 style={s.newsTitle}>{ann.title}</h3>
-            <p style={s.newsExcerpt}>{ann.content}</p>
+            <div style={s.noticeText}>{formatNoticeText(ann)}</div>
             <div style={s.newsActions}>
               <button style={s.actionBtnNavy} onClick={()=>handlePin(ann._id)}><i className="fa-regular fa-star"></i></button>
               <button style={s.actionBtnRed} onClick={()=>handleDelete(ann._id)}><i className="fa-solid fa-trash"></i></button>
@@ -194,6 +192,12 @@ function getAudienceLabel(announcement) {
   }
 
   return targetParts.length ? `${baseLabel} - ${targetParts.join(", ")}` : baseLabel;
+}
+
+function formatNoticeText(announcement) {
+  const title = String(announcement.title || "").trim();
+  const content = String(announcement.content || "").trim();
+  return [title, content].filter(Boolean).join("\n");
 }
 
 const s = {
@@ -246,8 +250,7 @@ const s = {
   
   newsDate: { background: "var(--gold)", color: "var(--navy-dark)", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "800", zIndex: 1 },
   newsCat: { background: "var(--light-bg)", color: "var(--text-muted)", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "700", border: "1px solid var(--border)", zIndex: 1 },
-  newsTitle: { fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1.3rem", margin: "0 0 12px 0", zIndex: 1 },
-  newsExcerpt: { color: "var(--text-muted)", fontSize: "0.9rem", margin: "0 0 24px 0", lineHeight: 1.5, flex: 1, zIndex: 1 },
+  noticeText: { color: "var(--text-muted)", fontSize: "0.95rem", margin: "0 0 24px 0", lineHeight: 1.7, whiteSpace: "pre-wrap", overflowWrap: "anywhere", flex: 1, zIndex: 1, fontWeight: "600" },
   
   newsActions: { display: "flex", gap: "12px", zIndex: 1 },
   empty: { padding: "24px", background: "var(--white)", border: "1px dashed var(--border)", borderRadius: "12px", color: "var(--text-muted)", fontWeight: "800", textAlign: "center" },

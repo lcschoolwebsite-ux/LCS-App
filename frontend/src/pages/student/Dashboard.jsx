@@ -126,8 +126,7 @@ export default function Dashboard() {
             {announcements.map(ann => (
               <article key={ann._id} style={s.newsCard}>
                 <div style={s.newsDateBadge}>{new Date(ann.createdAt).toLocaleDateString()}</div>
-                <h4 style={s.newsTitle}>{ann.title}</h4>
-                <p style={s.newsExcerpt}>{ann.content}</p>
+                <div style={s.newsExcerpt}>{formatNoticeText(ann)}</div>
               </article>
             ))}
           </div>
@@ -151,6 +150,12 @@ function QuickCard({ to, icon, title, subtitle }) {
       <p style={s.quickSub}>{subtitle}</p>
     </Link>
   );
+}
+
+function formatNoticeText(announcement) {
+  const title = String(announcement.title || "").trim();
+  const content = String(announcement.content || "").trim();
+  return [title, content].filter(Boolean).join("\n");
 }
 
 const s = {
@@ -182,7 +187,6 @@ const s = {
   newsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" },
   newsCard: { background: "var(--light-bg)", border: "1px solid var(--border)", borderRadius: "12px", padding: "24px", transition: "var(--transition)" },
   newsDateBadge: { display: "inline-block", background: "var(--gold)", color: "var(--navy-dark)", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "800", marginBottom: "12px" },
-  newsTitle: { fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1.2rem", margin: "0 0 8px 0" },
-  newsExcerpt: { color: "var(--text-muted)", fontSize: "0.9rem", margin: 0, lineHeight: 1.5 },
+  newsExcerpt: { color: "var(--text-muted)", fontSize: "0.95rem", margin: 0, lineHeight: 1.7, whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontWeight: "600" },
   btnOutline: { display: "inline-block", background: "transparent", border: "2px solid var(--navy)", color: "var(--navy)", padding: "10px 24px", borderRadius: "50px", fontWeight: "700", cursor: "pointer", transition: "var(--transition)", textDecoration: "none" }
 };

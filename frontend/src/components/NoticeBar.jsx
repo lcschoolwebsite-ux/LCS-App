@@ -4,11 +4,11 @@ import api from "../api/axios";
 const DEFAULT_NOTICE = "Welcome to the Loretto Central School Management System.\nPlease ensure all mid-term marks are submitted by 15th October.";
 
 export default function NoticeBar({ notices }) {
-  const [loadedNotices, setLoadedNotices] = useState([]);
+  const [loadedNotice, setLoadedNotice] = useState("");
 
   useEffect(() => {
     if (Array.isArray(notices)) {
-      setLoadedNotices(notices);
+      setLoadedNotice(String(notices.find(Boolean) || ""));
       return;
     }
 
@@ -18,9 +18,12 @@ export default function NoticeBar({ notices }) {
       try {
         const { data } = await api.get("/announcements");
         if (!active) return;
-        setLoadedNotices((data || []).slice(0, 3).map((notice) => notice?.content || "").filter(Boolean));
+        const primaryNotice = (data || []).find((notice) => String(notice?.content || "").trim());
+        const title = String(primaryNotice?.title || "").trim();
+        const content = String(primaryNotice?.content || "").trim();
+        setLoadedNotice([title, content].filter(Boolean).join("\n"));
       } catch {
-        if (active) setLoadedNotices([]);
+        if (active) setLoadedNotice("");
       }
     };
 
@@ -31,24 +34,15 @@ export default function NoticeBar({ notices }) {
     };
   }, [notices]);
 
-  const visibleNotices = (loadedNotices?.length ? loadedNotices : [DEFAULT_NOTICE]).flatMap((notice) =>
-    String(notice)
-      .split(/\r?\n/)
-      .map((line) => {
-        const text = line.trimEnd();
-        return text.length > 0 ? text : "\u00A0";
-      })
-  );
+  const visibleNotice = (loadedNotice && String(loadedNotice).trim()) || DEFAULT_NOTICE;
 
   return (
     <div style={s.wrapper} role="status" aria-live="polite">
       <div style={s.pill}>NOTICE</div>
       <div style={s.noticeWrap}>
-        {visibleNotices.map((notice, index) => (
-          <div key={`${notice}-${index}`} style={s.noticeLine}>
-            {notice}
-          </div>
-        ))}
+        <div style={s.noticeLine}>
+          {visibleNotice}
+        </div>
       </div>
     </div>
   );

@@ -18,14 +18,18 @@ export default function Announcements() {
               <span style={s.date}>{new Date(a.createdAt).toLocaleDateString()}</span>
               {a.pinned && <span style={s.pinnedBadge}>📌 Pinned</span>}
             </div>
-            <h3 style={s.cardTitle}>{a.title}</h3>
-            <p style={s.cardContent}>{a.content}</p>
-            <p style={s.author}>- {a.createdBy?.name} (Admin)</p>
+            <div style={s.cardContent}>{formatNoticeText(a)}</div>
           </div>
         ))}
       </div>
     </div>
   );
+}
+
+function formatNoticeText(announcement) {
+  const title = String(announcement.title || "").trim();
+  const content = String(announcement.content || "").trim();
+  return [title, content].filter(Boolean).join("\n");
 }
 
 const s = {
@@ -35,7 +39,5 @@ const s = {
   cardHeader: { display: "flex", justifyContent: "space-between", marginBottom: "0.75rem" },
   date: { fontSize: "0.75rem", color: "#94a3b8" },
   pinnedBadge: { fontSize: "0.75rem", fontWeight: "700", color: "#d97706" },
-  cardTitle: { fontSize: "1.1rem", fontWeight: "700", color: "#1e293b", margin: "0 0 0.5rem 0" },
-  cardContent: { fontSize: "0.95rem", color: "#475569", lineHeight: "1.6", margin: 0 },
-  author: { fontSize: "0.8rem", color: "#94a3b8", marginTop: "1rem", fontWeight: "600" }
+  cardContent: { fontSize: "0.95rem", color: "#475569", lineHeight: "1.7", margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontWeight: "600" }
 };
