@@ -152,12 +152,10 @@ const bgStyles = {
     lineHeight: 1.15,
     fontWeight: 800,
     marginBottom: "14px",
+    color: "#ffffff",
   },
   titleAccent: {
-    background: "linear-gradient(90deg, var(--gold), var(--gold-light))",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    backgroundClip: "text",
+    color: "#ffffff",
     fontStyle: "italic",
   },
   desc: {
@@ -199,6 +197,12 @@ const bgStyles = {
     fontSize: "0.76rem",
     lineHeight: 1.55,
     color: "rgba(255,255,255,0.52)",
+  },
+  featureTextCompact: {
+    fontSize: "0.76rem",
+    lineHeight: 1.55,
+    color: "rgba(255,255,255,0.52)",
+    maxWidth: "240px",
   },
   quote: {
     borderTop: "1px solid rgba(255,255,255,0.07)",
@@ -430,21 +434,6 @@ const bgStyles = {
   },
   footLink: { color: "var(--navy)", fontWeight: 700 },
   divider: { color: "var(--border)" },
-  loginLink: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "8px",
-    marginTop: "18px",
-    fontSize: "0.82rem",
-    flexWrap: "wrap",
-  },
-  loginLinkLabel: { color: "var(--text-muted)" },
-  loginLinkAction: {
-    color: "var(--gold)",
-    fontWeight: 800,
-    textDecoration: "underline",
-    textUnderlineOffset: "3px",
-  },
 };
 
 function LoginField({ label, hint, icon, type, value, onChange, placeholder, autoComplete, showToggle, showValue, onToggle }) {
@@ -533,9 +522,6 @@ export default function StudentLogin() {
               <div style={bgStyles.brandTag}>Student Portal</div>
             </div>
           </div>
-          <Link to="/" style={bgStyles.backLink}>
-            Back to staff login
-          </Link>
         </header>
 
         <main style={bgStyles.main}>
@@ -605,8 +591,8 @@ export default function StudentLogin() {
                   </article>
                   <article style={bgStyles.feature}>
                     <div style={bgStyles.featureNumber}>03</div>
-                    <div style={bgStyles.featureTitle}>Timetable and events</div>
-                    <div style={bgStyles.featureText}>Stay on top of classes, exams, and school activities.</div>
+                    <div style={bgStyles.featureTitle}>Attendance tracker</div>
+                    <div style={bgStyles.featureTextCompact}>View attendance updates and keep track of your regularity.</div>
                   </article>
                   <article style={bgStyles.feature}>
                     <div style={bgStyles.featureNumber}>04</div>
@@ -675,7 +661,7 @@ export default function StudentLogin() {
                   </label>
                   <a
                     style={bgStyles.forgot}
-                    href="mailto:Lorettocentralschool@gmail.com?subject=Student%20Login%20Help"
+                    href="mailto:Lorettocentralschool@gmail.com?subject=Student%20Login%20Help&body=Please%20contact%20the%20school%20office%20for%20student%20login%20assistance."
                   >
                     Forgot credentials?
                   </a>
@@ -694,24 +680,6 @@ export default function StudentLogin() {
 
                 {error ? <div style={bgStyles.error}>{error}</div> : null}
 
-                <div style={bgStyles.loginLink}>
-                  <span style={bgStyles.loginLinkLabel}>Need staff access?</span>
-                  <Link to="/" style={bgStyles.loginLinkAction}>
-                    Go to admin and teacher login
-                  </Link>
-                </div>
-
-                <div style={bgStyles.foot}>
-                  <span>SSL encrypted</span>
-                  <span style={bgStyles.divider}>·</span>
-                  <a style={bgStyles.footLink} href="mailto:Lorettocentralschool@gmail.com">
-                    Need help?
-                  </a>
-                  <span style={bgStyles.divider}>·</span>
-                  <a style={bgStyles.footLink} href="tel:+919480663011">
-                    +91 94806 63011
-                  </a>
-                </div>
               </form>
             </div>
           </section>
