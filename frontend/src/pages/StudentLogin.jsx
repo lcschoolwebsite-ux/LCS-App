@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import AppFooter from "../components/AppFooter";
 
@@ -44,6 +44,13 @@ const bgStyles = {
     fontWeight: 800,
     color: "var(--gold-light)",
     boxShadow: "0 0 0 4px rgba(200,150,12,0.08)",
+  },
+  brandLogo: {
+    width: "48px",
+    height: "48px",
+    objectFit: "contain",
+    filter: "drop-shadow(0 0 10px rgba(200,150,12,0.35))",
+    flexShrink: 0,
   },
   brandText: { display: "flex", flexDirection: "column", gap: "2px" },
   brandName: {
@@ -516,7 +523,7 @@ export default function StudentLogin() {
       <div style={bgStyles.shell}>
         <header style={bgStyles.topBar}>
           <div style={bgStyles.brand}>
-            <div style={bgStyles.brandMark}>LCS</div>
+            <img src="/logo.png" alt="Loretto Central School logo" style={bgStyles.brandLogo} />
             <div style={bgStyles.brandText}>
               <div style={bgStyles.brandName}>Loretto Central School</div>
               <div style={bgStyles.brandTag}>Student Portal</div>
