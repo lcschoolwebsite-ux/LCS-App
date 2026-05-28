@@ -297,7 +297,8 @@ const bgStyles = {
   coreLogo: {
     width: "100%",
     height: "100%",
-    objectFit: "contain",
+    objectFit: "cover",
+    borderRadius: "50%",
     objectPosition: "center center",
     filter: "drop-shadow(0 0 6px rgba(200,150,12,0.28))",
   },
@@ -696,6 +697,7 @@ export default function StudentLogin() {
                         ...bgStyles.coreLogo,
                         width: isMobile ? "100%" : bgStyles.coreLogo.width,
                         height: isMobile ? "100%" : bgStyles.coreLogo.height,
+                        objectFit: "cover",
                       }}
                     />
                   </div>
