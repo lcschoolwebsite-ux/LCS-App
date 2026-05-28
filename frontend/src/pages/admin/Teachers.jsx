@@ -100,12 +100,12 @@ export default function Teachers() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this teacher? This action cannot be undone.")) return;
     try {
       await api.delete(`/teachers/${id}`);
+      alert("Teacher deleted successfully!");
       fetchData();
     } catch (e) {
-      alert("Delete failed");
+      alert(e.response?.data?.message || "Delete failed");
     }
   };
 
