@@ -285,16 +285,21 @@ const bgStyles = {
     position: "absolute",
     inset: "14px",
     borderRadius: "50%",
-    background: "linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%)",
-    display: "grid",
-    placeItems: "center",
+    background: "radial-gradient(circle at 30% 30%, #ffffff 0%, #f7f2e6 100%)",
+    border: "2px solid rgba(200,150,12,0.45)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "12px",
+    boxSizing: "border-box",
     overflow: "hidden",
   },
   coreLogo: {
-    width: "74%",
-    height: "74%",
+    width: "100%",
+    height: "100%",
     objectFit: "contain",
-    filter: "drop-shadow(0 0 8px rgba(200,150,12,0.35))",
+    objectPosition: "center center",
+    filter: "drop-shadow(0 0 6px rgba(200,150,12,0.28))",
   },
   formTitle: {
     fontFamily: "var(--font-heading)",
@@ -483,10 +488,15 @@ export default function StudentLogin() {
   const [loading, setLoading] = useState(false);
   const [stars, setStars] = useState([]);
   const [particles, setParticles] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const updateViewport = () => setIsMobile(window.innerWidth < 900);
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+
     const nextStars = Array.from({ length: 52 }).map((_, id) => ({
       id,
       left: `${Math.random() * 100}%`,
@@ -502,6 +512,8 @@ export default function StudentLogin() {
     }));
     setStars(nextStars);
     setParticles(nextParticles);
+
+    return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -525,17 +537,41 @@ export default function StudentLogin() {
   return (
     <div style={bgStyles.page}>
       <div style={bgStyles.shell}>
-        <header style={bgStyles.topBar}>
+        <header
+          style={{
+            ...bgStyles.topBar,
+            padding: isMobile ? "14px 16px" : bgStyles.topBar.padding,
+            justifyContent: isMobile ? "center" : bgStyles.topBar.justifyContent,
+          }}
+        >
           <div style={bgStyles.brand}>
-            <img src="/logo.png" alt="Loretto Central School logo" style={bgStyles.brandLogo} />
+            <img
+              src="/logo.png"
+              alt="Loretto Central School logo"
+              style={{
+                ...bgStyles.brandLogo,
+                width: isMobile ? "42px" : bgStyles.brandLogo.width,
+                height: isMobile ? "42px" : bgStyles.brandLogo.height,
+              }}
+            />
             <div style={bgStyles.brandText}>
-              <div style={bgStyles.brandName}>Loretto Central School</div>
-              <div style={bgStyles.brandTag}>Student Portal</div>
+              <div style={{ ...bgStyles.brandName, fontSize: isMobile ? "0.92rem" : bgStyles.brandName.fontSize }}>
+                Loretto Central School
+              </div>
+              <div style={{ ...bgStyles.brandTag, letterSpacing: isMobile ? "0.12em" : bgStyles.brandTag.letterSpacing }}>
+                Student Portal
+              </div>
             </div>
           </div>
         </header>
 
-        <main style={bgStyles.main}>
+        <main
+          style={{
+            ...bgStyles.main,
+            padding: isMobile ? "20px 14px 28px" : bgStyles.main.padding,
+            alignItems: isMobile ? "flex-start" : bgStyles.main.alignItems,
+          }}
+        >
           <div style={bgStyles.grid} />
 
           {stars.map((star) => (
@@ -573,8 +609,21 @@ export default function StudentLogin() {
             />
           ))}
 
-          <section style={bgStyles.card}>
-            <div style={bgStyles.left}>
+          <section
+            style={{
+              ...bgStyles.card,
+              gridTemplateColumns: isMobile ? "1fr" : bgStyles.card.gridTemplateColumns,
+              minHeight: isMobile ? "auto" : bgStyles.card.minHeight,
+              maxWidth: isMobile ? "560px" : bgStyles.card.maxWidth,
+              borderRadius: isMobile ? "20px" : bgStyles.card.borderRadius,
+            }}
+          >
+            <div
+              style={{
+                ...bgStyles.left,
+                display: isMobile ? "none" : bgStyles.left.display,
+              }}
+            >
               <div style={bgStyles.leftGlow} />
 
               <div style={{ position: "relative", zIndex: 1 }}>
@@ -619,20 +668,48 @@ export default function StudentLogin() {
               </div>
             </div>
 
-            <div style={bgStyles.right}>
+            <div
+              style={{
+                ...bgStyles.right,
+                padding: isMobile ? "28px 18px" : bgStyles.right.padding,
+              }}
+            >
               <div style={bgStyles.rightTopBar} />
               <div style={bgStyles.watermark}>LCS</div>
 
               <form style={bgStyles.form} onSubmit={handleSubmit}>
-                <div style={bgStyles.ring}>
+                <div
+                  style={{
+                    ...bgStyles.ring,
+                    width: isMobile ? "84px" : bgStyles.ring.width,
+                    height: isMobile ? "84px" : bgStyles.ring.height,
+                    marginBottom: isMobile ? "18px" : bgStyles.ring.marginBottom,
+                  }}
+                >
                   <div style={bgStyles.orbit1} />
                   <div style={bgStyles.orbit2} />
                   <div style={bgStyles.core}>
-                    <img src="/logo.png" alt="Loretto Central School logo" style={bgStyles.coreLogo} />
+                    <img
+                      src="/logo.png"
+                      alt="Loretto Central School logo"
+                      style={{
+                        ...bgStyles.coreLogo,
+                        width: isMobile ? "100%" : bgStyles.coreLogo.width,
+                        height: isMobile ? "100%" : bgStyles.coreLogo.height,
+                      }}
+                    />
                   </div>
                 </div>
 
-                <h2 style={bgStyles.formTitle}>Student sign in</h2>
+                <h2
+                  style={{
+                    ...bgStyles.formTitle,
+                    fontSize: isMobile ? "1.55rem" : bgStyles.formTitle.fontSize,
+                    textAlign: isMobile ? "center" : "left",
+                  }}
+                >
+                  Student sign in
+                </h2>
                 <p style={bgStyles.formSub}>
                   Enter your stats code and registered mobile number to access the student portal.
                 </p>
@@ -662,7 +739,14 @@ export default function StudentLogin() {
                   onToggle={() => setShowMobile((next) => !next)}
                 />
 
-                <div style={bgStyles.extrasRow}>
+                <div
+                  style={{
+                    ...bgStyles.extrasRow,
+                    flexDirection: isMobile ? "column" : bgStyles.extrasRow.flexDirection,
+                    alignItems: isMobile ? "stretch" : bgStyles.extrasRow.alignItems,
+                    gap: isMobile ? "10px" : bgStyles.extrasRow.gap,
+                  }}
+                >
                   <label style={bgStyles.remember}>
                     <input
                       type="checkbox"
