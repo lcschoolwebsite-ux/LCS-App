@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 require("../models/Student");
 
+mongoose.set("strictQuery", true);
+
 const ensureStudentIndexes = async () => {
   const collection = mongoose.connection.db.collection("students");
   const indexes = await collection.indexes();

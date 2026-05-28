@@ -4,7 +4,7 @@ import { useAuth } from "./useAuth";
 
 export const SocketContext = createContext(null);
 
-const socketURL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5001";
+const socketURL = import.meta.env.VITE_SOCKET_URL || "https://api-portal.lorettocentralschool.edu.in";
 
 export function SocketProvider({ children }) {
   const { user } = useAuth();
@@ -14,7 +14,9 @@ export function SocketProvider({ children }) {
     if (user) {
       const token = localStorage.getItem("token");
       const newSocket = io(socketURL, {
-        auth: { token }
+        auth: { token },
+        withCredentials: true,
+        transports: ["websocket", "polling"]
       });
       setSocket(newSocket);
       return () => newSocket.close();

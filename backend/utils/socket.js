@@ -1,12 +1,21 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
-const { corsOptions } = require("../config/cors");
 
 let io;
 
 exports.initSocket = (server) => {
   io = new Server(server, {
-    cors: corsOptions
+    cors: {
+      origin: [
+        "https://portal.lorettocentralschool.edu.in",
+        "https://lcs-portal.pages.dev",
+        "http://localhost:3000",
+        "http://localhost:5173"
+      ],
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"]
+    }
   });
 
   // Auth Middleware for Socket

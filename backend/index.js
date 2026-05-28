@@ -3,6 +3,7 @@ const express   = require("express");
 const cors      = require("cors");
 const http      = require("http");
 const helmet    = require("helmet");
+const mongoose  = require("mongoose");
 const mongoSanitize = require("express-mongo-sanitize");
 const { rateLimit } = require("express-rate-limit");
 const connectDB = require("./config/db");
@@ -12,6 +13,8 @@ const { initSocket } = require("./utils/socket");
 const app = express();
 const server = http.createServer(app);
 
+mongoose.set("strictQuery", true);
+app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.json({ limit: "1mb" }));
