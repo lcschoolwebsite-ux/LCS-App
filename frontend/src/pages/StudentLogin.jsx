@@ -263,9 +263,9 @@ const bgStyles = {
   form: { position: "relative", zIndex: 1 },
   ring: {
     position: "relative",
-    width: "70px",
-    height: "70px",
-    marginBottom: "22px",
+    width: "92px",
+    height: "92px",
+    margin: "0 auto 22px",
   },
   orbit1: {
     position: "absolute",
@@ -283,14 +283,18 @@ const bgStyles = {
   },
   core: {
     position: "absolute",
-    inset: "11px",
+    inset: "14px",
     borderRadius: "50%",
     background: "linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%)",
     display: "grid",
     placeItems: "center",
-    fontSize: "1.15rem",
-    color: "var(--gold-light)",
-    fontWeight: 900,
+    overflow: "hidden",
+  },
+  coreLogo: {
+    width: "74%",
+    height: "74%",
+    objectFit: "contain",
+    filter: "drop-shadow(0 0 8px rgba(200,150,12,0.35))",
   },
   formTitle: {
     fontFamily: "var(--font-heading)",
@@ -623,7 +627,9 @@ export default function StudentLogin() {
                 <div style={bgStyles.ring}>
                   <div style={bgStyles.orbit1} />
                   <div style={bgStyles.orbit2} />
-                  <div style={bgStyles.core}>ST</div>
+                  <div style={bgStyles.core}>
+                    <img src="/logo.png" alt="Loretto Central School logo" style={bgStyles.coreLogo} />
+                  </div>
                 </div>
 
                 <h2 style={bgStyles.formTitle}>Student sign in</h2>
