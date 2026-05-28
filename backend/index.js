@@ -7,15 +7,25 @@ const mongoose  = require("mongoose");
 const mongoSanitize = require("express-mongo-sanitize");
 const { rateLimit } = require("express-rate-limit");
 const connectDB = require("./config/db");
-const { corsOptions } = require("./config/cors");
 const { initSocket } = require("./utils/socket");
 
 const app = express();
+app.set("trust proxy", 1);
 const server = http.createServer(app);
 
 mongoose.set("strictQuery", true);
-app.set("trust proxy", 1);
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: [
+    "https://portal.lorettocentralschool.edu.in",
+    "https://lcs-portal.pages.dev",
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+}));
+app.options("*", cors());
 app.use(helmet());
 app.use(express.json({ limit: "1mb" }));
 app.use(mongoSanitize());
