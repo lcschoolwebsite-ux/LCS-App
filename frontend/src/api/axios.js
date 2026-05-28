@@ -1,7 +1,9 @@
 import axios from "axios";
 
-const api = axios.create({ 
-  baseURL: `${import.meta.env.VITE_API_URL || "https://api-portal.lorettocentralschool.edu.in"}/api`
+const API_URL = import.meta.env.VITE_API_URL || "https://api-portal.lorettocentralschool.edu.in";
+
+const api = axios.create({
+  baseURL: `${API_URL}/api`
 });
 
 let authToken = localStorage.getItem("token");
