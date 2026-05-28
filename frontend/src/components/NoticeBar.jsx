@@ -1,17 +1,54 @@
-import React from 'react';
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 
-export default function NoticeBar({ notices = [] }) {
-  if (!notices || notices.length === 0) {
-    notices = ["Welcome to the Loretto Central School Management System. Please ensure all mid-term marks are submitted by 15th October."];
-  }
+const DEFAULT_NOTICE = "Welcome to the Loretto Central School Management System.\nPlease ensure all mid-term marks are submitted by 15th October.";
+
+export default function NoticeBar({ notices }) {
+  const [loadedNotices, setLoadedNotices] = useState([]);
+
+  useEffect(() => {
+    if (Array.isArray(notices)) {
+      setLoadedNotices(notices);
+      return;
+    }
+
+    let active = true;
+
+    const loadNotices = async () => {
+      try {
+        const { data } = await api.get("/announcements");
+        if (!active) return;
+        setLoadedNotices((data || []).slice(0, 3).map((notice) => notice?.content || "").filter(Boolean));
+      } catch {
+        if (active) setLoadedNotices([]);
+      }
+    };
+
+    loadNotices();
+
+    return () => {
+      active = false;
+    };
+  }, [notices]);
+
+  const visibleNotices = (loadedNotices?.length ? loadedNotices : [DEFAULT_NOTICE]).flatMap((notice) =>
+    String(notice)
+      .split(/\r?\n/)
+      .map((line) => {
+        const text = line.trimEnd();
+        return text.length > 0 ? text : "\u00A0";
+      })
+  );
 
   return (
-    <div style={s.wrapper}>
+    <div style={s.wrapper} role="status" aria-live="polite">
       <div style={s.pill}>NOTICE</div>
-      <div style={s.tickerWrap}>
-        <div style={s.ticker}>
-          {notices.join(" ✦ ")}
-        </div>
+      <div style={s.noticeWrap}>
+        {visibleNotices.map((notice, index) => (
+          <div key={`${notice}-${index}`} style={s.noticeLine}>
+            {notice}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -22,7 +59,7 @@ const s = {
     background: "var(--navy)",
     padding: "8px 32px",
     display: "flex",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: "16px",
     overflow: "hidden",
     position: "relative",
@@ -42,19 +79,19 @@ const s = {
     zIndex: 2,
     boxShadow: "0 0 10px rgba(0,0,0,0.2)"
   },
-  tickerWrap: {
+  noticeWrap: {
     flex: 1,
-    overflow: "hidden",
-    position: "relative",
-    maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
-    WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)"
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    minWidth: 0
   },
-  ticker: {
+  noticeLine: {
     color: "var(--white)",
     fontSize: "0.85rem",
     fontWeight: "600",
-    whiteSpace: "nowrap",
-    animation: "ticker 28s linear infinite",
-    paddingLeft: "100%"
+    whiteSpace: "pre-wrap",
+    overflowWrap: "anywhere",
+    lineHeight: 1.45
   }
 };

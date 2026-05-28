@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
+import NoticeBar from "../components/NoticeBar";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/student/Dashboard"));
@@ -142,6 +143,8 @@ export default function StudentLayout() {
             <div style={s.headerAvatar}>{user?.name?.[0] || 'S'}</div>
           </div>
         </header>
+
+        <NoticeBar />
 
         <section style={s.content} className="student-content">
           <Suspense fallback={<div style={s.loading}><i className="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>}>
