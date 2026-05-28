@@ -36,7 +36,12 @@ const syncClassAssignments = async (teacherId, classIds) => {
 };
 
 exports.getAll = async (req, res) =>
-  res.json(await Teacher.find().select("-password").populate("assignedClasses","name section").populate("assignedSubjects","name"));
+  res.json(
+    await Teacher.find({ isActive: true })
+      .select("-password")
+      .populate("assignedClasses", "name section")
+      .populate("assignedSubjects", "name")
+  );
 
 exports.create = async (req, res) => {
   try {
