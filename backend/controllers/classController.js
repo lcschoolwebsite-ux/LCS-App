@@ -4,7 +4,6 @@ const Subject = require("../models/Subject");
 const Exam = require("../models/Exam");
 const Attendance = require("../models/Attendance");
 const FeeStructure = require("../models/FeeStructure");
-const Fee = require("../models/Fee");
 const Teacher = require("../models/Teacher");
 
 const normalizeClassPayload = body => {
@@ -59,15 +58,13 @@ exports.remove = async (req, res) => {
       subjectCount,
       examCount,
       attendanceCount,
-      feeStructureCount,
-      feeCount
+      feeStructureCount
     ] = await Promise.all([
       Student.countDocuments({ class: classDoc._id }),
       Subject.countDocuments({ class: classDoc._id }),
       Exam.countDocuments({ class: classDoc._id }),
       Attendance.countDocuments({ class: classDoc._id }),
-      FeeStructure.countDocuments({ class: classDoc._id }),
-      Fee.countDocuments({ class: classDoc._id })
+      FeeStructure.countDocuments({ class: classDoc._id })
     ]);
 
     const blockingRefs = [
@@ -75,8 +72,7 @@ exports.remove = async (req, res) => {
       [subjectCount, "subjects"],
       [examCount, "exams"],
       [attendanceCount, "attendance records"],
-      [feeStructureCount, "fee structures"],
-      [feeCount, "fee records"]
+      [feeStructureCount, "fee structures"]
     ].filter(([count]) => count > 0);
 
     if (blockingRefs.length > 0) {
