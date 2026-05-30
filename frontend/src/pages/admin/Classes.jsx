@@ -9,6 +9,8 @@ export default function Classes() {
   const [activeYear, setActiveYear] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedClass, setSelectedClass] = useState(null);
   const [form, setForm] = useState({ name: "", section: "", academicYear: "" });
 
   const fetchData = async () => {
@@ -31,14 +33,62 @@ export default function Classes() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleCreate = async () => {
+  const resetForm = (academicYear = activeYear?._id || "") => {
+    setForm({ name: "", section: "", academicYear });
+  };
+
+  const openCreateModal = () => {
+    setIsEditing(false);
+    setSelectedClass(null);
+    resetForm(activeYear?._id || "");
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (cls) => {
+    setIsEditing(true);
+    setSelectedClass(cls);
+    setForm({
+      name: cls.name || "",
+      section: cls.section || "",
+      academicYear: cls.academicYear?._id || cls.academicYear || activeYear?._id || ""
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
     try {
-      await api.post("/classes", form);
+      const payload = {
+        name: form.name.trim(),
+        section: form.section.trim(),
+        academicYear: form.academicYear
+      };
+
+      if (isEditing) {
+        await api.put(`/classes/${selectedClass._id}`, payload);
+      } else {
+        await api.post("/classes", payload);
+      }
+
       setIsModalOpen(false);
-      setForm({ ...form, name: "", section: "" });
+      setSelectedClass(null);
+      setIsEditing(false);
+      resetForm(activeYear?._id || "");
       fetchData();
     } catch (e) {
-      alert(e.response?.data?.message || "Creation failed");
+      alert(e.response?.data?.message || (isEditing ? "Update failed" : "Creation failed"));
+    }
+  };
+
+  const handleDelete = async (cls) => {
+    const classLabel = `${cls.name || ""}${cls.section || ""}`.trim() || "this class";
+    const confirmed = window.confirm(`Delete ${classLabel}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/classes/${cls._id}`);
+      fetchData();
+    } catch (e) {
+      alert(e.response?.data?.message || "Delete failed");
     }
   };
 
@@ -51,7 +101,7 @@ export default function Classes() {
             Managing classes for session: <strong style={{color: 'var(--gold)'}}>{activeYear?.year || "Not Set"}</strong>
           </p>
         </div>
-        <button style={s.btnPrimary} onClick={() => setIsModalOpen(true)}>
+        <button style={s.btnPrimary} onClick={openCreateModal}>
           <i className="fa-solid fa-plus" style={{marginRight: '8px'}}></i> Add New Class
         </button>
       </div>
@@ -67,7 +117,14 @@ export default function Classes() {
             <td style={s.td}>{c.academicYear?.year}</td>
             <td style={s.td}>{c.classTeacher?.name || <span style={{opacity: 0.5}}>Not Assigned</span>}</td>
             <td style={s.td}>
-              <button style={s.actionBtn}><i className="fa-solid fa-pen-to-square"></i> Edit</button>
+              <div style={s.actions}>
+                <button style={s.actionBtn} onClick={() => openEditModal(c)}>
+                  <i className="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <button style={{...s.actionBtn, ...s.deleteBtn}} onClick={() => handleDelete(c)}>
+                  <i className="fa-solid fa-trash"></i> Delete
+                </button>
+              </div>
             </td>
           </>
         )}
@@ -76,13 +133,14 @@ export default function Classes() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Register New Class"
-        subtitle="Create a new class division and assign it to an academic session."
+        title={isEditing ? "Edit Class" : "Register New Class"}
+        subtitle={isEditing ? "Update the class details and academic session." : "Create a new class division and assign it to an academic session."}
         footer={(
           <div style={{display: 'flex', gap: '12px', width: '100%'}}>
             <button style={s.cancelBtn} onClick={() => setIsModalOpen(false)}>Cancel</button>
-            <button style={s.saveBtn} onClick={handleCreate}>
-              <i className="fa-solid fa-plus-circle" style={{marginRight: '8px'}}></i> Save & Add Class
+            <button style={s.saveBtn} onClick={handleSave}>
+              <i className={`fa-solid ${isEditing ? "fa-floppy-disk" : "fa-plus-circle"}`} style={{marginRight: '8px'}}></i>
+              {isEditing ? "Save Changes" : "Save & Add Class"}
             </button>
           </div>
         )}
@@ -98,14 +156,15 @@ export default function Classes() {
               <input style={s.input} value={form.section} onChange={e => setForm({ ...form, section: e.target.value })} placeholder="e.g. A" />
             </div>
           </div>
-          <div style={s.formItem}>
-            <label style={s.label}>Academic Session</label>
-            <select style={s.input} value={form.academicYear} onChange={e => setForm({ ...form, academicYear: e.target.value })}>
-              {years.map(y => (
-                <option key={y._id} value={y._id}>{y.year} {y.isActive ? "(Current Active)" : ""}</option>
-              ))}
-            </select>
-          </div>
+            <div style={s.formItem}>
+              <label style={s.label}>Academic Session</label>
+              <select style={s.input} value={form.academicYear} onChange={e => setForm({ ...form, academicYear: e.target.value })}>
+                <option value="" disabled>Select session</option>
+                {years.map(y => (
+                  <option key={y._id} value={y._id}>{y.year} {y.isActive ? "(Current Active)" : ""}</option>
+                ))}
+              </select>
+            </div>
         </div>
       </Modal>
     </div>
@@ -118,7 +177,9 @@ const s = {
   sub: { fontSize: "0.9rem", color: "var(--text-muted)", marginTop: "0.4rem" },
   btnPrimary: { background: "linear-gradient(135deg, var(--navy), var(--navy-dark))", color: "var(--white)", border: "none", padding: "12px 24px", borderRadius: "30px", fontWeight: "700", cursor: "pointer", boxShadow: "var(--shadow-md)" },
   td: { padding: "16px 20px", fontSize: "0.95rem", color: "var(--text)", borderBottom: "1px solid var(--border)" },
+  actions: { display: "flex", gap: "10px", flexWrap: "wrap" },
   actionBtn: { background: "var(--white)", border: "1.5px solid var(--navy)", padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem", color: "var(--navy)", fontWeight: "700" },
+  deleteBtn: { color: "var(--danger-text)", borderColor: "var(--danger-text)" },
   form: { display: "flex", flexDirection: "column", gap: "1.5rem" },
   formItem: { display: "flex", flexDirection: "column", gap: "6px" },
   row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" },
