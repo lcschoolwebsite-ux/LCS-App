@@ -13,6 +13,9 @@ const normalizeClassPayload = body => {
   return payload;
 };
 
+const duplicateClassMessage = () =>
+  "A class with the same academic year, name, and section already exists.";
+
 exports.getAll = async (req, res) => {
   const { academicYear } = req.query;
   const q = academicYear ? { academicYear } : {};
@@ -29,7 +32,12 @@ exports.create = async (req, res) => {
         .populate("classTeacher", "name")
     );
   }
-  catch (e) { res.status(400).json({ message: e.message }); }
+  catch (e) {
+    if (e?.code === 11000) {
+      return res.status(409).json({ message: duplicateClassMessage() });
+    }
+    res.status(400).json({ message: e.message });
+  }
 };
 
 exports.update = async (req, res) => {
@@ -45,7 +53,12 @@ exports.update = async (req, res) => {
     if (!updated) return res.status(404).json({ message: "Class not found" });
     res.json(updated);
   }
-  catch (e) { res.status(400).json({ message: e.message }); }
+  catch (e) {
+    if (e?.code === 11000) {
+      return res.status(409).json({ message: duplicateClassMessage() });
+    }
+    res.status(400).json({ message: e.message });
+  }
 };
 
 exports.remove = async (req, res) => {
