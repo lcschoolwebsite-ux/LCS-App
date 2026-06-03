@@ -102,6 +102,23 @@ export default function Fees() {
     } catch (e) { alert(e.response?.data?.message || "Failed to record payment"); }
   };
 
+  const handleDeleteSelectedFee = async () => {
+    if (!selectedFee) return;
+    const confirmDelete = window.confirm(
+      `This will permanently delete the fee record for ${selectedFee.student?.name || "this student"}. Continue?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/student-fees/${selectedFee._id}`);
+      alert("Fee record deleted permanently.");
+      setSelectedFee(null);
+      fetchFeeData();
+    } catch (e) {
+      alert(e.response?.data?.message || "Failed to delete fee record");
+    }
+  };
+
   return (
     <div>
       <SectionTitle title="Fee Management" subtitle="Track collections and record offline payments." />
@@ -212,6 +229,9 @@ export default function Fees() {
                   </div>
                   <button onClick={() => setIsPaymentModalOpen(true)} style={s.btnMainRecord} disabled={selectedFee.totalDue <= 0}>
                     <i className="fa-solid fa-plus-circle"></i> Record Payment
+                  </button>
+                  <button onClick={handleDeleteSelectedFee} style={s.btnDeleteRecord}>
+                    <i className="fa-solid fa-trash-can"></i> Permanent Delete
                   </button>
                </div>
 
@@ -340,6 +360,7 @@ const s = {
   detailName: { fontSize: "1.8rem", color: "var(--navy)", margin: 0, fontFamily: "var(--font-heading)" },
   detailSub: { color: "var(--text-muted)", marginBottom: "12px" },
   btnMainRecord: { background: "var(--navy)", color: "var(--gold-light)", border: "none", padding: "12px 20px", borderRadius: "30px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" },
+  btnDeleteRecord: { background: "linear-gradient(135deg, #dc2626, #b91c1c)", color: "var(--white)", border: "none", padding: "12px 20px", borderRadius: "30px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 8px 18px rgba(220,38,38,0.22)" },
   detailMetrics: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", marginBottom: "32px" },
   metricBox: { padding: "20px", borderRadius: "16px", background: "var(--light-bg)", textAlign: "center", border: "1px solid var(--border)" },
   metricLabel: { fontSize: "0.75rem", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" },

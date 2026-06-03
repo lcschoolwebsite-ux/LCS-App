@@ -271,3 +271,16 @@ exports.recordFlexiblePayment = async (req, res) => {
     res.status(400).json({ message: e.message });
   }
 };
+
+exports.remove = async (req, res) => {
+  try {
+    const fee = await StudentFee.findByIdAndDelete(req.params.id);
+    if (!fee) {
+      return res.status(404).json({ message: "Fee record not found" });
+    }
+
+    res.json({ message: "Fee record deleted permanently" });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
