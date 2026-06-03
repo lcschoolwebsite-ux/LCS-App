@@ -8,6 +8,7 @@ import AppFooter from "../components/AppFooter";
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
 const Classes = lazy(() => import("../pages/admin/Classes"));
 const AcademicYears = lazy(() => import("../pages/admin/AcademicYears"));
+const StudentLogins = lazy(() => import("../pages/admin/StudentLogins"));
 const Students = lazy(() => import("../pages/admin/Students"));
 const Teachers = lazy(() => import("../pages/admin/Teachers"));
 const Subjects = lazy(() => import("../pages/admin/Subjects"));
@@ -26,6 +27,7 @@ const menuGroups = [
       { label: "Analytics", path: "/admin/analytics", icon: "fa-solid fa-chart-simple" },
       { label: "Attendance", path: "/admin/attendance", icon: "fa-solid fa-calendar-check" },
       { label: "Academic Years", path: "/admin/academic-years", icon: "fa-solid fa-calendar-days" },
+      { label: "Student Logins", path: "/admin/student-logins", icon: "fa-solid fa-right-to-bracket" },
     ],
   },
   {
@@ -129,6 +131,7 @@ export default function AdminLayout() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/classes" element={<Classes />} />
               <Route path="/academic-years" element={<AcademicYears />} />
+              <Route path="/student-logins" element={<StudentLogins />} />
               <Route path="/students" element={<Students />} />
               <Route path="/teachers" element={<Teachers />} />
               <Route path="/subjects" element={<Subjects />} />

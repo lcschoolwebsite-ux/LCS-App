@@ -10,6 +10,25 @@ exports.create = async (req, res) => {
   } catch (e) { res.status(400).json({ message: e.message }); }
 };
 
+exports.update = async (req, res) => {
+  try {
+    const { year, startDate, endDate } = req.body;
+    const ay = await AcademicYear.findByIdAndUpdate(
+      req.params.id,
+      { year, startDate, endDate },
+      { new: true, runValidators: true }
+    );
+
+    if (!ay) {
+      return res.status(404).json({ message: "Academic year not found" });
+    }
+
+    res.json(ay);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
+
 exports.setActive = async (req, res) => {
   try {
     await AcademicYear.updateMany({}, { isActive: false });

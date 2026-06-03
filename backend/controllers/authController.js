@@ -80,6 +80,7 @@ exports.login = async (req, res) => {
     // ── STUDENT LOGIN ─────────────────────────
     if (role === "student") {
       const Student = require("../models/Student");
+      const StudentLoginLog = require("../models/StudentLoginLog");
       const student = await Student.findOne({ 
         satCode: username, 
         isActive: true 
@@ -102,6 +103,16 @@ exports.login = async (req, res) => {
         id: student._id, 
         role: "student", 
         name: student.name 
+      });
+
+      StudentLoginLog.create({
+        studentId: student._id,
+        studentName: student.name,
+        satCode: student.satCode,
+        className: student.class ? `${student.class.name || ""}${student.class.section ? ` ${student.class.section}` : ""}`.trim() : "",
+        academicYear: student.academicYear?.year || ""
+      }).catch(err => {
+        console.error("Student login log error:", err.message);
       });
 
       return res.json({

@@ -18,6 +18,7 @@ router.use("/student-fees",  require("./studentFee"));
 router.use("/announcements",  require("./announcement"));
 router.use("/dashboard",      require("./dashboard"));
 router.use("/analytics",      require("./analytics"));
+router.use("/student-logins", require("./studentLoginLog"));
 router.use("/export",         require("./export"));
 router.use("/reports",        require("./report"));
 router.use("/search",         require("./search"));

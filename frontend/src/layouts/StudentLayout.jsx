@@ -46,7 +46,7 @@ export default function StudentLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/student-login", { replace: true });
   };
 
   const currentPathLabel = menuItems.find(i => i.path === location.pathname)?.label || "Dashboard";
