@@ -61,20 +61,16 @@
   gap: 0.8rem;
 }
 
-.portal-crest {
+.portal-logo {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: var(--gold);
-  border: 2px solid rgba(255,255,255,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-size: 1.1rem;
-  color: var(--navy-dark);
+  object-fit: contain;
   flex-shrink: 0;
   box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: 4px;
 }
 
 .portal-school-name {
@@ -108,27 +104,6 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.5);
-}
-
-.portal-head-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.88);
-  font-size: 0.78rem;
-  font-weight: 700;
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 0.65rem 1rem;
-  border-radius: 999px;
-  transition: var(--transition);
-}
-
-.portal-head-link:hover {
-  color: var(--gold-light);
-  border-color: rgba(200,150,12,0.35);
-  background: rgba(200,150,12,0.07);
-  transform: translateY(-1px);
 }
 
 .portal-hero-centre {
@@ -229,9 +204,18 @@
 }
 
 .portal-info-icon {
-  font-size: 1.4rem;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(200,150,12,0.1);
+  border: 1px solid rgba(200,150,12,0.22);
+  color: var(--gold-light);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   flex-shrink: 0;
-  margin-top: 0.1rem;
 }
 
 .portal-info-text h4 {
@@ -279,6 +263,8 @@
   color: var(--white);
   position: relative;
   overflow: hidden;
+  text-decoration: none;
+  display: block;
 }
 
 .portal-ql-card::after {
@@ -301,9 +287,19 @@
 }
 
 .portal-ql-icon {
-  font-size: 1.5rem;
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 0.4rem;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(200,150,12,0.12);
+  border: 1px solid rgba(200,150,12,0.22);
+  color: var(--gold-light);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   display: block;
-  margin-bottom: 0.4rem;
 }
 
 .portal-ql-name {
@@ -424,7 +420,9 @@
   }
 
   .portal-ql-icon {
-    font-size: 1.3rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.68rem;
   }
 
   .portal-ql-name {

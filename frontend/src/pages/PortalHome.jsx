@@ -10,7 +10,7 @@ export default function PortalHome() {
       <div className="portal-content">
         <header className="portal-top-bar">
           <div className="portal-school-brand">
-            <div className="portal-crest">✦</div>
+            <img src="/logo.png" alt="Loretto Central School logo" className="portal-logo" />
             <div className="portal-school-name">
               <small>Welcome to the</small>
               Loretto Central School
@@ -19,7 +19,6 @@ export default function PortalHome() {
 
           <div className="portal-top-actions">
             <span className="portal-tag">portal.lorettocentralschool.edu.in</span>
-            <Link to="/head" className="portal-head-link">Head Login</Link>
           </div>
         </header>
 
@@ -36,21 +35,21 @@ export default function PortalHome() {
 
         <section className="portal-info-row" aria-label="Portal highlights">
           <article className="portal-info-card">
-            <div className="portal-info-icon">🔒</div>
+            <div className="portal-info-icon">SA</div>
             <div className="portal-info-text">
               <h4>Secure Access</h4>
               <p>Industry-standard encryption keeps your data safe on any device, anytime.</p>
             </div>
           </article>
           <article className="portal-info-card">
-            <div className="portal-info-icon">📋</div>
+            <div className="portal-info-icon">AR</div>
             <div className="portal-info-text">
               <h4>Academic Records</h4>
               <p>View attendance, exam results, progress reports and timetables at a glance.</p>
             </div>
           </article>
           <article className="portal-info-card">
-            <div className="portal-info-icon">📢</div>
+            <div className="portal-info-icon">LU</div>
             <div className="portal-info-text">
               <h4>Live Updates</h4>
               <p>Real-time school announcements, event schedules and important notices.</p>
@@ -61,26 +60,26 @@ export default function PortalHome() {
         <section className="portal-quick-links" aria-label="Quick links">
           <p className="portal-ql-label">Quick Links</p>
           <div className="portal-ql-row">
-            <button type="button" className="portal-ql-card">
-              <span className="portal-ql-icon">📰</span>
+            <a href="https://lorettocentralschool.edu.in/news" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
+              <span className="portal-ql-icon">NW</span>
               <span className="portal-ql-name">News</span>
-              <span className="portal-ql-arrow">COMING SOON →</span>
-            </button>
-            <button type="button" className="portal-ql-card">
-              <span className="portal-ql-icon">🖼️</span>
+              <span className="portal-ql-arrow">OPEN →</span>
+            </a>
+            <a href="https://lorettocentralschool.edu.in/school-information/school-gallery" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
+              <span className="portal-ql-icon">GL</span>
               <span className="portal-ql-name">Gallery</span>
-              <span className="portal-ql-arrow">COMING SOON →</span>
-            </button>
-            <button type="button" className="portal-ql-card">
-              <span className="portal-ql-icon">🏫</span>
+              <span className="portal-ql-arrow">OPEN →</span>
+            </a>
+            <a href="https://lorettocentralschool.edu.in/about-us/1-school-profile" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
+              <span className="portal-ql-icon">SI</span>
               <span className="portal-ql-name">School Info</span>
-              <span className="portal-ql-arrow">COMING SOON →</span>
-            </button>
-            <button type="button" className="portal-ql-card">
-              <span className="portal-ql-icon">📖</span>
+              <span className="portal-ql-arrow">OPEN →</span>
+            </a>
+            <a href="https://lorettocentralschool.edu.in/e-magazine" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
+              <span className="portal-ql-icon">EM</span>
               <span className="portal-ql-name">E-Magazine</span>
-              <span className="portal-ql-arrow">COMING SOON →</span>
-            </button>
+              <span className="portal-ql-arrow">OPEN →</span>
+            </a>
           </div>
         </section>
       </div>
