@@ -68,7 +68,6 @@ export default function Attendance() {
 
   useEffect(() => {
     fetchMarkedDates();
-    setSelectedDate(getLocalDate());
   }, [fetchMarkedDates]);
 
   const fetchAttendance = useCallback(async () => {
@@ -150,14 +149,16 @@ export default function Attendance() {
             <label style={s.label}>2. Select Date</label>
             <div style={s.inputWrap}>
               <i className="fa-solid fa-calendar-day" style={s.inputIcon}></i>
-              <select style={s.inputWithIcon} value={selectedDate} onChange={e => setSelectedDate(e.target.value)}>
-                <option value={today}>Today - Latest Attendance ({formatAttendanceDate(today)})</option>
-                {pastDateOptions.map(record => (
-                  <option key={record.date} value={record.date}>
-                    {formatAttendanceDate(record.date)} - Marked Attendance ({record.absentCount} absent)
-                  </option>
-                ))}
-              </select>
+              <input
+                type="date"
+                style={s.inputWithIcon}
+                value={selectedDate}
+                max={today}
+                onChange={e => setSelectedDate(e.target.value)}
+              />
+            </div>
+            <div style={s.dateHint}>
+              Pick any past date to enter or update attendance. Current day is prefilled, and previously marked dates are listed below.
             </div>
           </div>
         </div>
@@ -166,6 +167,23 @@ export default function Attendance() {
           <div style={s.warningBanner}>
             <i className="fa-solid fa-circle-check" style={{marginRight: '8px', color: 'var(--success-text)'}}></i>
             Records already exist for <strong>{formatAttendanceDate(selectedDate)}</strong>. Saving will update the existing log.
+          </div>
+        )}
+        {pastDateOptions.length > 0 && (
+          <div style={s.markedDatesRow}>
+            <span style={s.markedDatesLabel}>Previously marked dates:</span>
+            <div style={s.markedDatesList}>
+              {pastDateOptions.map(record => (
+                <button
+                  key={record.date}
+                  type="button"
+                  style={selectedDate === record.date ? s.markedDateActive : s.markedDateBtn}
+                  onClick={() => setSelectedDate(record.date)}
+                >
+                  {formatAttendanceDate(record.date)} <span style={s.markedDateMeta}>({record.absentCount} absent)</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -232,8 +250,15 @@ const s = {
   inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
   inputIcon: { position: 'absolute', left: '16px', color: 'var(--navy)', fontSize: '1.1rem', zIndex: 5 },
   inputWithIcon: { width: "100%", padding: "14px 14px 14px 48px", borderRadius: "12px", border: "2px solid var(--border)", fontFamily: "var(--font-body)", fontSize: "1rem", background: "var(--white)", boxSizing: "border-box", transition: "var(--transition)", cursor: 'pointer', fontWeight: '600' },
+  dateHint: { marginTop: "8px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5 },
   
   warningBanner: { background: "var(--light-bg)", border: "1px solid var(--border)", color: "var(--text)", padding: "14px 20px", borderRadius: "10px", fontSize: "0.9rem", marginTop: "16px" },
+  markedDatesRow: { marginTop: "18px", paddingTop: "18px", borderTop: "1px dashed var(--border)" },
+  markedDatesLabel: { display: "block", fontSize: "0.72rem", fontWeight: "900", color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" },
+  markedDatesList: { display: "flex", flexWrap: "wrap", gap: "10px" },
+  markedDateBtn: { background: "var(--white)", border: "1px solid var(--border)", borderRadius: "999px", padding: "8px 14px", cursor: "pointer", color: "var(--navy)", fontWeight: "700", fontSize: "0.82rem" },
+  markedDateActive: { background: "var(--navy)", border: "1px solid var(--navy)", borderRadius: "999px", padding: "8px 14px", cursor: "pointer", color: "var(--white)", fontWeight: "700", fontSize: "0.82rem" },
+  markedDateMeta: { fontWeight: "600", opacity: 0.8 },
   
   bulkRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" },
   bulkBtns: { display: "flex", gap: "12px" },
