@@ -16,7 +16,7 @@ export default function Fees() {
   
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentForm, setPaymentForm] = useState({
-    amount: "", method: "Cash", paidDate: new Date().toISOString().split('T')[0], note: "School Fee Payment"
+    amount: "", method: "Cash", paidDate: new Date().toISOString().split('T')[0]
   });
 
   const formatClass = cls => {
@@ -86,7 +86,9 @@ export default function Fees() {
     try {
       await api.post("/student-fees/record-flexible-payment", {
         studentFeeId: selectedFee._id,
-        ...paymentForm
+        amount: paymentForm.amount,
+        method: paymentForm.method,
+        paidDate: paymentForm.paidDate
       });
       alert("Payment recorded successfully!");
       setIsPaymentModalOpen(false);
@@ -95,7 +97,7 @@ export default function Fees() {
       setSelectedFee(data);
       fetchFeeData();
       setPaymentForm({
-        amount: "", method: "Cash", paidDate: new Date().toISOString().split('T')[0], note: "School Fee Payment"
+        amount: "", method: "Cash", paidDate: new Date().toISOString().split('T')[0]
       });
     } catch (e) { alert(e.response?.data?.message || "Failed to record payment"); }
   };
@@ -303,16 +305,6 @@ export default function Fees() {
           <div style={s.formGroup}>
             <label style={s.fLabel}>Date of Payment</label>
             <input type="date" style={s.input} value={paymentForm.paidDate} onChange={e => setPaymentForm({...paymentForm, paidDate: e.target.value})} />
-          </div>
-          <div style={s.formGroup}>
-            <label style={s.fLabel}>Note / Description</label>
-            <input 
-              type="text" 
-              style={s.input} 
-              placeholder="e.g. 1st Installment"
-              value={paymentForm.note} 
-              onChange={e => setPaymentForm({...paymentForm, note: e.target.value})} 
-            />
           </div>
         </div>
       </Modal>

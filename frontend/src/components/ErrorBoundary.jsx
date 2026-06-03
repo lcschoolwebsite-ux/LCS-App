@@ -6,12 +6,32 @@ export default class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null };
   }
 
+  componentDidMount() {
+    // Clear the retry flag on a fresh app load so a future deploy mismatch can recover once.
+    sessionStorage.removeItem("portal-chunk-reloaded");
+  }
+
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
 
   componentDidCatch(error, info) {
     console.error("ErrorBoundary caught:", error, info);
+
+    if (this.isChunkLoadError(error) && !sessionStorage.getItem("portal-chunk-reloaded")) {
+      sessionStorage.setItem("portal-chunk-reloaded", "1");
+      window.location.reload();
+    }
+  }
+
+  isChunkLoadError(error) {
+    const message = String(error?.message || error || "");
+    return (
+      message.includes("Failed to fetch dynamically imported module") ||
+      message.includes("Importing a module script failed") ||
+      message.includes("Loading chunk") ||
+      message.includes("ChunkLoadError")
+    );
   }
 
   render() {
