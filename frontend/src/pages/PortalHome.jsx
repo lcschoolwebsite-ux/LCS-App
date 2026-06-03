@@ -35,21 +35,27 @@ export default function PortalHome() {
 
         <section className="portal-info-row" aria-label="Portal highlights">
           <article className="portal-info-card">
-            <div className="portal-info-icon">SA</div>
+            <div className="portal-info-icon" aria-hidden="true">
+              <i className="fa-solid fa-shield-halved"></i>
+            </div>
             <div className="portal-info-text">
               <h4>Secure Access</h4>
               <p>Industry-standard encryption keeps your data safe on any device, anytime.</p>
             </div>
           </article>
           <article className="portal-info-card">
-            <div className="portal-info-icon">AR</div>
+            <div className="portal-info-icon" aria-hidden="true">
+              <i className="fa-solid fa-book-open"></i>
+            </div>
             <div className="portal-info-text">
               <h4>Academic Records</h4>
               <p>View attendance, exam results, progress reports and timetables at a glance.</p>
             </div>
           </article>
           <article className="portal-info-card">
-            <div className="portal-info-icon">LU</div>
+            <div className="portal-info-icon" aria-hidden="true">
+              <i className="fa-solid fa-bullhorn"></i>
+            </div>
             <div className="portal-info-text">
               <h4>Live Updates</h4>
               <p>Real-time school announcements, event schedules and important notices.</p>
@@ -61,22 +67,22 @@ export default function PortalHome() {
           <p className="portal-ql-label">Quick Links</p>
           <div className="portal-ql-row">
             <a href="https://lorettocentralschool.edu.in/news" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon">NW</span>
+              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-regular fa-newspaper"></i></span>
               <span className="portal-ql-name">News</span>
               <span className="portal-ql-arrow">OPEN →</span>
             </a>
             <a href="https://lorettocentralschool.edu.in/school-information/school-gallery" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon">GL</span>
+              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-regular fa-images"></i></span>
               <span className="portal-ql-name">Gallery</span>
               <span className="portal-ql-arrow">OPEN →</span>
             </a>
             <a href="https://lorettocentralschool.edu.in/about-us/1-school-profile" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon">SI</span>
+              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-solid fa-school"></i></span>
               <span className="portal-ql-name">School Info</span>
               <span className="portal-ql-arrow">OPEN →</span>
             </a>
             <a href="https://lorettocentralschool.edu.in/e-magazine" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon">EM</span>
+              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-solid fa-book-open-reader"></i></span>
               <span className="portal-ql-name">E-Magazine</span>
               <span className="portal-ql-arrow">OPEN →</span>
             </a>
