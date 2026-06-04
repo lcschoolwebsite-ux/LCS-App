@@ -102,9 +102,9 @@ export default function MarksOverview() {
     <div style={s.page}>
       <div style={s.hero}>
         <div>
-          <p style={s.eyebrow}>Evaluation</p>
-          <h1 style={s.title}>Marks Overview</h1>
-          <p style={s.sub}>
+          <p style={{ ...s.eyebrow, color: "var(--white)" }}>Evaluation</p>
+          <h1 style={{ ...s.title, color: "var(--white)" }}>Marks Overview</h1>
+          <p style={{ ...s.sub, color: "rgba(255,255,255,0.82)" }}>
             View teacher uploads, student-wise marks, failed subjects, and exam performance across classes.
           </p>
         </div>
