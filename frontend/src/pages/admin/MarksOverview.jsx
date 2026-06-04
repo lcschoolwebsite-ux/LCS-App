@@ -355,8 +355,15 @@ export default function MarksOverview() {
 }
 
 const s = {
-  page: { display: "flex", flexDirection: "column", gap: "20px" },
-  loading: { padding: "60px 24px", textAlign: "center", color: "var(--text-muted)", fontSize: "1rem" },
+  page: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+    background: "linear-gradient(180deg, #041b1b 0%, #062424 100%)",
+    padding: "20px",
+    borderRadius: "24px"
+  },
+  loading: { padding: "60px 24px", textAlign: "center", color: "rgba(255,255,255,0.72)", fontSize: "1rem" },
   hero: {
     background: "linear-gradient(135deg, rgba(9,79,79,0.95), rgba(14,107,107,0.95))",
     color: "var(--white)",
@@ -388,11 +395,11 @@ const s = {
     alignItems: "end"
   },
   field: { display: "flex", flexDirection: "column", gap: "8px" },
-  label: { fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", fontWeight: 700 },
+  label: { fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.78)", fontWeight: 700 },
   input: {
     height: "46px",
     borderRadius: "12px",
-    border: "1px solid #dbe4ea",
+    border: "1px solid rgba(255,255,255,0.18)",
     background: "var(--white)",
     padding: "0 14px",
     fontSize: "0.92rem",
@@ -401,7 +408,7 @@ const s = {
   searchWrap: {
     height: "46px",
     borderRadius: "12px",
-    border: "1px solid #dbe4ea",
+    border: "1px solid rgba(255,255,255,0.18)",
     background: "var(--white)",
     display: "flex",
     alignItems: "center",
@@ -423,10 +430,10 @@ const s = {
     gap: "16px"
   },
   statCard: {
-    background: "var(--white)",
+    background: "rgba(255,255,255,0.06)",
     borderRadius: "18px",
-    border: "1px solid #e7eef2",
-    boxShadow: "var(--shadow-sm)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.18)",
     padding: "18px",
     display: "flex",
     alignItems: "center",
@@ -442,8 +449,8 @@ const s = {
     fontSize: "1.1rem",
     flexShrink: 0
   },
-  statValue: { fontSize: "1.7rem", fontWeight: 800, color: "var(--navy)", lineHeight: 1 },
-  statLabel: { fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "4px", fontWeight: 700 },
+  statValue: { fontSize: "1.7rem", fontWeight: 800, color: "var(--white)", lineHeight: 1 },
+  statLabel: { fontSize: "0.82rem", color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "4px", fontWeight: 700 },
   panelGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
@@ -455,10 +462,10 @@ const s = {
     gap: "16px"
   },
   panel: {
-    background: "var(--white)",
+    background: "rgba(255,255,255,0.06)",
     borderRadius: "18px",
-    border: "1px solid #e7eef2",
-    boxShadow: "var(--shadow-sm)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.18)",
     padding: "18px",
     minWidth: 0
   },
@@ -469,14 +476,14 @@ const s = {
     gap: "12px",
     marginBottom: "16px"
   },
-  panelTitle: { margin: 0, fontSize: "1.05rem", color: "var(--navy)", fontFamily: "var(--font-heading)" },
+  panelTitle: { margin: 0, fontSize: "1.05rem", color: "var(--white)", fontFamily: "var(--font-heading)" },
   panelBadge: {
     fontSize: "0.72rem",
     fontWeight: 800,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
     color: "var(--navy-dark)",
-    background: "var(--gold-pale)",
+    background: "var(--gold-light)",
     padding: "7px 10px",
     borderRadius: "999px"
   },
@@ -488,11 +495,11 @@ const s = {
     gap: "14px",
     padding: "14px 16px",
     borderRadius: "14px",
-    background: "#f8fbfb",
-    border: "1px solid #edf3f5"
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.08)"
   },
-  teacherName: { fontWeight: 800, color: "var(--navy)" },
-  teacherMeta: { marginTop: "4px", fontSize: "0.82rem", color: "var(--text-muted)" },
+  teacherName: { fontWeight: 800, color: "var(--white)" },
+  teacherMeta: { marginTop: "4px", fontSize: "0.82rem", color: "rgba(255,255,255,0.72)" },
   teacherCount: {
     width: "42px",
     height: "42px",
@@ -510,16 +517,17 @@ const s = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    minWidth: "680px"
+    minWidth: "680px",
+    color: "var(--white)"
   },
   emptyCell: {
     textAlign: "center",
     padding: "18px",
-    color: "var(--text-muted)"
+    color: "rgba(255,255,255,0.72)"
   },
   tableHead: {},
-  cellTitle: { fontWeight: 800, color: "var(--navy)" },
-  cellSub: { fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px" },
+  cellTitle: { fontWeight: 800, color: "var(--white)" },
+  cellSub: { fontSize: "0.78rem", color: "rgba(255,255,255,0.68)", marginTop: "3px" },
   failPill: {
     display: "inline-flex",
     alignItems: "center",
@@ -570,8 +578,8 @@ const s = {
   studentCard: {
     width: "100%",
     textAlign: "left",
-    border: "1px solid #e7eef2",
-    background: "#f9fbfb",
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(255,255,255,0.05)",
     borderRadius: "16px",
     padding: "14px 16px",
     cursor: "pointer",
@@ -579,19 +587,19 @@ const s = {
   },
   studentCardActive: {
     borderColor: "var(--gold)",
-    boxShadow: "0 8px 20px rgba(200,150,12,0.12)",
-    background: "#fffdf5"
+    boxShadow: "0 8px 20px rgba(200,150,12,0.18)",
+    background: "rgba(200,150,12,0.12)"
   },
   studentCardTop: { display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" },
-  studentName: { fontSize: "0.98rem", fontWeight: 800, color: "var(--navy)" },
-  studentMeta: { marginTop: "4px", fontSize: "0.8rem", color: "var(--text-muted)" },
+  studentName: { fontSize: "0.98rem", fontWeight: 800, color: "var(--white)" },
+  studentMeta: { marginTop: "4px", fontSize: "0.8rem", color: "rgba(255,255,255,0.72)" },
   studentMetrics: {
     display: "flex",
     flexWrap: "wrap",
     gap: "10px",
     marginTop: "12px",
     fontSize: "0.8rem",
-    color: "var(--navy-dark)",
+    color: "var(--white)",
     fontWeight: 700
   },
   studentDetailHeader: {
@@ -600,31 +608,31 @@ const s = {
     gap: "12px",
     alignItems: "stretch",
     padding: "16px",
-    background: "#f8fbfb",
+    background: "rgba(255,255,255,0.05)",
     borderRadius: "16px",
-    border: "1px solid #edf3f5"
+    border: "1px solid rgba(255,255,255,0.08)"
   },
-  detailName: { fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)" },
-  detailMeta: { marginTop: "6px", color: "var(--text-muted)", fontSize: "0.86rem" },
+  detailName: { fontSize: "1.05rem", fontWeight: 800, color: "var(--white)" },
+  detailMeta: { marginTop: "6px", color: "rgba(255,255,255,0.72)", fontSize: "0.86rem" },
   detailStat: {
-    background: "var(--white)",
+    background: "rgba(255,255,255,0.06)",
     borderRadius: "14px",
-    border: "1px solid #e7eef2",
+    border: "1px solid rgba(255,255,255,0.12)",
     padding: "12px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center"
   },
-  detailStatValue: { fontSize: "1.3rem", fontWeight: 800, color: "var(--navy)" },
-  detailStatLabel: { marginTop: "4px", fontSize: "0.74rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", fontWeight: 700 },
+  detailStatValue: { fontSize: "1.3rem", fontWeight: 800, color: "var(--white)" },
+  detailStatLabel: { marginTop: "4px", fontSize: "0.74rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.68)", fontWeight: 700 },
   empty: {
     padding: "20px",
     textAlign: "center",
-    color: "var(--text-muted)",
-    border: "1px dashed #d5dee6",
+    color: "rgba(255,255,255,0.72)",
+    border: "1px dashed rgba(255,255,255,0.18)",
     borderRadius: "14px",
-    background: "#fbfcfd"
+    background: "rgba(255,255,255,0.03)"
   },
   emptyPanel: {
     minHeight: "320px",
@@ -632,10 +640,10 @@ const s = {
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
-    color: "var(--text-muted)",
-    border: "1px dashed #d5dee6",
+    color: "rgba(255,255,255,0.72)",
+    border: "1px dashed rgba(255,255,255,0.18)",
     borderRadius: "14px",
-    background: "#fbfcfd",
+    background: "rgba(255,255,255,0.03)",
     padding: "24px"
   }
 };
