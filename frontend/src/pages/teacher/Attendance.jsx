@@ -26,6 +26,8 @@ export default function Attendance() {
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
   const [markedDates, setMarkedDates] = useState([]);
   const [alreadyMarked, setAlreadyMarked] = useState(false);
+  const [holidayInfo, setHolidayInfo] = useState(null);
+  const [holidaySummary, setHolidaySummary] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -70,17 +72,31 @@ export default function Attendance() {
     fetchMarkedDates();
   }, [fetchMarkedDates]);
 
+  useEffect(() => {
+    const fetchHolidaySummary = async () => {
+      try {
+        const { data } = await api.get("/attendance/holiday-summary");
+        setHolidaySummary(data);
+      } catch (e) {
+        console.error("Failed to load holiday summary", e);
+      }
+    };
+
+    fetchHolidaySummary();
+  }, []);
+
   const fetchAttendance = useCallback(async () => {
     if (!selectedClass || !selectedDate) return;
     setLoading(true);
     try {
       const { data } = await api.get(`/attendance?classId=${selectedClass}&date=${selectedDate}`);
-      const mapped = data.students.map(s => ({
+      setHolidayInfo(data.isHoliday ? data.holiday : null);
+      setAlreadyMarked(Boolean(data.alreadyMarked));
+      const mapped = data.isHoliday ? [] : data.students.map(s => ({
         ...s,
         status: s.absent ? "absent" : "present"
       }));
       setStudents(mapped);
-      setAlreadyMarked(data.alreadyMarked);
     } catch (e) {
       alert("Failed to load attendance records");
     } finally {
@@ -124,6 +140,7 @@ export default function Attendance() {
 
   const today = getLocalDate();
   const pastDateOptions = markedDates.filter(record => record.date !== today);
+  const selectedHoliday = holidayInfo;
   const presentCount = students.filter(s => s.status === 'present').length;
   const absentCount = students.filter(s => s.status === 'absent').length;
 
@@ -163,7 +180,41 @@ export default function Attendance() {
           </div>
         </div>
 
-        {alreadyMarked && (
+        <div style={s.holidayWidget}>
+          <div style={s.widgetHeader}>
+            <div>
+              <p style={s.widgetEyebrow}>Holiday Summary</p>
+              <h3 style={s.widgetTitle}>Attendance-safe calendar</h3>
+            </div>
+            <i className="fa-solid fa-umbrella-beach" style={s.widgetIcon}></i>
+          </div>
+          <div style={s.widgetGrid}>
+            <div style={s.widgetStat}>
+              <span style={s.widgetLabel}>Total Holidays</span>
+              <strong style={s.widgetValue}>{holidaySummary?.totalHolidays ?? "..."}</strong>
+            </div>
+            <div style={s.widgetStat}>
+              <span style={s.widgetLabel}>Fixed Sundays</span>
+              <strong style={s.widgetValue}>{holidaySummary?.fixedHolidays ?? "..."}</strong>
+            </div>
+            <div style={s.widgetStat}>
+              <span style={s.widgetLabel}>Next Holiday</span>
+              <strong style={s.widgetValue}>{holidaySummary?.upcomingHoliday?.eventName || "Not set"}</strong>
+              <span style={s.widgetMeta}>
+                {holidaySummary?.upcomingHoliday?.date
+                  ? formatAttendanceDate(holidaySummary.upcomingHoliday.date)
+                  : "No upcoming holiday"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {selectedHoliday ? (
+          <div style={s.warningBanner}>
+            <i className="fa-solid fa-umbrella-beach" style={{marginRight: '8px', color: 'var(--gold)'}}></i>
+            <strong>{selectedHoliday.eventName}</strong> on <strong>{formatAttendanceDate(selectedDate)}</strong> is a holiday. Attendance is not counted on this date.
+          </div>
+        ) : alreadyMarked && (
           <div style={s.warningBanner}>
             <i className="fa-solid fa-circle-check" style={{marginRight: '8px', color: 'var(--success-text)'}}></i>
             Records already exist for <strong>{formatAttendanceDate(selectedDate)}</strong>. Saving will update the existing log.
@@ -250,6 +301,22 @@ const s = {
   inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
   inputIcon: { position: 'absolute', left: '16px', color: 'var(--navy)', fontSize: '1.1rem', zIndex: 5 },
   inputWithIcon: { width: "100%", padding: "14px 14px 14px 48px", borderRadius: "12px", border: "2px solid var(--border)", fontFamily: "var(--font-body)", fontSize: "1rem", background: "var(--white)", boxSizing: "border-box", transition: "var(--transition)", cursor: 'pointer', fontWeight: '600' },
+  holidayWidget: {
+    marginTop: "20px",
+    padding: "18px 20px",
+    borderRadius: "16px",
+    background: "linear-gradient(135deg, rgba(14,107,107,0.08), rgba(200,150,12,0.08))",
+    border: "1px solid rgba(200,150,12,0.18)"
+  },
+  widgetHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "14px" },
+  widgetEyebrow: { margin: 0, fontSize: "0.7rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--gold)" },
+  widgetTitle: { margin: "4px 0 0", fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1rem" },
+  widgetIcon: { color: "var(--navy)", fontSize: "1.1rem" },
+  widgetGrid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" },
+  widgetStat: { background: "var(--white)", borderRadius: "12px", padding: "12px 14px", border: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "4px" },
+  widgetLabel: { fontSize: "0.72rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)" },
+  widgetValue: { fontSize: "0.95rem", fontWeight: 900, color: "var(--navy)" },
+  widgetMeta: { fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 },
   dateHint: { marginTop: "8px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5 },
   
   warningBanner: { background: "var(--light-bg)", border: "1px solid var(--border)", color: "var(--text)", padding: "14px 20px", borderRadius: "10px", fontSize: "0.9rem", marginTop: "16px" },

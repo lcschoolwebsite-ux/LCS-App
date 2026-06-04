@@ -8,6 +8,7 @@ router.use("/teachers",       require("./teacher"));
 router.use("/students",       require("./student"));
 router.use("/settings",       require("./setting"));
 router.use("/attendance",     require("./attendance"));
+router.use("/holidays",       require("./holiday"));
 router.use("/exam-types",     require("./examType"));
 router.use("/exams",          require("./exam"));
 router.use("/marks",          require("./mark"));

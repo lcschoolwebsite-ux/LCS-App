@@ -3,6 +3,7 @@ const Student    = require("../models/Student");
 const AcademicYear = require("../models/AcademicYear");
 const Teacher = require("../models/Teacher");
 const { getIO } = require("../utils/socket");
+const { isHolidayDate, getHolidayCalendar, toLocalDateString } = require("../utils/holidayUtils");
 
 const ensureAssignedClass = async (req, classId) => {
   if (req.user.role !== "teacher") return true;
@@ -16,6 +17,17 @@ exports.getOrInit = async (req, res) => {
     const { classId, date } = req.query;
     if (!classId || !date) return res.status(400).json({ message: "Class and Date required" });
     if (!(await ensureAssignedClass(req, classId))) return res.status(403).json({ message: "Class not assigned to teacher" });
+
+    const activeYear = await AcademicYear.findOne({ isActive: true }).select("_id").lean();
+    const holidayCheck = await isHolidayDate(date, activeYear?._id);
+    if (holidayCheck.isHoliday) {
+      return res.json({
+        students: [],
+        alreadyMarked: false,
+        isHoliday: true,
+        holiday: holidayCheck.holiday
+      });
+    }
 
     const students = await Student.find({ class: classId, isActive: true })
       .select("name satCode")
@@ -55,6 +67,33 @@ exports.getMarkedDates = async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 };
 
+exports.getHolidaySummary = async (req, res) => {
+  try {
+    const activeYear = await AcademicYear.findOne({ isActive: true }).select("_id year startDate endDate").lean();
+    const { holidays } = await getHolidayCalendar(activeYear?._id);
+    const today = toLocalDateString(new Date());
+    const upcomingHoliday = holidays.find(item => item.date >= today) || null;
+
+    res.json({
+      academicYear: activeYear
+        ? {
+            _id: activeYear._id,
+            year: activeYear.year,
+            startDate: activeYear.startDate,
+            endDate: activeYear.endDate
+          }
+        : null,
+      totalHolidays: holidays.length,
+      fixedHolidays: holidays.filter(item => item.isFixed).length,
+      customHolidays: holidays.filter(item => item.isCustom).length,
+      todayHoliday: holidays.find(item => item.date === today) || null,
+      upcomingHoliday
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
 exports.markAttendance = async (req, res) => {
   try {
     const { classId, date, absentIds } = req.body;
@@ -62,6 +101,15 @@ exports.markAttendance = async (req, res) => {
     
     if (!activeYear) return res.status(400).json({ message: "No active academic year found" });
     if (!(await ensureAssignedClass(req, classId))) return res.status(403).json({ message: "Class not assigned to teacher" });
+
+    const holidayCheck = await isHolidayDate(date, activeYear._id);
+    if (holidayCheck.isHoliday) {
+      return res.status(400).json({
+        message: holidayCheck.holiday?.eventName
+          ? `${holidayCheck.holiday.eventName} is a holiday. Attendance cannot be marked on this date.`
+          : "This date is a holiday. Attendance cannot be marked."
+      });
+    }
 
     const attendance = await Attendance.findOneAndUpdate(
       { class: classId, date },
@@ -100,8 +148,11 @@ exports.getStudentReport = async (req, res) => {
     const start = `${year}-${String(month).padStart(2,"0")}-01`;
     const end   = `${year}-${String(month).padStart(2,"0")}-31`;
 
-    const student = await Student.findById(studentId).select("class").lean();
+    const student = await Student.findById(studentId).select("class academicYear").lean();
     if (!student) return res.status(404).json({ message: "Student not found" });
+
+    const { holidays } = await getHolidayCalendar(student.academicYear);
+    const holidayDates = new Set(holidays.map(item => item.date));
 
     const records = await Attendance.find({ class: student.class, date: { $gte: start, $lte: end } })
       .select("date absentees")
@@ -109,11 +160,12 @@ exports.getStudentReport = async (req, res) => {
 
     let present = 0, absent = 0;
     const log = records.map(r => {
+      if (holidayDates.has(r.date)) return null;
       const isAbsent = r.absentees.map(a => a.toString()).includes(studentId);
       isAbsent ? absent++ : present++;
       return { date: r.date, status: isAbsent ? "Absent" : "Present" };
-    });
+    }).filter(Boolean);
 
-    res.json({ log, present, absent, total: records.length });
+    res.json({ log, present, absent, total: log.length });
   } catch (e) { res.status(500).json({ message: e.message }); }
 };

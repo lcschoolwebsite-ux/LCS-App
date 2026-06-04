@@ -4,6 +4,7 @@ const Class = require("../models/Class");
 const StudentFee = require("../models/StudentFee");
 const Attendance = require("../models/Attendance");
 const AcademicYear = require("../models/AcademicYear");
+const { getHolidayCalendar, toLocalDateString } = require("../utils/holidayUtils");
 
 exports.getAdminStats = async (req, res) => {
   try {
@@ -42,7 +43,31 @@ exports.getAdminStats = async (req, res) => {
     ]);
 
     // 4. Today's Attendance
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString(new Date());
+    const { holidays } = await getHolidayCalendar(yearId);
+    const todayHoliday = holidays.find(h => h.date === today);
+
+    if (todayHoliday) {
+      return res.json({
+        students: studentCount,
+        teachers: teacherCount,
+        classes: classCount,
+        fees: fees.totalCollected,
+        pendingFees: fees.totalDue,
+        studentsByClass,
+        todayAttendance: {
+          present: 0,
+          absent: 0,
+          unmarkedClasses: [],
+          isHoliday: true,
+          holiday: todayHoliday.eventName,
+          holidayDate: todayHoliday.date
+        },
+        recentActivity: [],
+        upcomingExams: []
+      });
+    }
+
     const attendanceRecords = await Attendance.find({ date: today })
       .select("class absentees")
       .populate("class", "name section")
@@ -59,7 +84,8 @@ exports.getAdminStats = async (req, res) => {
     const todayAttendance = {
       present: totalStudentsInMarkedClasses - totalAbsentees,
       absent: totalAbsentees,
-      unmarkedClasses: [] // You'd compare all classes vs attendanceRecords to find these
+      unmarkedClasses: [],
+      isHoliday: false
     };
 
     // Find unmarked classes

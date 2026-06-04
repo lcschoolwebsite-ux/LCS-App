@@ -9,6 +9,7 @@ const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
 const Classes = lazy(() => import("../pages/admin/Classes"));
 const AcademicYears = lazy(() => import("../pages/admin/AcademicYears"));
 const StudentLogins = lazy(() => import("../pages/admin/StudentLogins"));
+const Holidays = lazy(() => import("../pages/admin/Holidays"));
 const Students = lazy(() => import("../pages/admin/Students"));
 const Teachers = lazy(() => import("../pages/admin/Teachers"));
 const Subjects = lazy(() => import("../pages/admin/Subjects"));
@@ -27,6 +28,7 @@ const menuGroups = [
       { label: "Dashboard", path: "/admin", icon: "fa-solid fa-gauge-high" },
       { label: "Analytics", path: "/admin/analytics", icon: "fa-solid fa-chart-simple" },
       { label: "Attendance", path: "/admin/attendance", icon: "fa-solid fa-calendar-check" },
+      { label: "Holidays", path: "/admin/holidays", icon: "fa-solid fa-umbrella-beach" },
       { label: "Academic Years", path: "/admin/academic-years", icon: "fa-solid fa-calendar-days" },
       { label: "Student Logins", path: "/admin/student-logins", icon: "fa-solid fa-right-to-bracket" },
     ],
@@ -140,6 +142,7 @@ export default function AdminLayout() {
               <Route path="/exams" element={<Exams />} />
               <Route path="/marks-overview" element={<MarksOverview />} />
               <Route path="/attendance" element={<Attendance />} />
+              <Route path="/holidays" element={<Holidays />} />
               <Route path="/fee-structure" element={<FeeStructure />} />
               <Route path="/fees" element={<Fees />} />
               <Route path="/announcements" element={<Announcements />} />

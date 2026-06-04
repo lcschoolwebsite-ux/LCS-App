@@ -13,7 +13,7 @@ export default function Dashboard() {
   const { academicYearLabel } = useActiveAcademicYear();
   const [stats, setStats] = useState({
     students: 0, teachers: 0, classes: 0, fees: 0, pendingFees: 0,
-    studentsByClass: [], todayAttendance: { present: 0, absent: 0, unmarked: 0, unmarkedClasses: [] }, recentActivity: [], upcomingExams: []
+    studentsByClass: [], todayAttendance: { present: 0, absent: 0, unmarked: 0, unmarkedClasses: [], isHoliday: false }, recentActivity: [], upcomingExams: []
   });
 
   useEffect(() => {
@@ -78,6 +78,15 @@ export default function Dashboard() {
         {/* Right Col: Attendance Donut */}
         <div style={s.card}>
           <SectionTitle title="Today's Attendance" />
+          {stats.todayAttendance.isHoliday && (
+            <div style={s.holidayBanner}>
+              <i className="fa-solid fa-umbrella-beach"></i>
+              <div>
+                <strong>{stats.todayAttendance.holiday || "Holiday"}</strong>
+                <div style={s.holidayMeta}>Attendance is disabled for {stats.todayAttendance.holidayDate || "today"}.</div>
+              </div>
+            </div>
+          )}
           <div style={{ height: "200px", width: "100%" }}>
             <ResponsiveContainer>
               <PieChart>
@@ -162,6 +171,18 @@ const s = {
   grid2: { display: "grid", gridTemplateColumns: "60% calc(40% - 24px)", gap: "24px", marginBottom: "28px" },
   card: { background: "var(--white)", borderRadius: "16px", padding: "28px", boxShadow: "var(--shadow-md)", border: "1px solid var(--border)" },
   
+  holidayBanner: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    background: "rgba(200,150,12,0.12)",
+    border: "1px solid rgba(200,150,12,0.24)",
+    color: "var(--navy)",
+    borderRadius: "12px",
+    padding: "14px 16px",
+    marginBottom: "16px"
+  },
+  holidayMeta: { marginTop: "4px", fontSize: "0.8rem", color: "var(--text-muted)" },
   attnSummary: { textAlign: "center", marginTop: "16px" },
   unmarkedBox: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--danger-bg)", padding: "12px 16px", borderRadius: "8px", marginTop: "12px" },
   smallGoldBtn: { background: "var(--gold)", color: "var(--navy-dark)", padding: "6px 12px", borderRadius: "6px", fontWeight: "700", fontSize: "0.75rem" },
