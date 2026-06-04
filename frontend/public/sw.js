@@ -1,17 +1,51 @@
 self.addEventListener("install", event => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key))))
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", event => {
+  event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener("push", event => {
+  const payload = (() => {
+    try {
+      return event.data ? event.data.json() : {};
+    } catch (error) {
+      return {};
+    }
+  })();
+
+  const title = payload.title || "School Announcement";
+  const body = payload.body || "";
+  const url = payload.url || "/";
+
   event.waitUntil(
-    Promise.all([
-      caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))),
-      self.registration.unregister(),
-    ]).then(() => self.clients.claim())
+    self.registration.showNotification(title, {
+      body,
+      data: { url }
+    })
   );
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+
+  const targetUrl = event.notification?.data?.url || "/";
+
+  event.waitUntil((async () => {
+    const clientList = await clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const client of clientList) {
+      if ("focus" in client) {
+        client.focus();
+        client.navigate(targetUrl);
+        return;
+      }
+    }
+    if (clients.openWindow) {
+      await clients.openWindow(targetUrl);
+    }
+  })());
 });
 
 self.addEventListener("fetch", event => {

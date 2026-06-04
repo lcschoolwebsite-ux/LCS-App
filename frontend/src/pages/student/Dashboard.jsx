@@ -15,6 +15,13 @@ const getMonthParts = () => {
 
 const formatCurrency = (amount = 0) => `₹${Number(amount || 0).toLocaleString("en-IN")}`;
 
+const urlBase64ToUint8Array = (base64String) => {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+};
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { academicYearLabel } = useActiveAcademicYear(user?.academicYear?.year);
@@ -23,6 +30,7 @@ export default function Dashboard() {
   const [attendance, setAttendance] = useState({ present: 0, absent: 0, totalWorkingDays: 0 });
   const [announcements, setAnnouncements] = useState([]);
   const [marksSummary, setMarksSummary] = useState({ subjectCount: 0, percentage: null });
+  const [notifyStatus, setNotifyStatus] = useState("");
 
   const studentId = user?.id || user?._id;
 
@@ -85,6 +93,52 @@ export default function Dashboard() {
     if (!studentId) setLoading(false);
   }, [studentId]);
 
+  const enableNotifications = async () => {
+    try {
+      setNotifyStatus("");
+
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        throw new Error("This browser does not support push notifications.");
+      }
+
+      const mobile = String(user?.mobile || "").trim();
+      if (!mobile) {
+        throw new Error("No registered mobile number found for this account.");
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        throw new Error("Notification permission was not granted.");
+      }
+
+      const { data } = await api.get("/push/vapid-public-key");
+      if (!data?.publicKey) {
+        throw new Error("Push notifications are not configured on the server.");
+      }
+
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      const existingSubscription = await registration.pushManager.getSubscription();
+
+      let subscription = existingSubscription;
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(data.publicKey)
+        });
+      }
+
+      await api.post("/push/subscribe", {
+        mobile,
+        subscription: subscription.toJSON()
+      });
+
+      setNotifyStatus("Notifications enabled successfully.");
+    } catch (error) {
+      setNotifyStatus(error.message || "Failed to enable notifications.");
+      alert(error.message || "Failed to enable notifications.");
+    }
+  };
+
   const feeStatus = fee?.totalDue > 0 ? "Due" : fee ? "Paid" : "Unavailable";
   const academicYear = academicYearLabel || fee?.academicYear?.year || "Academic Year";
 
@@ -109,6 +163,11 @@ export default function Dashboard() {
               {feeStatus === "Due" ? `Fees Due: ${formatCurrency(fee.totalDue)}` : feeStatus === "Paid" ? "Fees Paid" : "Fees Not Assigned"}
             </span>
           </div>
+          <button type="button" onClick={enableNotifications} style={s.notifyBtn}>
+            <i className="fa-solid fa-bell" style={{ marginRight: "8px" }} />
+            Enable Notifications
+          </button>
+          {notifyStatus && <p style={s.notifyStatus}>{notifyStatus}</p>}
         </div>
 
         <div style={s.quickGrid} className="student-quick-grid">
@@ -176,6 +235,18 @@ const s = {
   yearPill: { background: "var(--light-bg)", border: "1px solid var(--border)", padding: "6px 14px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "700", color: "var(--text-muted)" },
   badgePaid: { background: "var(--success-bg)", border: "1px solid var(--success-text)", padding: "6px 14px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "800", color: "var(--success-text)" },
   badgeDue: { background: "var(--danger-bg)", border: "1px solid var(--danger-text)", padding: "6px 14px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "800", color: "var(--danger-text)" },
+  notifyBtn: {
+    marginTop: "18px",
+    border: "none",
+    background: "linear-gradient(135deg, var(--navy), var(--navy-dark))",
+    color: "var(--white)",
+    padding: "12px 18px",
+    borderRadius: "999px",
+    fontWeight: "800",
+    cursor: "pointer",
+    boxShadow: "var(--shadow-sm)"
+  },
+  notifyStatus: { margin: "10px 0 0", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.5 },
 
   quickGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" },
   quickCard: { background: "linear-gradient(135deg, var(--navy-dark), var(--navy))", borderRadius: "16px", padding: "24px", color: "var(--white)", cursor: "pointer", position: "relative", overflow: "hidden", transition: "var(--transition)", boxShadow: "var(--shadow-md)", textDecoration: "none", minHeight: "148px", boxSizing: "border-box" },

@@ -1,5 +1,6 @@
 const Announcement = require("../models/Announcement");
 const { getIO } = require("../utils/socket");
+const { notifyAllParents, notifyClassParents } = require("../utils/pushNotification");
 
 exports.getAll = async (req, res) => {
   const { audience, classId, academicYear } = req.query;
@@ -33,6 +34,14 @@ exports.create = async (req, res) => {
     
     // Notify all clients
     getIO().emit("new-announcement", announcementWithUser);
+
+    if (a.audience === "all") {
+      await notifyAllParents(a.title, a.content);
+    }
+
+    if (a.audience === "student" && a.class) {
+      await notifyClassParents(a.class, a.title, a.content);
+    }
     
     res.status(201).json(a);
   } catch (e) { res.status(400).json({ message: e.message }); }

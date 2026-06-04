@@ -41,6 +41,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api", require("./routes/index"));
+app.use("/api/push", require("./routes/push"));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
