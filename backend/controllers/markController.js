@@ -123,3 +123,195 @@ exports.getReportCard = async (req, res) => {
     res.json({ subjects });
   } catch (e) { res.status(500).json({ message: e.message }); }
 };
+
+exports.getAdminOverview = async (req, res) => {
+  try {
+    const { classId, examType, search } = req.query;
+    const examQuery = {};
+    if (classId) examQuery.class = classId;
+    if (examType) examQuery.examType = examType;
+
+    const exams = await Exam.find(examQuery)
+      .populate("class", "name section")
+      .populate("subject", "name")
+      .sort({ date: -1 })
+      .lean();
+
+    const examIds = exams.map(exam => exam._id);
+    if (!examIds.length) {
+      return res.json({
+        summary: {
+          totalStudents: 0,
+          totalExams: 0,
+          totalMarks: 0,
+          passedCount: 0,
+          failedCount: 0,
+          absentCount: 0,
+          teacherCount: 0
+        },
+        teachers: [],
+        students: [],
+        failedBreakdown: [],
+        exams: []
+      });
+    }
+
+    const marks = await Mark.find({ exam: { $in: examIds } })
+      .populate({
+        path: "exam",
+        populate: [
+          { path: "class", select: "name section" },
+          { path: "subject", select: "name" }
+        ]
+      })
+      .populate("subject", "name")
+      .populate("student", "name satCode penCode class")
+      .populate({
+        path: "student",
+        populate: { path: "class", select: "name section" }
+      })
+      .populate("enteredBy", "name")
+      .lean();
+
+    const normalizedSearch = String(search || "").trim().toLowerCase();
+    const filteredMarks = normalizedSearch
+      ? marks.filter(mark => {
+          const studentName = mark.student?.name || "";
+          const satCode = mark.student?.satCode || "";
+          const penCode = mark.student?.penCode || "";
+          return [studentName, satCode, penCode]
+            .some(value => String(value).toLowerCase().includes(normalizedSearch));
+        })
+      : marks;
+
+    const studentMap = new Map();
+    const failedBreakdown = [];
+    const teacherMap = new Map();
+
+    filteredMarks.forEach(mark => {
+      const studentId = mark.student?._id?.toString();
+      if (!studentId) return;
+
+      const examPassMark = Number(mark.exam?.passMark || 0);
+      const examMaxMarks = Number(mark.exam?.maxMarks || 0);
+      const marksObtained = Number(mark.marksObtained || 0);
+      const isAbsent = Boolean(mark.isAbsent);
+      const isPass = !isAbsent && marksObtained >= examPassMark;
+      const studentClass = mark.student?.class;
+      const className = studentClass ? [studentClass.name, studentClass.section].filter(Boolean).join(" ") : "N/A";
+
+      if (!studentMap.has(studentId)) {
+        studentMap.set(studentId, {
+          studentId,
+          name: mark.student?.name || "Student",
+          satCode: mark.student?.satCode || "",
+          penCode: mark.student?.penCode || "",
+          className,
+          passes: 0,
+          fails: 0,
+          absent: 0,
+          totalMarks: 0,
+          examsTaken: 0,
+          average: 0,
+          results: []
+        });
+      }
+
+      const studentRow = studentMap.get(studentId);
+      studentRow.examsTaken += 1;
+      studentRow.totalMarks += isAbsent ? 0 : marksObtained;
+      if (isAbsent) studentRow.absent += 1;
+      else if (isPass) studentRow.passes += 1;
+      else studentRow.fails += 1;
+
+      studentRow.results.push({
+        examId: mark.exam?._id || mark.exam,
+        examTitle: mark.exam?.title || "Exam",
+        examType: mark.exam?.examType || "Exam",
+        subjectName: mark.subject?.name || mark.exam?.subject?.name || "Subject",
+        date: mark.exam?.date || "",
+        marksObtained: isAbsent ? "AB" : marksObtained,
+        maxMarks: examMaxMarks,
+        passMark: examPassMark,
+        grade: mark.grade || "",
+        status: isAbsent ? "Absent" : isPass ? "Pass" : "Fail",
+        teacherName: mark.enteredBy?.name || "N/A"
+      });
+
+      if (!isPass || isAbsent) {
+        failedBreakdown.push({
+          studentId,
+          name: mark.student?.name || "Student",
+          satCode: mark.student?.satCode || "",
+          className,
+          examTitle: mark.exam?.title || "Exam",
+          examType: mark.exam?.examType || "Exam",
+          subjectName: mark.subject?.name || mark.exam?.subject?.name || "Subject",
+          marksObtained: isAbsent ? "AB" : marksObtained,
+          maxMarks: examMaxMarks,
+          passMark: examPassMark,
+          grade: mark.grade || "",
+          teacherName: mark.enteredBy?.name || "N/A"
+        });
+      }
+
+      const teacherId = mark.enteredBy?._id?.toString();
+      if (teacherId) {
+        const current = teacherMap.get(teacherId) || {
+          id: teacherId,
+          name: mark.enteredBy?.name || "Teacher",
+          marksCount: 0,
+          exams: new Set()
+        };
+        current.marksCount += 1;
+        if (mark.exam?._id) current.exams.add(mark.exam._id.toString());
+        teacherMap.set(teacherId, current);
+      }
+    });
+
+    const students = [...studentMap.values()].map(student => ({
+      ...student,
+      average: student.examsTaken && (student.examsTaken - student.absent) > 0
+        ? Number((student.totalMarks / (student.examsTaken - student.absent)).toFixed(1))
+        : 0,
+      results: student.results.sort((a, b) => {
+        if (a.date && b.date && a.date !== b.date) return a.date < b.date ? 1 : -1;
+        return String(a.examTitle).localeCompare(String(b.examTitle));
+      })
+    })).sort((a, b) => a.name.localeCompare(b.name));
+
+    const summary = {
+      totalStudents: students.length,
+      totalExams: exams.length,
+      totalMarks: filteredMarks.length,
+      passedCount: students.reduce((sum, student) => sum + student.passes, 0),
+      failedCount: failedBreakdown.filter(row => row.marksObtained !== "AB").length,
+      absentCount: failedBreakdown.filter(row => row.marksObtained === "AB").length,
+      teacherCount: teacherMap.size
+    };
+
+    res.json({
+      summary,
+      teachers: [...teacherMap.values()].map(teacher => ({
+        id: teacher.id,
+        name: teacher.name,
+        marksCount: teacher.marksCount,
+        examCount: teacher.exams.size
+      })).sort((a, b) => b.marksCount - a.marksCount),
+      students,
+      failedBreakdown: failedBreakdown.sort((a, b) => a.name.localeCompare(b.name)),
+      exams: exams.map(exam => ({
+        id: exam._id,
+        title: exam.title,
+        examType: exam.examType,
+        className: exam.class ? [exam.class.name, exam.class.section].filter(Boolean).join(" ") : "N/A",
+        subjectName: exam.subject?.name || "Subject",
+        date: exam.date,
+        maxMarks: exam.maxMarks,
+        passMark: exam.passMark
+      }))
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};

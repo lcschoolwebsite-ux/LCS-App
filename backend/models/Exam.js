@@ -7,6 +7,6 @@ module.exports = mongoose.model("Exam", new mongoose.Schema({
   academicYear: { type: mongoose.Schema.Types.ObjectId, ref: "AcademicYear", required: true },
   maxMarks:     { type: Number, required: true },
   passMark:     { type: Number, required: true },
-  examType:     { type: String, required: true, trim: true, default: "Unit Test" },
+  examType:     { type: String, required: true, trim: true, default: "Periodic Test" },
   date:         { type: String, required: true },
 }, { timestamps: true }));

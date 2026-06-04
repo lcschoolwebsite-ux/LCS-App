@@ -18,6 +18,7 @@ const FeeStructure = lazy(() => import("../pages/admin/FeeStructure"));
 const Fees = lazy(() => import("../pages/admin/Fees"));
 const Announcements = lazy(() => import("../pages/admin/Announcements"));
 const Analytics = lazy(() => import("../pages/admin/Analytics"));
+const MarksOverview = lazy(() => import("../pages/admin/MarksOverview"));
 
 const menuGroups = [
   {
@@ -48,6 +49,7 @@ const menuGroups = [
     title: "Evaluation",
     items: [
       { label: "Exams", path: "/admin/exams", icon: "fa-solid fa-file-invoice" },
+      { label: "Marks Overview", path: "/admin/marks-overview", icon: "fa-solid fa-chart-column" },
       { label: "Announcements", path: "/admin/announcements", icon: "fa-solid fa-bullhorn" },
     ],
   },
@@ -136,6 +138,7 @@ export default function AdminLayout() {
               <Route path="/teachers" element={<Teachers />} />
               <Route path="/subjects" element={<Subjects />} />
               <Route path="/exams" element={<Exams />} />
+              <Route path="/marks-overview" element={<MarksOverview />} />
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/fee-structure" element={<FeeStructure />} />
               <Route path="/fees" element={<Fees />} />

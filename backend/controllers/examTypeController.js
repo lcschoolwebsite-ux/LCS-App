@@ -1,6 +1,6 @@
 const ExamType = require("../models/ExamType");
 
-const DEFAULT_TYPES = ["Unit Test", "Mid Term", "Final", "Assignment"];
+const DEFAULT_TYPES = ["Periodic Test", "Mid Term", "Final", "Assignment"];
 
 const ensureDefaultTypes = async () => {
   await Promise.all(DEFAULT_TYPES.map(name => ExamType.updateOne(

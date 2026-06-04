@@ -22,7 +22,7 @@ export default function Exams() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statsModal, setStatsModal] = useState({ open: false, loading: false, exam: null, data: null });
   const [deletingId, setDeletingId] = useState("");
-  const [form, setForm] = useState({ title: "", class: "", subjects: [], maxMarks: 100, passMark: 35, examType: "Unit Test", date: "" });
+  const [form, setForm] = useState({ title: "", class: "", subjects: [], maxMarks: 100, passMark: 35, examType: "Periodic Test", date: "" });
   const selectedClass = classes.find(c => c._id === classFilter);
   const selectedExamType = examTypes.find(type => type.name === typeFilter);
   const examTypeByName = new Map(examTypes.map(type => [type.name, type]));
@@ -54,7 +54,7 @@ export default function Exams() {
   };
 
   const resetForm = () => {
-    setForm({ title: "", class: "", subjects: [], maxMarks: 100, passMark: 35, examType: typeFilter || examTypeNames[0] || "Unit Test", date: "" });
+    setForm({ title: "", class: "", subjects: [], maxMarks: 100, passMark: 35, examType: typeFilter || examTypeNames[0] || "Periodic Test", date: "" });
   };
 
   const fetchData = async () => {
@@ -71,7 +71,7 @@ export default function Exams() {
       setExamTypes(typeRes.data);
       setClasses(cRes.data);
       setSubjects(sRes.data);
-      if (yRes.data) setForm(f => ({ ...f, academicYear: yRes.data._id, examType: f.examType || typeRes.data[0]?.name || "Unit Test" }));
+      if (yRes.data) setForm(f => ({ ...f, academicYear: yRes.data._id, examType: f.examType || typeRes.data[0]?.name || "Periodic Test" }));
     } catch (e) {
       console.error("Error fetching data", e);
     } finally {
@@ -83,7 +83,7 @@ export default function Exams() {
 
   useEffect(() => {
     if (searchParams.get("action") === "create" && classes.length > 0) {
-      setForm(f => ({ ...f, class: f.class || classFilter || classes[0]._id, examType: f.examType || typeFilter || examTypeNames[0] || "Unit Test" }));
+      setForm(f => ({ ...f, class: f.class || classFilter || classes[0]._id, examType: f.examType || typeFilter || examTypeNames[0] || "Periodic Test" }));
       setIsModalOpen(true);
       const next = new URLSearchParams(searchParams);
       next.delete("action");
@@ -174,7 +174,7 @@ export default function Exams() {
       ...f,
       class: classFilter || f.class || classes[0]?._id || "",
       subjects: classFilter && f.class !== classFilter ? [] : f.subjects,
-      examType: examTypeName || f.examType || examTypeNames[0] || "Unit Test"
+      examType: examTypeName || f.examType || examTypeNames[0] || "Periodic Test"
     }));
     setIsModalOpen(true);
   };
