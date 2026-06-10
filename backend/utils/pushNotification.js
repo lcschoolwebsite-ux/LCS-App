@@ -50,30 +50,66 @@ const sendToSubscriptions = async (subscriptions, payload) => {
   return { sent, removed };
 };
 
-const notifyAllParents = async (title, body) => {
-  const subscriptions = await PushSubscription.find({}).lean();
-  return sendToSubscriptions(subscriptions, { title, body, url: "/" });
+const getAllActiveStudentMobiles = async () => {
+  const mobiles = await Student.distinct("mobile", {
+    isActive: true
+  });
+
+  return [...new Set(mobiles.map(mobile => String(mobile || "").trim()).filter(Boolean))];
 };
 
-const notifyClassParents = async (classId, title, body) => {
+const getClassStudentMobiles = async (classId) => {
+  if (!classId) return [];
+
   const mobiles = await Student.distinct("mobile", {
     class: classId,
     isActive: true
   });
 
-  const normalizedMobiles = [...new Set(mobiles.map(mobile => String(mobile || "").trim()).filter(Boolean))];
-  if (!normalizedMobiles.length) {
+  return [...new Set(mobiles.map(mobile => String(mobile || "").trim()).filter(Boolean))];
+};
+
+const notifyAllStudents = async (title, body) => {
+  const mobiles = await getAllActiveStudentMobiles();
+  if (!mobiles.length) {
     return { sent: 0, removed: 0 };
   }
 
   const subscriptions = await PushSubscription.find({
-    mobile: { $in: normalizedMobiles }
+    mobile: { $in: mobiles }
   }).lean();
 
-  return sendToSubscriptions(subscriptions, { title, body, url: "/" });
+  return sendToSubscriptions(subscriptions, {
+    title,
+    body,
+    url: "/student/announcements"
+  });
+};
+
+const notifyAllParents = async (title, body) => {
+  const subscriptions = await PushSubscription.find({}).lean();
+  return sendToSubscriptions(subscriptions, { title, body, url: "/student/announcements" });
+};
+
+const notifyClassParents = async (classId, title, body) => {
+  const mobiles = await getClassStudentMobiles(classId);
+  if (!mobiles.length) {
+    return { sent: 0, removed: 0 };
+  }
+
+  const subscriptions = await PushSubscription.find({
+    mobile: { $in: mobiles }
+  }).lean();
+
+  return sendToSubscriptions(subscriptions, {
+    title,
+    body,
+    url: "/student/announcements"
+  });
 };
 
 module.exports = {
+  notifyAllStudents,
   notifyAllParents,
   notifyClassParents
 };

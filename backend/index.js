@@ -37,7 +37,7 @@ app.use("/api", rateLimit({
 }));
 
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", timestamp: new Date() });
+  res.json({ status: "ok" });
 });
 
 app.use("/api", require("./routes/index"));
