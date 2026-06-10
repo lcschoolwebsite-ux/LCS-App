@@ -158,14 +158,14 @@ export default function Fees() {
       {/* Filters */}
       <div style={s.filterArea}>
         <div style={s.filterRow}>
-          <select style={s.input} value={activeAY} onChange={e => setActiveAY(e.target.value)}>
+          <select style={s.filterSelect} value={activeAY} onChange={e => setActiveAY(e.target.value)}>
             {academicYears.map(y => <option key={y._id} value={y._id}>{y.year}</option>)}
           </select>
-          <select style={s.input} value={filters.classId} onChange={e => setFilters({...filters, classId: e.target.value})}>
+          <select style={s.filterSelect} value={filters.classId} onChange={e => setFilters({...filters, classId: e.target.value})}>
             <option value="">All Classes</option>
             {classes.map(c => <option key={c._id} value={c._id}>{formatClass(c)}</option>)}
           </select>
-          <select style={s.input} value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})}>
+          <select style={s.filterSelect} value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})}>
             <option value="">All Status</option>
             <option value="Paid">Paid</option>
             <option value="Partial">Partial</option>
@@ -343,9 +343,10 @@ const s = {
   statLabel: { fontSize: "0.7rem", color: "var(--gold-light)", textTransform: "uppercase", fontWeight: "700", marginBottom: "4px" },
   statValue: { fontSize: "1.2rem", color: "var(--white)", fontWeight: "800" },
   filterArea: { marginBottom: "2rem" },
-  filterRow: { display: "flex", gap: "16px", marginBottom: "14px", flexWrap: "wrap" },
+  filterRow: { display: "flex", gap: "16px", marginBottom: "14px", flexWrap: "nowrap" },
   searchRow: { display: "flex", justifyContent: "center" },
   searchInput: { padding: "12px", borderRadius: "10px", border: "1.5px solid var(--border)", background: "white", color: "var(--navy)", fontWeight: "600", width: "min(560px, 100%)" },
+  filterSelect: { flex: 1, minWidth: 0, padding: "12px", borderRadius: "10px", border: "1.5px solid var(--border)", background: "white", color: "var(--navy)", fontWeight: "600", width: "100%" },
   input: { padding: "12px", borderRadius: "10px", border: "1.5px solid var(--border)", background: "white", color: "var(--navy)", fontWeight: "600", width: '100%' },
   mainGrid: { display: "grid", gridTemplateColumns: "380px 1fr", gap: "24px", height: "calc(100vh - 350px)" },
   listPanel: { background: "var(--white)", borderRadius: "16px", overflowY: "auto", border: "1px solid var(--border)", padding: "10px" },
