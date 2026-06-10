@@ -172,7 +172,7 @@ export default function Fees() {
         </select>
         <input 
           style={{...s.input, flex: 1}} 
-          placeholder="Search student or SAT code..." 
+          placeholder="Search by name, SATS no. or mobile..." 
           value={filters.search} 
           onChange={e => setFilters({...filters, search: e.target.value})}
         />

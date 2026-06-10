@@ -31,7 +31,13 @@ exports.getAll = async (req, res) => {
       if (classId) sFilter.class = classId;
       if (search) {
         const regex = { $regex: search, $options: "i" };
-        sFilter.$or = [{ name: regex }, { satCode: regex }, { penCode: regex }];
+        sFilter.$or = [
+          { name: regex },
+          { satCode: regex },
+          { penCode: regex },
+          { mobile: regex },
+          { alternateMobile: regex }
+        ];
       }
       const students = await Student.find(sFilter).select("_id");
       studentIds = students.map(s => s._id);
