@@ -156,26 +156,30 @@ export default function Fees() {
       )}
 
       {/* Filters */}
-      <div style={s.filterRow}>
-        <select style={s.input} value={activeAY} onChange={e => setActiveAY(e.target.value)}>
-          {academicYears.map(y => <option key={y._id} value={y._id}>{y.year}</option>)}
-        </select>
-        <select style={s.input} value={filters.classId} onChange={e => setFilters({...filters, classId: e.target.value})}>
-          <option value="">All Classes</option>
-          {classes.map(c => <option key={c._id} value={c._id}>{formatClass(c)}</option>)}
-        </select>
-        <select style={s.input} value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})}>
-          <option value="">All Status</option>
-          <option value="Paid">Paid</option>
-          <option value="Partial">Partial</option>
-          <option value="Unpaid">Unpaid</option>
-        </select>
-        <input 
-          style={{...s.input, flex: 1}} 
-          placeholder="Search by name, SATS no. or mobile..." 
-          value={filters.search} 
-          onChange={e => setFilters({...filters, search: e.target.value})}
-        />
+      <div style={s.filterArea}>
+        <div style={s.filterRow}>
+          <select style={s.input} value={activeAY} onChange={e => setActiveAY(e.target.value)}>
+            {academicYears.map(y => <option key={y._id} value={y._id}>{y.year}</option>)}
+          </select>
+          <select style={s.input} value={filters.classId} onChange={e => setFilters({...filters, classId: e.target.value})}>
+            <option value="">All Classes</option>
+            {classes.map(c => <option key={c._id} value={c._id}>{formatClass(c)}</option>)}
+          </select>
+          <select style={s.input} value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})}>
+            <option value="">All Status</option>
+            <option value="Paid">Paid</option>
+            <option value="Partial">Partial</option>
+            <option value="Unpaid">Unpaid</option>
+          </select>
+        </div>
+        <div style={s.searchRow}>
+          <input 
+            style={s.searchInput} 
+            placeholder="Search by name, SATS no. or mobile..." 
+            value={filters.search} 
+            onChange={e => setFilters({...filters, search: e.target.value})}
+          />
+        </div>
       </div>
 
       <div style={s.mainGrid}>
@@ -338,7 +342,10 @@ const s = {
   statBox: { textAlign: "center", borderRight: "1px solid rgba(255,255,255,0.1)" },
   statLabel: { fontSize: "0.7rem", color: "var(--gold-light)", textTransform: "uppercase", fontWeight: "700", marginBottom: "4px" },
   statValue: { fontSize: "1.2rem", color: "var(--white)", fontWeight: "800" },
-  filterRow: { display: "flex", gap: "16px", marginBottom: "2rem" },
+  filterArea: { marginBottom: "2rem" },
+  filterRow: { display: "flex", gap: "16px", marginBottom: "14px", flexWrap: "wrap" },
+  searchRow: { display: "flex", justifyContent: "center" },
+  searchInput: { padding: "12px", borderRadius: "10px", border: "1.5px solid var(--border)", background: "white", color: "var(--navy)", fontWeight: "600", width: "min(560px, 100%)" },
   input: { padding: "12px", borderRadius: "10px", border: "1.5px solid var(--border)", background: "white", color: "var(--navy)", fontWeight: "600", width: '100%' },
   mainGrid: { display: "grid", gridTemplateColumns: "380px 1fr", gap: "24px", height: "calc(100vh - 350px)" },
   listPanel: { background: "var(--white)", borderRadius: "16px", overflowY: "auto", border: "1px solid var(--border)", padding: "10px" },
