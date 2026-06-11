@@ -618,6 +618,65 @@ input, select, textarea {
     width: 100% !important;
   }
 
+  .student-table-card {
+    padding: 18px !important;
+  }
+
+  .student-payment-history-table,
+  .student-payment-history-table thead,
+  .student-payment-history-table tbody,
+  .student-payment-history-table tr,
+  .student-payment-history-table td {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .student-payment-history-table thead {
+    display: none !important;
+  }
+
+  .student-payment-history-table tr {
+    background: var(--light-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  .student-payment-history-table td {
+    border: none !important;
+    padding: 7px 0 !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    text-align: right;
+  }
+
+  .student-payment-history-table td::before {
+    content: attr(data-label);
+    flex: 0 0 40%;
+    text-align: left;
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .student-payment-history-table td:last-child {
+    justify-content: flex-end;
+    padding-top: 10px !important;
+  }
+
+  .student-payment-history-table td:last-child::before {
+    display: none;
+  }
+
+  .student-payment-history-table td:last-child button {
+    width: 100%;
+  }
+
   .student-attendance-week-controls {
     display: grid !important;
     grid-template-columns: 36px minmax(0, 1fr) 36px;

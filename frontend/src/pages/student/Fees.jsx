@@ -364,7 +364,7 @@ export default function StudentFees() {
       {fee.terms?.filter(t => t.status === "Paid").length > 0 && (
         <div style={s.historySection} className="student-table-card">
           <h3 style={s.sectionTitle}>Payment History & Receipts</h3>
-          <table style={s.table}>
+          <table style={s.table} className="student-payment-history-table">
             <thead>
               <tr>
                 <th style={s.th}>Description</th>
@@ -376,12 +376,12 @@ export default function StudentFees() {
             </thead>
             <tbody>
               {fee.terms?.filter(t => t.status === "Paid").reverse().map((pay, idx) => (
-                <tr key={idx}>
-                  <td style={s.td}>{pay.termName}</td>
-                  <td style={s.td}>{pay.paidDate}</td>
-                  <td style={s.td}>₹{pay.paidAmount.toLocaleString()}</td>
-                  <td style={s.td}>{pay.method}</td>
-                  <td style={s.td}>
+                <tr key={idx} className="student-payment-history-row">
+                  <td style={s.td} data-label="Description">{pay.termName}</td>
+                  <td style={s.td} data-label="Paid Date">{pay.paidDate}</td>
+                  <td style={s.td} data-label="Amount">₹{pay.paidAmount.toLocaleString()}</td>
+                  <td style={s.td} data-label="Method">{pay.method}</td>
+                  <td style={s.td} data-label="Receipt">
                     <button onClick={() => generatePDF(pay)} style={s.btnSmall}>
                       <i className="fa-solid fa-file-pdf"></i> Receipt
                     </button>
