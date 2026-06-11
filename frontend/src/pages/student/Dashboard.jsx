@@ -22,6 +22,16 @@ const urlBase64ToUint8Array = (base64String) => {
   return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
 };
 
+const getBrowserLabel = () => {
+  const ua = navigator.userAgent;
+  if (/samsungbrowser/i.test(ua)) return "Samsung Internet";
+  if (/edg/i.test(ua)) return "Microsoft Edge";
+  if (/chrome/i.test(ua) && !/edg|opr|samsungbrowser/i.test(ua)) return "Chrome";
+  if (/firefox/i.test(ua)) return "Firefox";
+  if (/safari/i.test(ua) && !/chrome|crios|android/i.test(ua)) return "Safari";
+  return "Browser";
+};
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { academicYearLabel } = useActiveAcademicYear(user?.academicYear?.year);
@@ -129,7 +139,8 @@ export default function Dashboard() {
 
       await api.post("/push/subscribe", {
         mobile,
-        subscription: subscription.toJSON()
+        subscription: subscription.toJSON(),
+        browser: getBrowserLabel()
       });
 
       setNotifyStatus("Notifications enabled successfully.");

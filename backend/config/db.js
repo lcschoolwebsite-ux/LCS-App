@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 require("../models/Student");
+require("../models/PushSubscription");
 
 mongoose.set("strictQuery", true);
 
@@ -30,6 +31,57 @@ const ensureStudentIndexes = async () => {
   }
 };
 
+const ensurePushSubscriptionIndexes = async () => {
+  const collection = mongoose.connection.db.collection("pushsubscriptions");
+  const indexes = await collection.indexes();
+  const mobileIndex = indexes.find(index => index.name === "mobile_1");
+  const endpointIndex = indexes.find(index => index.name === "endpoint_1");
+  const missingEndpointDocs = await collection
+    .find({
+      $or: [
+        { endpoint: { $exists: false } },
+        { endpoint: "" }
+      ]
+    })
+    .toArray();
+
+  for (const doc of missingEndpointDocs) {
+    const endpoint = doc?.subscription?.endpoint;
+    if (!endpoint) continue;
+    await collection.updateOne(
+      { _id: doc._id },
+      { $set: { endpoint: String(endpoint).trim() } }
+    );
+  }
+
+  if (mobileIndex?.unique) {
+    await collection.dropIndex("mobile_1");
+  }
+
+  if (!endpointIndex || endpointIndex.unique !== true) {
+    if (endpointIndex) {
+      await collection.dropIndex("endpoint_1");
+    }
+
+    await collection.createIndex(
+      { endpoint: 1 },
+      {
+        name: "endpoint_1",
+        unique: true
+      }
+    );
+  }
+
+  if (!indexes.find(index => index.name === "mobile_1" && !index.unique)) {
+    await collection.createIndex(
+      { mobile: 1 },
+      {
+        name: "mobile_1"
+      }
+    );
+  }
+};
+
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
@@ -37,6 +89,7 @@ const connectDB = async () => {
       socketTimeoutMS: 45000,
     });
     await ensureStudentIndexes();
+    await ensurePushSubscriptionIndexes();
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
     return true;
   } catch (err) {
