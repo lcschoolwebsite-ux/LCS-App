@@ -1,5 +1,7 @@
+import { precacheAndRoute } from 'workbox-precaching';
+precacheAndRoute(self.__WB_MANIFEST || []);
+
 self.addEventListener("install", event => {
-  self.skipWaiting();
   event.waitUntil(self.skipWaiting());
 });
 
@@ -34,7 +36,7 @@ self.addEventListener("notificationclick", event => {
   const targetUrl = event.notification?.data?.url || "/";
 
   event.waitUntil((async () => {
-    const clientList = await clients.matchAll({ type: "window", includeUncontrolled: true });
+    const clientList = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const client of clientList) {
       if ("focus" in client) {
         client.focus();
@@ -42,8 +44,8 @@ self.addEventListener("notificationclick", event => {
         return;
       }
     }
-    if (clients.openWindow) {
-      await clients.openWindow(targetUrl);
+    if (self.clients.openWindow) {
+      await self.clients.openWindow(targetUrl);
     }
   })());
 });

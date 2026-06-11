@@ -111,6 +111,10 @@ export default function Dashboard() {
         throw new Error("This browser does not support push notifications.");
       }
 
+      if (!window.isSecureContext) {
+        throw new Error("Push notifications require a secure connection (HTTPS).");
+      }
+
       const mobile = String(user?.mobile || "").trim();
       if (!mobile) {
         throw new Error("No registered mobile number found for this account.");
@@ -126,12 +130,18 @@ export default function Dashboard() {
         throw new Error("Push notifications are not configured on the server.");
       }
 
-      const registration = await navigator.serviceWorker.register("/sw.js");
-      const existingSubscription = await registration.pushManager.getSubscription();
+      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      const activeRegistration = await navigator.serviceWorker.ready;
+
+      if (!activeRegistration?.active) {
+        throw new Error("Service worker is still starting up. Please try again in a moment.");
+      }
+
+      const existingSubscription = await activeRegistration.pushManager.getSubscription();
 
       let subscription = existingSubscription;
       if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
+        subscription = await activeRegistration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(data.publicKey)
         });
