@@ -1,5 +1,4 @@
-import { precacheAndRoute } from 'workbox-precaching';
-precacheAndRoute(self.__WB_MANIFEST || []);
+self.__WB_MANIFEST;
 
 self.addEventListener("install", event => {
   event.waitUntil(self.skipWaiting());
@@ -48,8 +47,4 @@ self.addEventListener("notificationclick", event => {
       await self.clients.openWindow(targetUrl);
     }
   })());
-});
-
-self.addEventListener("fetch", event => {
-  event.respondWith(fetch(event.request));
 });
