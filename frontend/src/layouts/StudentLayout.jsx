@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
+import InstallAppButton from "../components/InstallAppButton";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/student/Dashboard"));
@@ -110,9 +111,12 @@ export default function StudentLayout() {
               <p style={s.mobileUserLine}>{user?.name || "Student"} · {classLabel ? `Class ${classLabel}` : "Student Portal"}</p>
             </div>
           </div>
-          <button onClick={handleLogout} style={s.mobileLogout} aria-label="Logout">
-            <i className="fa-solid fa-arrow-right-from-bracket"></i>
-          </button>
+          <div style={s.mobileActions}>
+            <InstallAppButton compact />
+            <button onClick={handleLogout} style={s.mobileLogout} aria-label="Logout">
+              <i className="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+          </div>
         </div>
 
         <nav style={s.mobileNav} className="student-mobile-nav" aria-label="Student navigation">
@@ -135,6 +139,7 @@ export default function StudentLayout() {
           </div>
           
           <div style={s.headerRight} className="student-header-right">
+            <InstallAppButton />
             <button style={s.bellBtn}>
               <i className="fa-regular fa-bell"></i>
             </button>
@@ -197,6 +202,7 @@ const s = {
   mobileLogo: { width: "42px", height: "42px", objectFit: "contain", flex: "0 0 auto" },
   mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1rem", lineHeight: 1.1, margin: 0 },
   mobileUserLine: { color: "var(--gold-light)", fontSize: "0.72rem", fontWeight: "800", margin: "3px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "240px" },
+  mobileActions: { display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto" },
   mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
   mobileNav: { display: "none" },
   mobileNavItem: { display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "999px", color: "rgba(255,255,255,0.72)", fontSize: "0.78rem", fontWeight: "800", whiteSpace: "nowrap", flex: "0 0 auto", border: "1px solid rgba(255,255,255,0.08)" },
