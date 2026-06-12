@@ -312,7 +312,6 @@ export default function Marks() {
           {typeNames.length ? typeNames.map(type => {
             const count = rowsByType[type]?.length || 0;
             const typeInfo = typeDetails[type];
-            const createdAt = formatDate(typeInfo?.createdAt);
             const publishedAt = typeInfo?.isPublished
               ? formatDate(typeInfo?.publishedAt || typeInfo?.updatedAt || typeInfo?.createdAt)
               : "Not launched";
@@ -327,7 +326,6 @@ export default function Marks() {
                 <span style={s.categoryName}>{type}</span>
                 <span style={s.categoryMetaBlock}>
                   <small style={s.categoryMeta}>{count ? `${count} mark entries` : "Marks card"}</small>
-                  <small style={s.categoryMeta}>Exam created: {createdAt}</small>
                   <small style={s.categoryMeta}>Marks launched: {publishedAt}</small>
                 </span>
               </button>
@@ -368,7 +366,7 @@ export default function Marks() {
           <div style={s.marksHeader}>
             <div>
               <h2 style={s.marksTitle}>{activeType || "Marks"}</h2>
-              <p style={s.marksSub}>Exam created: {formatDate(activeTypeInfo?.createdAt)} · Marks launched: {activeTypeInfo?.isPublished ? formatDate(activeTypeInfo?.publishedAt || activeTypeInfo?.updatedAt || activeTypeInfo?.createdAt) : "Not launched"}</p>
+              <p style={s.marksSub}>Marks launched: {activeTypeInfo?.isPublished ? formatDate(activeTypeInfo?.publishedAt || activeTypeInfo?.updatedAt || activeTypeInfo?.createdAt) : "Not launched"}</p>
             </div>
             <div style={s.marksBadge}>{activeRows.length} subject rows</div>
           </div>
