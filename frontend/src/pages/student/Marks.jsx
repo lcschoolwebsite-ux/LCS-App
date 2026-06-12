@@ -14,6 +14,16 @@ const SCHOOL_EMAIL = "Lorettocentralschool@gmail.com";
 const SOFTWARE_CREDIT = "Software developed by Appvertex";
 
 const cleanFileName = value => String(value || "report-card").replace(/[^a-z0-9-]+/gi, "-").replace(/^-+|-+$/g, "");
+const formatDate = value => {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "N/A";
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+};
 
 const loadLogo = async () => {
   try {
@@ -103,6 +113,13 @@ export default function Marks() {
     return examTypes.map(type => type.name).filter(Boolean);
   }, [examTypes]);
 
+  const typeDetails = useMemo(() => {
+    return examTypes.reduce((acc, type) => {
+      if (type?.name) acc[type.name] = type;
+      return acc;
+    }, {});
+  }, [examTypes]);
+
   const rowsByType = useMemo(() => (
     rows.reduce((acc, row) => {
       const type = row.examType || "Exam";
@@ -113,7 +130,10 @@ export default function Marks() {
   ), [rows]);
 
   const isCategoryLaunched = !activeType || typeNames.includes(activeType);
-  const activeRows = isCategoryLaunched ? (rowsByType[activeType] || []) : [];
+  const activeRows = useMemo(() => (
+    isCategoryLaunched ? (rowsByType[activeType] || []) : []
+  ), [isCategoryLaunched, rowsByType, activeType]);
+  const activeTypeInfo = activeType ? typeDetails[activeType] : null;
 
   const summary = useMemo(() => {
     const totalScored = activeRows.reduce((sum, row) => sum + Number(row.marksObtained || 0), 0);
@@ -291,6 +311,11 @@ export default function Marks() {
         <div style={s.categoryGrid}>
           {typeNames.length ? typeNames.map(type => {
             const count = rowsByType[type]?.length || 0;
+            const typeInfo = typeDetails[type];
+            const createdAt = formatDate(typeInfo?.createdAt);
+            const publishedAt = typeInfo?.isPublished
+              ? formatDate(typeInfo?.publishedAt || typeInfo?.updatedAt || typeInfo?.createdAt)
+              : "Not launched";
             return (
               <button
                 key={type}
@@ -300,7 +325,11 @@ export default function Marks() {
               >
                 <span style={s.categoryIcon}><i className="fa-solid fa-file-lines"></i></span>
                 <span style={s.categoryName}>{type}</span>
-                <small style={s.categoryMeta}>{count ? `${count} mark entries` : "Marks card"}</small>
+                <span style={s.categoryMetaBlock}>
+                  <small style={s.categoryMeta}>{count ? `${count} mark entries` : "Marks card"}</small>
+                  <small style={s.categoryMeta}>Exam created: {createdAt}</small>
+                  <small style={s.categoryMeta}>Marks launched: {publishedAt}</small>
+                </span>
               </button>
             );
           }) : (
@@ -315,7 +344,7 @@ export default function Marks() {
             <i className="fa-solid fa-arrow-left"></i> Categories
           </button>
           <button style={s.printBtn} onClick={handleDownload} disabled={!activeRows.length}>
-            <i className="fa-solid fa-download"></i> Download {activeType} Card
+            <i className="fa-solid fa-download"></i> Download {activeType} Marks
           </button>
         </div>
       )}
@@ -331,40 +360,20 @@ export default function Marks() {
       ) : !isCategoryLaunched ? (
         <div style={s.promptCard}>
           <i className="fa-solid fa-lock" style={s.promptIcon}></i>
-          <div style={s.promptTitle}>Marks card not launched</div>
+          <div style={s.promptTitle}>Marks not launched</div>
           <div style={s.promptText}>This exam category is not available to students yet.</div>
         </div>
       ) : (
-      <div style={s.reportCard} className="print-area student-report-card">
-        <div style={s.cornerMark}></div>
-        <div style={s.rcHeader} className="student-report-header">
-          <div>
-            <h1 style={s.rcSchoolName}>STUDENT REPORT CARD</h1>
+        <div style={s.marksPanel}>
+          <div style={s.marksHeader}>
+            <div>
+              <h2 style={s.marksTitle}>{activeType || "Marks"}</h2>
+              <p style={s.marksSub}>Exam created: {formatDate(activeTypeInfo?.createdAt)} · Marks launched: {activeTypeInfo?.isPublished ? formatDate(activeTypeInfo?.publishedAt || activeTypeInfo?.updatedAt || activeTypeInfo?.createdAt) : "Not launched"}</p>
+            </div>
+            <div style={s.marksBadge}>{activeRows.length} subject rows</div>
           </div>
-          <img src="/logo.png" alt="School Logo" style={s.rcLogo} />
-        </div>
 
-        <div style={s.rcTitleArea}>
-          <div>
-            <h2 style={s.rcTitle}>LORETTO CENTRAL SCHOOL</h2>
-            <p style={s.rcTerm}>Address: {SCHOOL_ADDRESS}</p>
-            <p style={s.rcTerm}>Phone: {SCHOOL_PHONE}</p>
-            <p style={s.rcTerm}>Email: {SCHOOL_EMAIL}</p>
-          </div>
-          <div style={s.examPill}>{activeType ? activeType : "Marks Card"}</div>
-        </div>
-
-        <div style={s.infoGrid} className="student-report-info-grid">
-          <div style={{...s.infoItem, gridColumn: "1 / -1"}}><span style={s.infoLabel}>Name of the Student:</span> <span style={s.infoValue}>{user?.name || "N/A"}</span></div>
-          <div style={s.infoItem}><span style={s.infoLabel}>Date of Birth:</span> <span style={s.infoValue}>{user?.dob || "N/A"}</span></div>
-          <div style={s.infoItem}><span style={s.infoLabel}>Class:</span> <span style={s.infoValue}>{classLabel || "N/A"}</span></div>
-          <div style={s.infoItem}><span style={s.infoLabel}>SATS No.:</span> <span style={s.infoValue}>{user?.satCode || "N/A"}</span></div>
-          <div style={s.infoItem}><span style={s.infoLabel}>Academic Year:</span> <span style={s.infoValue}>{academicYearLabel || "N/A"}</span></div>
-        </div>
-
-        {activeRows.length ? (
-          <>
-            <h3 style={s.subjectTitle}>MARKS OF EACH SUBJECT</h3>
+          {activeRows.length ? (
             <div className="student-table-wrap" style={s.tableWrap}>
               <table style={s.table}>
                 <thead>
@@ -393,37 +402,27 @@ export default function Marks() {
                 </tbody>
               </table>
             </div>
+          ) : (
+            <div style={s.empty}>
+              {activeType ? `No marks have been published under ${activeType} yet.` : "No marks have been published for this student yet."}
+            </div>
+          )}
 
-            <div style={s.summaryBar} className="student-report-summary">
-              <div style={s.summaryItem}>
-                <div style={s.summaryVal}>{summary.totalScored} <span style={{fontSize:'1rem', color:'#65706a'}}>/{summary.totalMax}</span></div>
-                <div style={s.summaryLabel}>Total Marks</div>
-              </div>
-              <div style={s.summaryItem}>
-                <div style={s.summaryVal}>{summary.percentage === null ? "N/A" : formatPercent(summary.percentage)}</div>
-                <div style={s.summaryLabel}>Percentage</div>
-              </div>
-              <div style={s.summaryItem}>
-                <div style={s.summaryVal}>{summary.grade}</div>
-                <div style={s.summaryLabel}>Overall Grade</div>
-              </div>
+          <div style={s.summaryBar} className="student-report-summary">
+            <div style={s.summaryItem}>
+              <div style={s.summaryVal}>{summary.totalScored} <span style={{fontSize:'1rem', color:'#65706a'}}>/{summary.totalMax}</span></div>
+              <div style={s.summaryLabel}>Total Marks</div>
             </div>
-            <div style={s.gradeScale}>
-              <strong>GRADE SCALE:</strong> A+: 90%-100% &nbsp; A: 80%-89% &nbsp; B+: 70%-79% &nbsp; B: 60%-69% &nbsp; C: 50%-59% &nbsp; D: 35%-49% &nbsp; F: Fail
+            <div style={s.summaryItem}>
+              <div style={s.summaryVal}>{summary.percentage === null ? "N/A" : formatPercent(summary.percentage)}</div>
+              <div style={s.summaryLabel}>Percentage</div>
             </div>
-          </>
-        ) : (
-          <div style={s.empty}>
-            {activeType ? `No marks have been published under ${activeType} yet.` : "No marks have been published for this student yet."}
+            <div style={s.summaryItem}>
+              <div style={s.summaryVal}>{summary.grade}</div>
+              <div style={s.summaryLabel}>Overall Grade</div>
+            </div>
           </div>
-        )}
-
-        <div style={s.signatures} className="student-report-signatures">
-          <div style={s.sigBox}><div style={s.sigLine}></div><p>Class Teacher Sign</p></div>
-          <div style={s.sigBox}><div style={s.sigLine}></div><p>Principal Sign with Stamp</p></div>
         </div>
-        <div style={s.softwareCredit}>{SOFTWARE_CREDIT}</div>
-      </div>
       )}
 
       <style>
@@ -456,6 +455,7 @@ const s = {
   categoryCardActive: { background: "var(--navy)", color: "var(--white)", borderColor: "var(--navy)", boxShadow: "var(--shadow-sm)" },
   categoryIcon: { width: "34px", height: "34px", borderRadius: "9px", background: "rgba(200,150,12,0.18)", color: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "1rem" },
   categoryName: { fontSize: "1rem", lineHeight: 1.2 },
+  categoryMetaBlock: { display: "flex", flexDirection: "column", gap: "2px", width: "100%" },
   categoryMeta: { color: "inherit", opacity: 0.72, fontSize: "0.75rem", fontWeight: "800" },
   promptCard: { background: "var(--white)", border: "1px dashed var(--border)", borderRadius: "14px", padding: "38px 22px", textAlign: "center", color: "var(--text-muted)", boxShadow: "var(--shadow-sm)" },
   promptIcon: { width: "42px", height: "42px", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", background: "var(--gold-pale)", color: "var(--navy)", marginBottom: "12px" },
@@ -464,20 +464,11 @@ const s = {
   printActions: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "16px", flexWrap: "wrap" },
   backBtn: { background: "var(--white)", color: "var(--navy)", border: "1px solid var(--border)", padding: "10px 16px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", boxShadow: "var(--shadow-sm)" },
   printBtn: { background: "var(--navy)", color: "var(--white)", padding: "10px 20px", borderRadius: "8px", fontWeight: "700", cursor: "pointer", transition: "var(--transition)", boxShadow: "var(--shadow-sm)" },
-  reportCard: { background: "var(--white)", borderRadius: "6px", padding: "34px 38px 30px", boxShadow: "var(--shadow-lg)", border: "1px solid #8a8a8a", position: "relative", overflow: "hidden", color: "#555" },
-  cornerMark: { position: "absolute", top: 0, left: 0, width: 0, height: 0, borderTop: "34px solid #d00000", borderRight: "150px solid transparent" },
-  rcHeader: { display: "flex", alignItems: "center", justifyContent: "center", gap: "28px", marginBottom: "22px", color: "#315a25", minHeight: "78px" },
-  rcLogo: { width: "74px", height: "74px", objectFit: "contain", flex: "0 0 auto", border: "1px solid #555", padding: "8px", marginLeft: "auto" },
-  rcSchoolName: { fontFamily: "var(--font-heading)", fontSize: "2rem", margin: 0, lineHeight: 1, fontWeight: "500", color: "#315a25", letterSpacing: "0.02em" },
-  rcTitleArea: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "18px", marginBottom: "24px" },
-  rcTitle: { fontFamily: "var(--font-heading)", color: "#315a25", fontSize: "1.15rem", margin: "0 0 8px", fontWeight: "900" },
-  rcTerm: { color: "#777", fontWeight: "600", fontSize: "0.86rem", margin: "3px 0" },
-  examPill: { border: "1px solid #315a25", color: "#315a25", padding: "8px 13px", borderRadius: "4px", fontWeight: "900", textTransform: "uppercase", fontSize: "0.78rem", whiteSpace: "nowrap" },
-  infoGrid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 0, border: "1px solid #777", marginBottom: "0" },
-  infoItem: { fontSize: "0.9rem", padding: "13px 12px", borderRight: "1px solid #777", borderBottom: "1px solid #777", minHeight: "48px" },
-  infoLabel: { color: "#6b6b6b", fontWeight: "600", display: "inline-block", marginRight: "6px" },
-  infoValue: { color: "var(--navy)", fontWeight: "800" },
-  subjectTitle: { margin: 0, padding: "13px", textAlign: "center", color: "#315a25", borderLeft: "1px solid #777", borderRight: "1px solid #777", fontSize: "1.05rem", letterSpacing: "0.02em" },
+  marksPanel: { background: "var(--white)", borderRadius: "14px", padding: "20px", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", color: "#555" },
+  marksHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "16px", flexWrap: "wrap" },
+  marksTitle: { fontFamily: "var(--font-heading)", fontSize: "1.6rem", margin: 0, color: "var(--navy)", fontWeight: "900" },
+  marksSub: { margin: "6px 0 0", color: "var(--text-muted)", fontWeight: "700", fontSize: "0.88rem" },
+  marksBadge: { borderRadius: "999px", background: "var(--gold-pale)", color: "var(--navy-dark)", padding: "8px 12px", fontSize: "0.78rem", fontWeight: "900", whiteSpace: "nowrap" },
   tableWrap: { overflowX: "auto", marginBottom: "20px" },
   table: { width: "100%", borderCollapse: "collapse" },
   th: { background: "#315a25", color: "var(--white)", padding: "12px", textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.05em", border: "1px solid #315a25" },
