@@ -392,7 +392,7 @@ export default function Marks() {
                       <td style={{...s.td, textAlign: 'center'}}>{row.maxMarks}</td>
                       <td style={{...s.td, textAlign: 'center', fontWeight: '800'}}>{row.marksObtained}</td>
                       <td style={{...s.td, textAlign: 'center'}}>
-                        <span style={s.gradeBadge}>{row.grade || "N/A"}</span>
+                        <span style={row.grade === "F" ? s.gradeBadgeFail : s.gradeBadge}>{row.grade || "N/A"}</span>
                       </td>
                       <td style={{...s.td, textAlign: 'center'}}>{formatPercent(row.percentage)}</td>
                     </tr>
@@ -473,6 +473,7 @@ const s = {
   tr: { borderBottom: "1px solid #777" },
   td: { padding: "11px 12px", fontSize: "0.9rem", border: "1px solid #777", color: "#686868" },
   gradeBadge: { padding: "4px 11px", borderRadius: "3px", fontWeight: "800", color: "#315a25", background: "#eef5e9", border: "1px solid rgba(49,90,37,0.28)" },
+  gradeBadgeFail: { padding: "4px 11px", borderRadius: "3px", fontWeight: "800", color: "#d00000", background: "#fdecec", border: "1px solid rgba(208,0,0,0.28)" },
   summaryBar: { display: "flex", background: "#f7faf5", borderRadius: "4px", padding: "16px", color: "#315a25", justifyContent: "space-around", marginBottom: "16px", border: "1px solid #9aa294", gap: "16px", flexWrap: "wrap" },
   summaryItem: { textAlign: "center", minWidth: "120px" },
   summaryVal: { fontFamily: "var(--font-stats)", fontSize: "1.6rem", color: "#315a25", lineHeight: 1, marginBottom: "4px" },
