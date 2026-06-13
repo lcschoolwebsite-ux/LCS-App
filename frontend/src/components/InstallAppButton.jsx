@@ -5,8 +5,6 @@ export default function InstallAppButton({ compact = false }) {
   const [prompt, setPrompt] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
 
-  if (isNativeAndroidApp()) return null;
-
   useEffect(() => {
     const onBeforeInstallPrompt = (event) => {
       event.preventDefault();
@@ -26,6 +24,8 @@ export default function InstallAppButton({ compact = false }) {
       window.removeEventListener("appinstalled", onAppInstalled);
     };
   }, []);
+
+  if (isNativeAndroidApp()) return null;
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
@@ -63,7 +63,7 @@ export default function InstallAppButton({ compact = false }) {
           <div style={s.sheet}>
             <div style={s.sheetHead}>
               <div>
-                <div style={s.sheetKicker}>Student Portal</div>
+                <div style={s.sheetKicker}>LCS Portal</div>
                 <h3 style={s.sheetTitle}>How to install</h3>
               </div>
               <button onClick={() => setShowGuide(false)} style={s.closeBtn} aria-label="Close install guide">

@@ -125,7 +125,7 @@ const s = {
   pagination: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", padding: "14px 20px", borderTop: "1px solid #f0ebe0", background: "var(--white)", flexWrap: "wrap" },
   pageInfo: { fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: "600" },
   pageBtns: { display: "flex", gap: "0.25rem", flexWrap: "wrap", alignItems: "center" },
-  pageBtn: { minHeight: "40px", padding: "6px 12px", border: "1px solid var(--border)", borderRadius: "10px", background: "var(--white)", color: "var(--navy)", fontWeight: "600", fontSize: "0.85rem", cursor: "pointer" },
+  pageBtn: { minHeight: "48px", padding: "8px 12px", border: "1px solid var(--border)", borderRadius: "10px", background: "var(--white)", color: "var(--navy)", fontWeight: "600", fontSize: "0.85rem", cursor: "pointer" },
   disabledBtn: { opacity: 0.45, cursor: "not-allowed" },
   activePageBtn: { background: "var(--navy)", color: "var(--white)", borderColor: "var(--navy)" },
   empty: {

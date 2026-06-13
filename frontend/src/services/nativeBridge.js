@@ -102,7 +102,7 @@ const setupPushListeners = async () => {
         notifications: [
           {
             id: Math.floor(Date.now() % 2147483647),
-            title: notification.title || "LCSMS Portal",
+            title: notification.title || "LCS Portal",
             body: notification.body || "",
             extra: notification.data || {},
             schedule: { at: new Date(Date.now() + 250) }

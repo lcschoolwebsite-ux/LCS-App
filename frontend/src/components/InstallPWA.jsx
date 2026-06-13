@@ -29,10 +29,10 @@ export default function InstallPWA() {
 
   const isStudentPortal = location.pathname.startsWith("/student");
 
-  if (isNativeAndroidApp()) return null;
-
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isInStandaloneMode = window.matchMedia("(display-mode: standalone)").matches;
+
+  if (isNativeAndroidApp()) return null;
 
   // Already installed — show nothing
   if (isInStandaloneMode) return null;
@@ -70,7 +70,7 @@ export default function InstallPWA() {
         style={s.banner}
         aria-label="Install student portal app"
       >
-        <div style={s.badge}>Student Portal</div>
+        <div style={s.badge}>LCS Portal</div>
         <div style={s.copy}>
           <div style={s.title}>{bannerLabel}</div>
           <div style={s.note}>{bannerNote}</div>
@@ -86,7 +86,7 @@ export default function InstallPWA() {
           <div style={s.sheet}>
             <div style={s.sheetHead}>
               <div>
-                <div style={s.sheetKicker}>Student Portal</div>
+                <div style={s.sheetKicker}>LCS Portal</div>
                 <h3 style={s.sheetTitle}>Install on iPhone</h3>
               </div>
               <button onClick={() => setShowIOSGuide(false)} style={s.closeBtn} aria-label="Close install guide">

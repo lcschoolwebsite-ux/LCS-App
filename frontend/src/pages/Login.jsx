@@ -91,7 +91,7 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const user = await login(role, username, password);
+      const { user } = await login(role, username, password);
       if (user.role === "admin") navigate("/admin");
       else if (user.role === "teacher") navigate("/teacher");
       else navigate("/student");
@@ -110,8 +110,8 @@ export default function Login() {
         <div style={{ ...s.logoWrapper, marginBottom: isMobile ? "16px" : s.logoWrapper.marginBottom }}>
           <img src="/logo.png" alt="School Logo" style={{ ...s.logoImg, width: isMobile ? "80px" : s.logoImg.width, height: isMobile ? "80px" : s.logoImg.height }} />
         </div>
-        <h1 style={{ ...s.schoolName, fontSize: isMobile ? "1.4rem" : s.schoolName.fontSize }}>Loretto Central</h1>
-        <p style={{ ...s.tagline, marginBottom: isMobile ? "18px" : s.tagline.marginBottom }}>love through service</p>
+        <h1 style={{ ...s.schoolName, fontSize: isMobile ? "1.4rem" : s.schoolName.fontSize }}>LCS Portal</h1>
+        <p style={{ ...s.tagline, marginBottom: isMobile ? "18px" : s.tagline.marginBottom }}>Loretto Central School</p>
 
         <div style={{ ...s.roleSwitcher, flexDirection: isMobile ? "column" : "row" }}>
           {["admin", "teacher"].map(r => (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 
-const DEFAULT_NOTICE = "Welcome to the Loretto Central School Management System.\nPlease ensure all mid-term marks are submitted by 15th October.";
+const DEFAULT_NOTICE = "Welcome to LCS Portal.\nPlease ensure all mid-term marks are submitted by 15th October.";
 
 export default function NoticeBar({ notices }) {
   const [loadedNotice, setLoadedNotice] = useState("");

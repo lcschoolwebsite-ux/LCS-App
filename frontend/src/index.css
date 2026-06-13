@@ -48,6 +48,14 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-body);
   background: var(--light-bg);
@@ -224,6 +232,18 @@ input, select, textarea {
   100% { box-shadow: 0 0 0 0 rgba(200, 150, 12, 0); }
 }
 
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.88; }
+  50% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.88; }
+}
+
+@keyframes logoPulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(200,150,12,0.45)); }
+  50% { transform: scale(1.04); filter: drop-shadow(0 0 16px rgba(200,150,12,0.65)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(200,150,12,0.45)); }
+}
+
 /* Global Utilities */
 .text-navy { color: var(--navy); }
 .text-gold { color: var(--gold); }
@@ -381,6 +401,28 @@ input, select, textarea {
 }
 
 @media (max-width: 760px) {
+  button,
+  .btn-primary,
+  .btn-gold,
+  .btn-outline {
+    min-height: 48px !important;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+  }
+
+  .admin-content table,
+  .teacher-content table,
+  .student-content table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .teacher-shell {
     display: block !important;
   }
@@ -390,13 +432,17 @@ input, select, textarea {
   }
 
   .teacher-mobile-topbar {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
-    justify-content: space-between;
-    gap: 14px;
+    gap: 10px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
     background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
     border-bottom: 1px solid rgba(200, 150, 12, 0.28);
     padding: 12px 16px;
+    overflow: hidden;
   }
 
   .teacher-mobile-nav {
@@ -430,16 +476,24 @@ input, select, textarea {
     position: sticky !important;
     top: 0 !important;
     height: auto !important;
-    padding: 12px 16px !important;
-    align-items: center !important;
-    flex-direction: row !important;
-    gap: 12px !important;
+    padding: 12px 14px !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 10px !important;
   }
 
   .teacher-header-right {
-    flex-wrap: nowrap !important;
+    width: 100%;
+    flex-wrap: wrap !important;
+    justify-content: flex-start;
     gap: 8px !important;
-    margin-left: auto;
+    margin-left: 0;
+  }
+
+  .teacher-header-right button,
+  .teacher-header-right .headerYearPill,
+  .teacher-header-right .headerAvatar {
+    min-height: 48px;
   }
 
   .teacher-content {
@@ -490,13 +544,17 @@ input, select, textarea {
   }
 
   .student-mobile-topbar {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
-    justify-content: space-between;
-    gap: 14px;
+    gap: 10px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
     background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
     border-bottom: 1px solid rgba(200, 150, 12, 0.28);
     padding: 12px 16px;
+    overflow: hidden;
   }
 
   .student-mobile-nav {
@@ -530,16 +588,24 @@ input, select, textarea {
     position: sticky !important;
     top: 0 !important;
     height: auto !important;
-    padding: 12px 16px !important;
-    align-items: center !important;
-    flex-direction: row !important;
-    gap: 12px !important;
+    padding: 12px 14px !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 10px !important;
   }
 
   .student-header-right {
-    flex-wrap: nowrap !important;
+    width: 100%;
+    flex-wrap: wrap !important;
+    justify-content: flex-start;
     gap: 8px !important;
-    margin-left: auto;
+    margin-left: 0;
+  }
+
+  .student-header-right button,
+  .student-header-right .headerYearPill,
+  .student-header-right .headerAvatar {
+    min-height: 48px;
   }
 
   .student-search {
@@ -714,6 +780,7 @@ video,
 canvas,
 svg {
   max-width: 100%;
+  height: auto;
 }
 
 button,
@@ -738,6 +805,22 @@ textarea {
 
 .responsive-table-shell {
   min-width: 0;
+}
+
+.app-shell,
+.admin-shell,
+.teacher-shell,
+.student-shell,
+.portal-page,
+.portal-content,
+.admin-main,
+.teacher-main,
+.student-main {
+  min-width: 0;
+}
+
+table {
+  max-width: 100%;
 }
 
 @media (max-width: 1180px) {
@@ -778,13 +861,17 @@ textarea {
   }
 
   .admin-mobile-topbar {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
-    justify-content: space-between;
-    gap: 14px;
+    gap: 10px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
     background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
     border-bottom: 1px solid rgba(200, 150, 12, 0.28);
     padding: 12px 16px;
+    overflow: hidden;
   }
 
   .admin-mobile-nav {
@@ -818,16 +905,23 @@ textarea {
 
   .admin-header {
     height: auto !important;
-    padding: 12px 16px !important;
+    padding: 12px 14px !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   .admin-header-right {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
     gap: 8px !important;
+  }
+
+  .admin-header-right button,
+  .admin-header-right .badge,
+  .admin-header-right .adminAvatar {
+    min-height: 48px;
   }
 
   .admin-content {
@@ -859,13 +953,17 @@ textarea {
   }
 
   .teacher-mobile-topbar {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
-    justify-content: space-between;
-    gap: 14px;
+    gap: 10px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
     background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
     border-bottom: 1px solid rgba(200, 150, 12, 0.28);
     padding: 12px 16px;
+    overflow: hidden;
   }
 
   .teacher-mobile-nav {
@@ -893,15 +991,16 @@ textarea {
 
   .teacher-header {
     height: auto !important;
-    padding: 12px 16px !important;
+    padding: 12px 14px !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   .teacher-header-right {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
     gap: 8px !important;
   }
 
@@ -942,5 +1041,14 @@ textarea {
   .teacher-attendance-list {
     max-height: none !important;
     padding-right: 0 !important;
+  }
+}
+
+@media (pointer: coarse) {
+  button,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 }

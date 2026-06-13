@@ -21,7 +21,7 @@ export default function Profile() {
           </div>
           <div>
             <h2 style={s.name}>{user?.name || "Student"}</h2>
-            <p style={s.role}>{classLabel ? `Class ${classLabel}` : "Student Portal"}</p>
+            <p style={s.role}>{classLabel ? `Class ${classLabel}` : "LCS Portal"}</p>
           </div>
         </div>
 

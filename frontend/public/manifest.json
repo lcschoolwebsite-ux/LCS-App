@@ -1,6 +1,6 @@
 {
-  "name": "LC School Management",
-  "short_name": "LCSMS",
+  "name": "LCS Portal",
+  "short_name": "LCS Portal",
   "description": "School Management System",
   "start_url": "/",
   "display": "standalone",

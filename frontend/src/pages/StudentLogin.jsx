@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import AppFooter from "../components/AppFooter";
+import {
+  getActiveStudentProfile,
+  loadStudentProfiles,
+  saveStudentProfile,
+  setActiveStudentProfile,
+  studentProfileSummary,
+  getStudentProfilePhoto
+} from "../services/studentSessions";
+import { isNativeAndroidApp } from "../services/nativeBridge";
 
 const bgStyles = {
   page: {
@@ -439,6 +448,127 @@ const bgStyles = {
     border: "1px solid #fecaca",
     borderLeft: "3px solid #ef4444",
   },
+  savedProfilesBtn: {
+    width: "100%",
+    marginTop: "12px",
+    padding: "12px 16px",
+    borderRadius: "13px",
+    border: "1px solid rgba(14,107,107,0.18)",
+    background: "rgba(14,107,107,0.06)",
+    color: "var(--navy)",
+    fontWeight: 800,
+    minHeight: "48px",
+  },
+  profileShell: {
+    width: "100%",
+    borderRadius: "24px",
+    padding: "24px",
+    background: "rgba(255,255,255,0.96)",
+    color: "var(--text)",
+    boxShadow: "0 24px 70px rgba(0,0,0,0.24)",
+    position: "relative",
+    zIndex: 1,
+  },
+  profileTop: {
+    marginBottom: "18px",
+    textAlign: "center",
+  },
+  profileBadge: {
+    display: "inline-flex",
+    padding: "6px 12px",
+    borderRadius: "999px",
+    background: "var(--gold-pale)",
+    color: "var(--navy-dark)",
+    fontSize: "0.72rem",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    marginBottom: "10px",
+  },
+  profileTitle: {
+    margin: 0,
+    color: "var(--navy)",
+    fontFamily: "var(--font-heading)",
+    fontSize: "1.55rem",
+    lineHeight: 1.2,
+  },
+  profileCopy: {
+    margin: "10px auto 0",
+    maxWidth: "540px",
+    color: "var(--text-muted)",
+    fontSize: "0.9rem",
+    lineHeight: 1.6,
+  },
+  profileGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "12px",
+  },
+  profileCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    width: "100%",
+    minHeight: "72px",
+    borderRadius: "18px",
+    padding: "14px",
+    border: "1px solid var(--border)",
+    background: "var(--light-bg)",
+    color: "var(--text)",
+    textAlign: "left",
+    boxShadow: "var(--shadow-sm)",
+  },
+  profileCardActive: {
+    borderColor: "var(--gold)",
+    boxShadow: "0 10px 24px rgba(200,150,12,0.16)",
+    background: "linear-gradient(135deg, rgba(245,230,192,0.95), rgba(255,255,255,0.98))",
+  },
+  profilePhoto: {
+    width: "52px",
+    height: "52px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "2px solid var(--gold)",
+    flex: "0 0 auto",
+  },
+  profileAvatar: {
+    width: "52px",
+    height: "52px",
+    borderRadius: "50%",
+    display: "grid",
+    placeItems: "center",
+    background: "linear-gradient(135deg, var(--navy), var(--navy-dark))",
+    color: "var(--white)",
+    fontWeight: 900,
+    flex: "0 0 auto",
+  },
+  profileText: {
+    minWidth: 0,
+  },
+  profileName: {
+    fontWeight: 900,
+    fontSize: "0.95rem",
+    color: "var(--navy)",
+    lineHeight: 1.2,
+  },
+  profileClass: {
+    marginTop: "3px",
+    fontSize: "0.78rem",
+    color: "var(--text-muted)",
+    fontWeight: 700,
+  },
+  differentAccountBtn: {
+    width: "100%",
+    marginTop: "16px",
+    border: "none",
+    borderRadius: "14px",
+    padding: "14px 16px",
+    minHeight: "48px",
+    background: "linear-gradient(135deg, var(--navy), var(--navy-dark))",
+    color: "var(--white)",
+    fontWeight: 800,
+    boxShadow: "var(--shadow-sm)",
+  },
   foot: {
     display: "flex",
     alignItems: "center",
@@ -484,13 +614,16 @@ export default function StudentLogin() {
   const [statsCode, setStatsCode] = useState("");
   const [mobileNo, setMobileNo] = useState("");
   const [showMobile, setShowMobile] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(isNativeAndroidApp());
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [savedProfiles, setSavedProfiles] = useState([]);
+  const [isProfilePicker, setIsProfilePicker] = useState(false);
+  const [selectedProfileId, setSelectedProfileId] = useState("");
   const [stars, setStars] = useState([]);
   const [particles, setParticles] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
-  const { login } = useAuth();
+  const { login, restoreSession } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -514,19 +647,54 @@ export default function StudentLogin() {
     setStars(nextStars);
     setParticles(nextParticles);
 
+    const loadProfiles = async () => {
+      const profiles = await loadStudentProfiles();
+      setSavedProfiles(profiles);
+      const active = await getActiveStudentProfile();
+      setSelectedProfileId(active?.profileId || profiles[0]?.profileId || "");
+      setIsProfilePicker(profiles.length > 0);
+    };
+
+    loadProfiles();
+
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
+
+  const refreshProfiles = async () => {
+    const profiles = await loadStudentProfiles();
+    setSavedProfiles(profiles);
+    const active = await getActiveStudentProfile();
+    setSelectedProfileId(active?.profileId || profiles[0]?.profileId || "");
+    setIsProfilePicker(profiles.length > 0);
+  };
+
+  const openProfile = async (profile) => {
+    try {
+      setError("");
+      setLoading(true);
+      await setActiveStudentProfile(profile.profileId);
+      await restoreSession({ token: profile.token, user: profile.user });
+      navigate("/student");
+    } catch (err) {
+      setError(err?.message || "Unable to open saved profile");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const user = await login("student", statsCode.trim(), mobileNo.trim());
+      const { user, token } = await login("student", statsCode.trim(), mobileNo.trim());
       if (user?.role !== "student") {
         throw new Error("This page is only for student accounts.");
       }
-      if (remember) localStorage.setItem("remember_student_login", "1");
+      if (remember) {
+        await saveStudentProfile(user, token);
+        await refreshProfiles();
+      }
       navigate("/student");
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || "Student login failed");
@@ -548,7 +716,7 @@ export default function StudentLogin() {
           <div style={bgStyles.brand}>
             <img
               src="/logo.png"
-              alt="Loretto Central School logo"
+              alt="LCS Portal logo"
               style={{
                 ...bgStyles.brandLogo,
                 width: isMobile ? "42px" : bgStyles.brandLogo.width,
@@ -557,10 +725,10 @@ export default function StudentLogin() {
             />
             <div style={bgStyles.brandText}>
               <div style={{ ...bgStyles.brandName, fontSize: isMobile ? "0.92rem" : bgStyles.brandName.fontSize }}>
-                Loretto Central School
+                LCS Portal
               </div>
               <div style={{ ...bgStyles.brandTag, letterSpacing: isMobile ? "0.12em" : bgStyles.brandTag.letterSpacing }}>
-                Student Portal
+                Loretto Central School
               </div>
             </div>
           </div>
@@ -610,27 +778,74 @@ export default function StudentLogin() {
             />
           ))}
 
-          <section
-            style={{
-              ...bgStyles.card,
-              gridTemplateColumns: isMobile ? "1fr" : bgStyles.card.gridTemplateColumns,
-              minHeight: isMobile ? "auto" : bgStyles.card.minHeight,
-              maxWidth: isMobile ? "560px" : bgStyles.card.maxWidth,
-              borderRadius: isMobile ? "20px" : bgStyles.card.borderRadius,
-            }}
-          >
-            <div
+          {isProfilePicker ? (
+            <section style={{ ...bgStyles.profileShell, maxWidth: isMobile ? "560px" : "720px" }}>
+              <div style={bgStyles.profileTop}>
+                <div style={bgStyles.profileBadge}>Welcome back</div>
+                <h2 style={bgStyles.profileTitle}>Tap a profile to enter LCS Portal</h2>
+                <p style={bgStyles.profileCopy}>Your saved student profiles are stored securely on this device. Choose one to continue instantly.</p>
+              </div>
+
+              <div style={bgStyles.profileGrid}>
+                {savedProfiles.map((profile) => {
+                  const { name, classLabel } = studentProfileSummary(profile);
+                  const photoUrl = getStudentProfilePhoto(profile);
+                  const active = selectedProfileId === profile.profileId;
+
+                  return (
+                    <button
+                      key={profile.profileId}
+                      type="button"
+                      onClick={() => openProfile(profile)}
+                      style={{
+                        ...bgStyles.profileCard,
+                        ...(active ? bgStyles.profileCardActive : {})
+                      }}
+                    >
+                      {photoUrl ? (
+                        <img src={photoUrl} alt={name} style={bgStyles.profilePhoto} />
+                      ) : (
+                        <div style={bgStyles.profileAvatar}>{name?.[0] || "S"}</div>
+                      )}
+                      <div style={bgStyles.profileText}>
+                        <div style={bgStyles.profileName}>{name}</div>
+                        <div style={bgStyles.profileClass}>{classLabel || "LCS Portal"}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsProfilePicker(false)}
+                style={bgStyles.differentAccountBtn}
+              >
+                Login with different account
+              </button>
+            </section>
+          ) : (
+            <section
               style={{
-                ...bgStyles.left,
-                display: isMobile ? "none" : bgStyles.left.display,
+                ...bgStyles.card,
+                gridTemplateColumns: isMobile ? "1fr" : bgStyles.card.gridTemplateColumns,
+                minHeight: isMobile ? "auto" : bgStyles.card.minHeight,
+                maxWidth: isMobile ? "560px" : bgStyles.card.maxWidth,
+                borderRadius: isMobile ? "20px" : bgStyles.card.borderRadius,
               }}
             >
+              <div
+                style={{
+                  ...bgStyles.left,
+                  display: isMobile ? "none" : bgStyles.left.display,
+                }}
+              >
               <div style={bgStyles.leftGlow} />
 
               <div style={{ position: "relative", zIndex: 1 }}>
                 <div style={bgStyles.badge}>
                   <span style={bgStyles.badgeDot} />
-                  Student Portal
+                  LCS Portal
                 </div>
                 <h1 style={bgStyles.title}>
                   Your gateway to <span style={bgStyles.titleAccent}>academic excellence</span>
@@ -669,119 +884,126 @@ export default function StudentLogin() {
               </div>
             </div>
 
-            <div
-              style={{
-                ...bgStyles.right,
-                padding: isMobile ? "28px 18px" : bgStyles.right.padding,
-              }}
-            >
-              <div style={bgStyles.rightTopBar} />
-              <div style={bgStyles.watermark}>LCS</div>
+              <div
+                style={{
+                  ...bgStyles.right,
+                  padding: isMobile ? "28px 18px" : bgStyles.right.padding,
+                }}
+              >
+                <div style={bgStyles.rightTopBar} />
+                <div style={bgStyles.watermark}>LCS</div>
 
-              <form style={bgStyles.form} onSubmit={handleSubmit}>
-                <div
-                  style={{
-                    ...bgStyles.ring,
-                    width: isMobile ? "84px" : bgStyles.ring.width,
-                    height: isMobile ? "84px" : bgStyles.ring.height,
-                    marginBottom: isMobile ? "18px" : bgStyles.ring.marginBottom,
-                  }}
-                >
-                  <div style={bgStyles.orbit1} />
-                  <div style={bgStyles.orbit2} />
-                  <div style={bgStyles.core}>
-                    <img
-                      src="/logo.png"
-                      alt="Loretto Central School logo"
-                      style={{
-                        ...bgStyles.coreLogo,
-                        width: isMobile ? "100%" : bgStyles.coreLogo.width,
-                        height: isMobile ? "100%" : bgStyles.coreLogo.height,
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <h2
-                  style={{
-                    ...bgStyles.formTitle,
-                    fontSize: isMobile ? "1.55rem" : bgStyles.formTitle.fontSize,
-                    textAlign: isMobile ? "center" : "left",
-                  }}
-                >
-                  Student sign in
-                </h2>
-                <p style={bgStyles.formSub}>
-                  Enter your stats code and registered mobile number to access the student portal.
-                </p>
-
-                <LoginField
-                  label="Stats Code"
-                  hint="Found on your ID card or admit card"
-                  icon="ID"
-                  type="text"
-                  value={statsCode}
-                  onChange={(e) => setStatsCode(e.target.value)}
-                  placeholder="Your student ID"
-                  autoComplete="username"
-                />
-
-                <LoginField
-                  label="Mobile Number"
-                  hint="Registered mobile number from admission"
-                  icon="PH"
-                  type={showMobile ? "text" : "password"}
-                  value={mobileNo}
-                  onChange={(e) => setMobileNo(e.target.value)}
-                  placeholder="Registered mobile number"
-                  autoComplete="current-password"
-                  showToggle
-                  showValue={showMobile}
-                  onToggle={() => setShowMobile((next) => !next)}
-                />
-
-                <div
-                  style={{
-                    ...bgStyles.extrasRow,
-                    flexDirection: isMobile ? "column" : bgStyles.extrasRow.flexDirection,
-                    alignItems: isMobile ? "stretch" : bgStyles.extrasRow.alignItems,
-                    gap: isMobile ? "10px" : bgStyles.extrasRow.gap,
-                  }}
-                >
-                  <label style={bgStyles.remember}>
-                    <input
-                      type="checkbox"
-                      checked={remember}
-                      onChange={(e) => setRemember(e.target.checked)}
-                      style={bgStyles.rememberInput}
-                    />
-                    Keep me signed in
-                  </label>
-                  <a
-                    style={bgStyles.forgot}
-                    href="mailto:Lorettocentralschool@gmail.com?subject=Student%20Login%20Help&body=Please%20contact%20the%20school%20office%20for%20student%20login%20assistance."
+                <form style={bgStyles.form} onSubmit={handleSubmit}>
+                  <div
+                    style={{
+                      ...bgStyles.ring,
+                      width: isMobile ? "84px" : bgStyles.ring.width,
+                      height: isMobile ? "84px" : bgStyles.ring.height,
+                      marginBottom: isMobile ? "18px" : bgStyles.ring.marginBottom,
+                    }}
                   >
-                    Forgot credentials?
-                  </a>
-                </div>
+                    <div style={bgStyles.orbit1} />
+                    <div style={bgStyles.orbit2} />
+                    <div style={bgStyles.core}>
+                      <img
+                        src="/logo.png"
+                        alt="LCS Portal logo"
+                        style={{
+                          ...bgStyles.coreLogo,
+                          width: isMobile ? "100%" : bgStyles.coreLogo.width,
+                          height: isMobile ? "100%" : bgStyles.coreLogo.height,
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+                  </div>
+  
+                  <h2
+                    style={{
+                      ...bgStyles.formTitle,
+                      fontSize: isMobile ? "1.55rem" : bgStyles.formTitle.fontSize,
+                      textAlign: isMobile ? "center" : "left",
+                    }}
+                  >
+                    Student sign in
+                  </h2>
+                  <p style={bgStyles.formSub}>
+                    Enter your stats code and registered mobile number to access LCS Portal.
+                  </p>
 
-                <button style={bgStyles.submit} type="submit" disabled={loading}>
-                  {loading ? (
-                    <span style={bgStyles.submitInner}>
-                      <span style={bgStyles.spinner} />
-                      Signing in...
-                    </span>
-                  ) : (
-                    <span style={bgStyles.submitInner}>Sign in to portal</span>
+                  <LoginField
+                    label="Stats Code"
+                    hint="Found on your ID card or admit card"
+                    icon="ID"
+                    type="text"
+                    value={statsCode}
+                    onChange={(e) => setStatsCode(e.target.value)}
+                    placeholder="Your student ID"
+                    autoComplete="username"
+                  />
+
+                  <LoginField
+                    label="Mobile Number"
+                    hint="Registered mobile number from admission"
+                    icon="PH"
+                    type={showMobile ? "text" : "password"}
+                    value={mobileNo}
+                    onChange={(e) => setMobileNo(e.target.value)}
+                    placeholder="Registered mobile number"
+                    autoComplete="current-password"
+                    showToggle
+                    showValue={showMobile}
+                    onToggle={() => setShowMobile((next) => !next)}
+                  />
+
+                  <div
+                    style={{
+                      ...bgStyles.extrasRow,
+                      flexDirection: isMobile ? "column" : bgStyles.extrasRow.flexDirection,
+                      alignItems: isMobile ? "stretch" : bgStyles.extrasRow.alignItems,
+                      gap: isMobile ? "10px" : bgStyles.extrasRow.gap,
+                    }}
+                  >
+                    <label style={bgStyles.remember}>
+                      <input
+                        type="checkbox"
+                        checked={remember}
+                        onChange={(e) => setRemember(e.target.checked)}
+                        style={bgStyles.rememberInput}
+                      />
+                      Keep me signed in
+                    </label>
+                    <a
+                      style={bgStyles.forgot}
+                      href="mailto:Lorettocentralschool@gmail.com?subject=Student%20Login%20Help&body=Please%20contact%20the%20school%20office%20for%20student%20login%20assistance."
+                    >
+                      Forgot credentials?
+                    </a>
+                  </div>
+
+                  <button style={bgStyles.submit} type="submit" disabled={loading}>
+                    {loading ? (
+                      <span style={bgStyles.submitInner}>
+                        <span style={bgStyles.spinner} />
+                        Signing in...
+                      </span>
+                    ) : (
+                      <span style={bgStyles.submitInner}>Sign in to portal</span>
+                    )}
+                  </button>
+
+                  {error ? <div style={bgStyles.error}>{error}</div> : null}
+
+                  {savedProfiles.length > 0 && (
+                    <button type="button" onClick={() => setIsProfilePicker(true)} style={bgStyles.savedProfilesBtn}>
+                      Open saved profiles
+                    </button>
                   )}
-                </button>
 
-                {error ? <div style={bgStyles.error}>{error}</div> : null}
-
-              </form>
-            </div>
-          </section>
+                </form>
+              </div>
+            </section>
+          )}
         </main>
 
         <AppFooter variant="dark" />

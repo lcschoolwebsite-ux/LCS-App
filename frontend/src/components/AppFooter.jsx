@@ -25,7 +25,12 @@ const s = {
     fontSize: "0.82rem",
     fontWeight: "700",
     borderTop: "1px solid var(--border)",
-    background: "rgba(255,255,255,0.72)"
+    background: "rgba(255,255,255,0.72)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "6px"
   },
   darkFooter: {
     position: "relative",

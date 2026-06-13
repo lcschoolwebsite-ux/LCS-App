@@ -1,8 +1,9 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
+import MobileMenuDrawer from "../components/MobileMenuDrawer";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
@@ -69,6 +70,7 @@ export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { academicYearLabel } = useActiveAcademicYear();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -79,11 +81,25 @@ export default function AdminLayout() {
 
   return (
     <div style={s.layout} className="admin-shell">
+      <MobileMenuDrawer
+        open={menuOpen}
+        title="LCS Portal"
+        subtitle={user?.name || "Administrator"}
+        items={menuGroups.flatMap(group => group.items)}
+        currentPath={location.pathname}
+        onClose={() => setMenuOpen(false)}
+        onLogout={handleLogout}
+        logoutLabel="Logout"
+      />
+
       <div style={s.mobileTopbar} className="admin-mobile-topbar">
+        <button type="button" onClick={() => setMenuOpen(true)} style={s.mobileMenuBtn} aria-label="Open menu">
+          <i className="fa-solid fa-bars"></i>
+        </button>
         <div style={s.mobileBrand}>
           <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
           <div>
-            <h1 style={s.mobileSchoolName}>Loretto Admin</h1>
+            <h1 style={s.mobileSchoolName}>LCS Portal</h1>
             <p style={s.mobileUserLine}>{user?.name || "Administrator"} · Admin Portal</p>
           </div>
         </div>
@@ -92,23 +108,11 @@ export default function AdminLayout() {
         </button>
       </div>
 
-      <nav style={s.mobileNav} className="admin-mobile-nav" aria-label="Admin navigation">
-        {menuGroups.flatMap(group => group.items).map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link key={item.path} to={item.path} style={{ ...s.mobileNavItem, ...(isActive ? s.activeMobileNavItem : {}) }}>
-              <i className={item.icon}></i>
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
       <aside style={s.sidebar} className="admin-sidebar">
         <div style={s.logoArea}>
           <img src="/logo.png" alt="Logo" style={s.logoImg} />
           <div>
-            <h1 style={s.schoolName}>Loretto Admin</h1>
+            <h1 style={s.schoolName}>LCS Portal</h1>
             <p style={s.tagline}>System Management</p>
           </div>
         </div>
@@ -146,7 +150,7 @@ export default function AdminLayout() {
         <header style={s.header} className="admin-header">
           <div style={s.headerLeft}>
             <h2 style={s.pageTitle}>{currentPathLabel}</h2>
-            <div style={s.breadcrumb}>Administrator / {currentPathLabel}</div>
+            <div style={s.breadcrumb}>LCS Portal / {currentPathLabel}</div>
           </div>
           <div style={s.headerRight} className="admin-header-right">
             <div style={s.badge}>AY {academicYearLabel}</div>
@@ -186,13 +190,11 @@ const s = {
   layout: { display: "flex", minHeight: "100vh", background: "var(--light-bg)" },
   mobileTopbar: { display: "none" },
   mobileBrand: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 },
+  mobileMenuBtn: { width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.28)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
   mobileLogo: { width: "42px", height: "42px", objectFit: "contain", flex: "0 0 auto" },
   mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1rem", lineHeight: 1.1, margin: 0 },
   mobileUserLine: { color: "var(--gold-light)", fontSize: "0.72rem", fontWeight: "800", margin: "3px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "240px" },
   mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
-  mobileNav: { display: "none" },
-  mobileNavItem: { display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "999px", color: "rgba(255,255,255,0.72)", fontSize: "0.78rem", fontWeight: "800", whiteSpace: "nowrap", flex: "0 0 auto", border: "1px solid rgba(255,255,255,0.08)" },
-  activeMobileNavItem: { background: "var(--gold)", color: "var(--navy-dark)", border: "1px solid var(--gold)", boxShadow: "0 6px 16px rgba(0,0,0,0.2)" },
   sidebar: {
     width: "240px",
     background: "linear-gradient(180deg, #051a1a 0%, #094f4f 100%)",

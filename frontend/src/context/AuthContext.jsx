@@ -1,7 +1,22 @@
 import { createContext, useState, useEffect } from "react";
+import { Capacitor } from "@capacitor/core";
+import { Preferences } from "@capacitor/preferences";
 import api, { clearAuthToken, setAuthToken } from "../api/axios";
+import {
+  clearStudentSessionMarker,
+  getActiveStudentProfile
+} from "../services/studentSessions";
 
 export const AuthContext = createContext(null);
+
+const applyAuthSession = ({ token, user }) => {
+  if (token) {
+    setAuthToken(token);
+    localStorage.setItem("token", token);
+  }
+
+  return user || null;
+};
 
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null);
@@ -10,7 +25,28 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setLoading(false);
+      const restoreNativeStudentSession = async () => {
+        if (Capacitor.getPlatform() !== "android" || !Capacitor.isNativePlatform()) {
+          setLoading(false);
+          return;
+        }
+
+        try {
+          const activeProfile = await getActiveStudentProfile();
+          if (!activeProfile?.token || !activeProfile?.user) {
+            setLoading(false);
+            return;
+          }
+
+          setUser(applyAuthSession({ token: activeProfile.token, user: activeProfile.user }));
+        } catch (_) {
+          // If the quick-login cache is unavailable, fall back to the login screen.
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      restoreNativeStudentSession();
       return;
     }
     setAuthToken(token);
@@ -18,6 +54,7 @@ export function AuthProvider({ children }) {
       .then(r => setUser(r.data))
       .catch(() => {
         clearAuthToken();
+        localStorage.removeItem("token");
         setUser(null);
       })
       .finally(() => setLoading(false));
@@ -29,13 +66,20 @@ export function AuthProvider({ children }) {
       username, 
       password 
     });
-    setAuthToken(data.token);
-    setUser(data.user);
-    return data.user;
+    setUser(applyAuthSession(data));
+    return data;
+  };
+
+  const restoreSession = async ({ token, user: nextUser }) => {
+    setUser(applyAuthSession({ token, user: nextUser }));
+    return nextUser || null;
   };
 
   const logout = () => {
     clearAuthToken();
+    localStorage.removeItem("token");
+    Preferences.remove({ key: "lcs.student.session" }).catch(() => {});
+    clearStudentSessionMarker().catch(() => {});
     setUser(null);
   };
 
@@ -44,7 +88,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser, restoreSession }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,9 +1,10 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
 import InstallAppButton from "../components/InstallAppButton";
+import MobileMenuDrawer from "../components/MobileMenuDrawer";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/student/Dashboard"));
@@ -41,6 +42,7 @@ export default function StudentLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
   const menuItems = MENU_GROUPS.flatMap(group => group.items);
   const classLabel = [user?.class?.name, user?.class?.section].filter(Boolean).join("");
   const { academicYearLabel } = useActiveAcademicYear(user?.academicYear?.year);
@@ -54,12 +56,23 @@ export default function StudentLayout() {
 
   return (
     <div style={s.container} className="student-shell">
+      <MobileMenuDrawer
+        open={menuOpen}
+        title="LCS Portal"
+        subtitle={user?.name || "Student Portal"}
+        items={menuItems}
+        currentPath={location.pathname}
+        onClose={() => setMenuOpen(false)}
+        onLogout={handleLogout}
+        logoutLabel="Logout"
+      />
+
       {/* Sidebar */}
       <aside style={s.sidebar} className="student-sidebar">
         <div style={s.logoArea}>
           <img src="/logo.png" alt="Logo" style={s.logoImg} />
           <div>
-            <h1 style={s.schoolName}>Loretto Central</h1>
+            <h1 style={s.schoolName}>LCS Portal</h1>
             <p style={s.tagline}>love through service</p>
           </div>
         </div>
@@ -72,7 +85,7 @@ export default function StudentLayout() {
           )}
           <div>
             <div style={s.userName}>{user?.name || 'Student'}</div>
-            <div style={s.userRole}>{classLabel ? `Class ${classLabel}` : "Student Portal"}</div>
+            <div style={s.userRole}>{classLabel ? `Class ${classLabel}` : "LCS Portal"}</div>
           </div>
         </div>
 
@@ -104,11 +117,14 @@ export default function StudentLayout() {
       {/* Main Content */}
       <main style={s.main} className="student-main">
         <div style={s.mobileTopbar} className="student-mobile-topbar">
+          <button type="button" onClick={() => setMenuOpen(true)} style={s.mobileMenuBtn} aria-label="Open menu">
+            <i className="fa-solid fa-bars"></i>
+          </button>
           <div style={s.mobileBrand}>
             <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
             <div>
-              <h1 style={s.mobileSchoolName}>Loretto Central</h1>
-              <p style={s.mobileUserLine}>{user?.name || "Student"} · {classLabel ? `Class ${classLabel}` : "Student Portal"}</p>
+              <h1 style={s.mobileSchoolName}>LCS Portal</h1>
+              <p style={s.mobileUserLine}>{user?.name || "Student"} · {classLabel ? `Class ${classLabel}` : "LCS Portal"}</p>
             </div>
           </div>
           <div style={s.mobileActions}>
@@ -119,23 +135,11 @@ export default function StudentLayout() {
           </div>
         </div>
 
-        <nav style={s.mobileNav} className="student-mobile-nav" aria-label="Student navigation">
-          {menuItems.map(item => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link key={item.path} to={item.path} style={{...s.mobileNavItem, ...(isActive ? s.activeMobileNavItem : {})}}>
-                <i className={item.icon}></i>
-                <span>{item.shortLabel || item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
         {/* Top Header */}
         <header style={s.header} className="student-header">
           <div>
             <h2 style={s.pageTitle}>{currentPathLabel}</h2>
-            <div style={s.breadcrumb} className="student-breadcrumb">Student Portal / {currentPathLabel}</div>
+            <div style={s.breadcrumb} className="student-breadcrumb">LCS Portal / {currentPathLabel}</div>
           </div>
           
           <div style={s.headerRight} className="student-header-right">
@@ -199,14 +203,12 @@ const s = {
   main: { flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minWidth: 0 },
   mobileTopbar: { display: "none" },
   mobileBrand: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 },
+  mobileMenuBtn: { width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.28)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
   mobileLogo: { width: "42px", height: "42px", objectFit: "contain", flex: "0 0 auto" },
   mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1rem", lineHeight: 1.1, margin: 0 },
   mobileUserLine: { color: "var(--gold-light)", fontSize: "0.72rem", fontWeight: "800", margin: "3px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "240px" },
   mobileActions: { display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto" },
   mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
-  mobileNav: { display: "none" },
-  mobileNavItem: { display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "999px", color: "rgba(255,255,255,0.72)", fontSize: "0.78rem", fontWeight: "800", whiteSpace: "nowrap", flex: "0 0 auto", border: "1px solid rgba(255,255,255,0.08)" },
-  activeMobileNavItem: { background: "var(--gold)", color: "var(--navy-dark)", border: "1px solid var(--gold)", boxShadow: "0 6px 16px rgba(0,0,0,0.2)" },
   header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 90 },
   pageTitle: { fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1.3rem", margin: 0, fontWeight: "700" },
   breadcrumb: { color: "var(--text-muted)", fontSize: "0.78rem", marginTop: "2px" },

@@ -8,23 +8,16 @@ export default function PortalHome() {
       <div className="portal-overlay" />
 
       <div className="portal-content">
-        <header className="portal-top-bar">
-          <div className="portal-school-brand">
-            <img src="/logo.png" alt="Loretto Central School logo" className="portal-logo" />
+        <main className="portal-hero-centre">
+          <div className="portal-school-brand portal-hero-brand">
+            <img src="/logo.png" alt="LCS Portal logo" className="portal-logo" />
             <div className="portal-school-name">
               <small>Welcome to the</small>
-              Loretto Central School
+              LCS Portal
             </div>
           </div>
-
-          <div className="portal-top-actions">
-            <span className="portal-tag">portal.lorettocentralschool.edu.in</span>
-          </div>
-        </header>
-
-        <main className="portal-hero-centre">
-          <p className="portal-hero-eyebrow">Student Portal</p>
-          <h1 className="portal-hero-title">Loretto <span>Central</span> School</h1>
+          <p className="portal-hero-eyebrow">School Portal</p>
+          <h1 className="portal-hero-title">LCS <span>Portal</span></h1>
           <div className="portal-gold-bar" />
           <p className="portal-hero-desc">
             Your all-in-one academic gateway - access results, resources,
@@ -91,7 +84,7 @@ export default function PortalHome() {
       </div>
 
       <footer className="portal-footer">
-        <span>© 2025 Loretto Central School</span>
+        <span>© 2025 LCS Portal</span>
         <span className="portal-foot-divider" />
         <span>
           Developed by <a href="https://www.appvertex.in" target="_blank" rel="noopener noreferrer">AppVertex</a>

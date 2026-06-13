@@ -8,8 +8,8 @@ export default function ProtectedRoute({ children, role }) {
   if (loading) {
     return (
       <div style={s.splash}>
-        <div style={s.logo}>LC</div>
-        <div style={s.schoolName}>Loretto Central School</div>
+        <img src="/logo.png" alt="LCS Portal" style={s.logo} />
+        <div style={s.schoolName}>LCS Portal</div>
         <div style={s.spinner}>
           <i className="fa-solid fa-circle-notch fa-spin"></i>
         </div>
@@ -39,15 +39,12 @@ const s = {
   logo: {
     width: "80px",
     height: "80px",
-    borderRadius: "50%",
-    border: "3px solid #c8960c",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#c8960c",
-    fontSize: "1.8rem",
-    fontWeight: "900",
-    letterSpacing: "0.05em",
+    borderRadius: "18px",
+    objectFit: "contain",
+    padding: "8px",
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(200,150,12,0.35)",
+    boxShadow: "0 0 0 6px rgba(200,150,12,0.08)",
     animation: "pulse 2s infinite",
   },
   schoolName: {

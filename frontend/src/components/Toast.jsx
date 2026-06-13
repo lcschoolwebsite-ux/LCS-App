@@ -23,7 +23,7 @@ const s = {
     background: "#fff", padding: "1rem 1.5rem", borderRadius: "12px",
     boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
     display: "flex", alignItems: "center", gap: "1rem", zIndex: 9999,
-    minWidth: "300px", animation: "slideIn 0.3s ease-out"
+    minWidth: "300px", width: "min(360px, calc(100vw - 24px))", animation: "slideIn 0.3s ease-out"
   },
   content: { fontSize: "0.9rem", fontWeight: "600", color: "#1e293b" },
   close: { background: "none", border: "none", cursor: "pointer", fontSize: "1.25rem", color: "#94a3b8" }

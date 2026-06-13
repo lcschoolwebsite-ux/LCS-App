@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">LCSMS Portal</string>
-    <string name="title_activity_main">LCSMS Portal</string>
+    <string name="app_name">LCS Portal</string>
+    <string name="title_activity_main">LCS Portal</string>
     <string name="package_name">edu.lorettocentralschool.portal</string>
     <string name="custom_url_scheme">edu.lorettocentralschool.portal</string>
 </resources>

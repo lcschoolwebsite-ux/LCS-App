@@ -4,6 +4,7 @@ import { useAuth } from "../context/useAuth";
 import api from "../api/axios";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
+import MobileMenuDrawer from "../components/MobileMenuDrawer";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/teacher/Dashboard"));
@@ -46,6 +47,7 @@ export default function TeacherLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [allowTeacherStudentCreation, setAllowTeacherStudentCreation] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { academicYearLabel } = useActiveAcademicYear();
 
   useEffect(() => {
@@ -71,11 +73,25 @@ export default function TeacherLayout() {
 
   return (
     <div style={s.container} className="teacher-shell">
+      <MobileMenuDrawer
+        open={menuOpen}
+        title="LCS Portal"
+        subtitle={user?.name || "Teacher"}
+        items={MENU_GROUPS.flatMap(group => group.items).filter(item => allowTeacherStudentCreation || item.path !== "/teacher/students/add")}
+        currentPath={location.pathname}
+        onClose={() => setMenuOpen(false)}
+        onLogout={handleLogout}
+        logoutLabel="Logout"
+      />
+
       <div style={s.mobileTopbar} className="teacher-mobile-topbar">
+        <button type="button" onClick={() => setMenuOpen(true)} style={s.mobileMenuBtn} aria-label="Open menu">
+          <i className="fa-solid fa-bars"></i>
+        </button>
         <div style={s.mobileBrand}>
           <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
           <div>
-            <h1 style={s.mobileSchoolName}>Loretto Central</h1>
+            <h1 style={s.mobileSchoolName}>LCS Portal</h1>
             <p style={s.mobileUserLine}>{user?.name || "Teacher"} · Teacher Portal</p>
           </div>
         </div>
@@ -84,26 +100,12 @@ export default function TeacherLayout() {
         </button>
       </div>
 
-      <nav style={s.mobileNav} className="teacher-mobile-nav" aria-label="Teacher navigation">
-        {MENU_GROUPS.flatMap(group => group.items)
-          .filter(item => allowTeacherStudentCreation || item.path !== "/teacher/students/add")
-          .map(item => {
-            const isActive = item.path === "/teacher" ? location.pathname === item.path : location.pathname.startsWith(item.path);
-            return (
-              <Link key={item.path} to={item.path} style={{ ...s.mobileNavItem, ...(isActive ? s.activeMobileNavItem : {}) }}>
-                <i className={item.icon}></i>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-      </nav>
-
       {/* Sidebar */}
       <aside style={s.sidebar} className="teacher-sidebar">
         <div style={s.logoArea}>
           <img src="/logo.png" alt="Logo" style={s.logoImg} />
           <div>
-            <h1 style={s.schoolName}>Loretto Central</h1>
+            <h1 style={s.schoolName}>LCS Portal</h1>
             <p style={s.tagline}>love through service</p>
           </div>
         </div>
@@ -147,7 +149,7 @@ export default function TeacherLayout() {
         <header style={s.header} className="teacher-header">
           <div>
             <h2 style={s.pageTitle}>{currentPathLabel}</h2>
-            <div style={s.breadcrumb}>Teacher Portal / {currentPathLabel}</div>
+            <div style={s.breadcrumb}>LCS Portal / {currentPathLabel}</div>
           </div>
           
           <div style={s.headerRight} className="teacher-header-right">
@@ -192,14 +194,11 @@ const s = {
 
   mobileTopbar: { display: "none" },
   mobileBrand: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 },
+  mobileMenuBtn: { width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.28)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
   mobileLogo: { width: "42px", height: "42px", objectFit: "contain", flex: "0 0 auto" },
   mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1rem", lineHeight: 1.1, margin: 0 },
   mobileUserLine: { color: "var(--gold-light)", fontSize: "0.72rem", fontWeight: "800", margin: "3px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "240px" },
   mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
-  mobileNav: { display: "none" },
-  mobileNavItem: { display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "999px", color: "rgba(255,255,255,0.72)", fontSize: "0.78rem", fontWeight: "800", whiteSpace: "nowrap", flex: "0 0 auto", border: "1px solid rgba(255,255,255,0.08)" },
-  activeMobileNavItem: { background: "var(--gold)", color: "var(--navy-dark)", border: "1px solid var(--gold)", boxShadow: "0 6px 16px rgba(0,0,0,0.2)" },
-  
   userInfoCard: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(200,150,12,0.2)", borderRadius: "12px", padding: "12px", margin: "0 20px 20px 20px", display: "flex", alignItems: "center", gap: "12px" },
   avatar: { width: "40px", height: "40px", borderRadius: "50%", background: "linear-gradient(135deg, var(--gold), var(--gold-light))", color: "var(--navy-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", fontSize: "1.1rem" },
   userName: { color: "var(--white)", fontSize: "0.85rem", fontFamily: "var(--font-body)", fontWeight: "700" },
