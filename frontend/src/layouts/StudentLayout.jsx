@@ -122,7 +122,7 @@ export default function StudentLayout() {
           </button>
           <div style={s.mobileBrand}>
             <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
-            <div>
+            <div style={s.mobileBrandCopy}>
               <h1 style={s.mobileSchoolName}>LCS Portal</h1>
               <p style={s.mobileUserLine}>{user?.name || "Student"} · {classLabel ? `Class ${classLabel}` : "LCS Portal"}</p>
             </div>
@@ -203,10 +203,11 @@ const s = {
   main: { flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minWidth: 0 },
   mobileTopbar: { display: "none" },
   mobileBrand: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 },
+  mobileBrandCopy: { minWidth: 0, display: "flex", flexDirection: "column", gap: "2px" },
   mobileMenuBtn: { width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.28)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
   mobileLogo: { width: "42px", height: "42px", objectFit: "contain", flex: "0 0 auto" },
-  mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1rem", lineHeight: 1.1, margin: 0 },
-  mobileUserLine: { color: "var(--gold-light)", fontSize: "0.72rem", fontWeight: "800", margin: "3px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "240px" },
+  mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "0.92rem", lineHeight: 1.1, margin: 0 },
+  mobileUserLine: { color: "var(--gold-light)", fontSize: "0.66rem", fontWeight: "800", margin: 0, whiteSpace: "normal", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", wordBreak: "break-word" },
   mobileActions: { display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto" },
   mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
   header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 90 },
