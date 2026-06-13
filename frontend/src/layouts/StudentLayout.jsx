@@ -122,7 +122,7 @@ export default function StudentLayout() {
           </button>
           <div style={s.mobileBrand}>
             <img src="/logo.png" alt="Logo" style={s.mobileLogo} className="student-mobile-logo" />
-            <div style={s.mobileBrandCopy}>
+            <div style={s.mobileBrandCopy} className="student-mobile-brand-copy">
               <h1 style={s.mobileSchoolName} className="student-mobile-school-name">LCS Portal</h1>
               <p style={s.mobileUserLine} className="student-mobile-subtitle">
                 {user?.name || "Student"} · {classLabel ? `Class ${classLabel}` : "LCS Portal"}
@@ -130,7 +130,7 @@ export default function StudentLayout() {
             </div>
           </div>
           <div style={s.mobileActions}>
-            <InstallAppButton compact />
+            <InstallAppButton compact className="student-mobile-install" />
             <button onClick={handleLogout} style={s.mobileLogout} className="student-mobile-logout" aria-label="Logout">
               <i className="fa-solid fa-arrow-right-from-bracket"></i>
             </button>

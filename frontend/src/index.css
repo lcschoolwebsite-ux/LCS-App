@@ -557,6 +557,14 @@ input, select, textarea {
     overflow: hidden;
   }
 
+  .student-mobile-brand-copy {
+    display: none;
+  }
+
+  .student-mobile-install {
+    display: none !important;
+  }
+
   .student-mobile-subtitle {
     display: -webkit-box;
   }
@@ -1064,6 +1072,10 @@ table {
     gap: 6px;
   }
 
+  .student-mobile-brand-copy {
+    display: none !important;
+  }
+
   .student-mobile-topbar .student-mobile-subtitle {
     display: none !important;
   }
@@ -1086,5 +1098,15 @@ table {
   .student-mobile-logout {
     width: 34px;
     height: 34px;
+  }
+
+  .student-mobile-topbar .student-mobile-menu-btn,
+  .student-mobile-topbar .student-mobile-logout {
+    min-width: 34px;
+    min-height: 34px;
+  }
+
+  .student-mobile-topbar .student-mobile-install {
+    display: none !important;
   }
 }

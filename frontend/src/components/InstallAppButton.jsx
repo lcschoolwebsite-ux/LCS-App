@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { isNativeAndroidApp } from "../services/nativeBridge";
 
-export default function InstallAppButton({ compact = false }) {
+export default function InstallAppButton({ compact = false, className = "" }) {
   const [prompt, setPrompt] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
 
@@ -52,6 +52,7 @@ export default function InstallAppButton({ compact = false }) {
         onClick={install}
         aria-label="Install student portal"
         title={compact ? "Install app" : "Install student portal"}
+        className={className}
         style={{ ...s.button, ...(compact ? s.buttonCompact : {}) }}
       >
         <i className="fa-solid fa-download" style={s.icon} />
