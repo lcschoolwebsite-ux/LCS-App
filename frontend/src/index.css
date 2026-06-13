@@ -595,6 +595,7 @@ input, select, textarea {
 
   .student-main {
     margin-left: 0 !important;
+    padding-top: 10px !important;
   }
 
   .student-header {
@@ -919,6 +920,7 @@ table {
 
   .admin-main {
     margin-left: 0 !important;
+    padding-top: 10px !important;
   }
 
   .admin-header {
@@ -1008,6 +1010,7 @@ table {
 
   .teacher-main {
     margin-left: 0 !important;
+    padding-top: 10px !important;
   }
 
   .teacher-header {
