@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function MobileBottomBar({
@@ -9,8 +10,45 @@ export default function MobileBottomBar({
   logoutLabel = "Logout",
   className = "",
 }) {
+  const [atBottom, setAtBottom] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    let rafId = 0;
+
+    const updateAtBottom = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const docHeight = document.documentElement.scrollHeight || document.body.scrollHeight || 0;
+      const nextAtBottom = scrollTop + viewportHeight >= docHeight - 4;
+      setAtBottom(nextAtBottom);
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateAtBottom);
+    };
+
+    updateAtBottom();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateAtBottom);
+    window.addEventListener("orientationchange", updateAtBottom);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateAtBottom);
+      window.removeEventListener("orientationchange", updateAtBottom);
+    };
+  }, []);
+
   return (
-    <nav className={className} style={s.bar} aria-label="Mobile quick navigation">
+    <nav
+      className={className}
+      style={{ ...s.bar, ...(atBottom ? s.barAtBottom : null) }}
+      aria-label="Mobile quick navigation"
+    >
       <button type="button" onClick={onMenuClick} style={s.menuBtn} aria-label={menuLabel}>
         <i className="fa-solid fa-bars" />
         <span>{menuLabel}</span>
@@ -57,7 +95,13 @@ const s = {
     background: "linear-gradient(135deg, #051a1a 0%, #094f4f 100%)",
     borderTop: "1px solid rgba(200, 150, 12, 0.28)",
     boxShadow: "0 -10px 28px rgba(0,0,0,0.18)",
-    overflow: "hidden"
+    overflow: "hidden",
+    transition: "transform 0.25s ease, opacity 0.25s ease"
+  },
+  barAtBottom: {
+    transform: "translateY(110%)",
+    opacity: 0,
+    pointerEvents: "none"
   },
   menuBtn: {
     minWidth: "66px",
