@@ -557,6 +557,10 @@ input, select, textarea {
     overflow: hidden;
   }
 
+  .student-mobile-subtitle {
+    display: -webkit-box;
+  }
+
   .student-mobile-nav {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1050,5 +1054,37 @@ table {
   select,
   textarea {
     touch-action: manipulation;
+  }
+}
+
+@media (max-width: 420px) {
+  .student-mobile-topbar {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    padding: 10px 10px;
+    gap: 6px;
+  }
+
+  .student-mobile-topbar .student-mobile-subtitle {
+    display: none !important;
+  }
+
+  .student-mobile-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .student-mobile-school-name {
+    font-size: 0.84rem;
+  }
+
+  .student-mobile-menu-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .student-mobile-logout {
+    width: 34px;
+    height: 34px;
   }
 }

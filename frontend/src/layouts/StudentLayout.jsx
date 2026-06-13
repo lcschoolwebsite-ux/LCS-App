@@ -117,19 +117,21 @@ export default function StudentLayout() {
       {/* Main Content */}
       <main style={s.main} className="student-main">
         <div style={s.mobileTopbar} className="student-mobile-topbar">
-          <button type="button" onClick={() => setMenuOpen(true)} style={s.mobileMenuBtn} aria-label="Open menu">
+          <button type="button" onClick={() => setMenuOpen(true)} style={s.mobileMenuBtn} className="student-mobile-menu-btn" aria-label="Open menu">
             <i className="fa-solid fa-bars"></i>
           </button>
           <div style={s.mobileBrand}>
-            <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
+            <img src="/logo.png" alt="Logo" style={s.mobileLogo} className="student-mobile-logo" />
             <div style={s.mobileBrandCopy}>
-              <h1 style={s.mobileSchoolName}>LCS Portal</h1>
-              <p style={s.mobileUserLine}>{user?.name || "Student"} · {classLabel ? `Class ${classLabel}` : "LCS Portal"}</p>
+              <h1 style={s.mobileSchoolName} className="student-mobile-school-name">LCS Portal</h1>
+              <p style={s.mobileUserLine} className="student-mobile-subtitle">
+                {user?.name || "Student"} · {classLabel ? `Class ${classLabel}` : "LCS Portal"}
+              </p>
             </div>
           </div>
           <div style={s.mobileActions}>
             <InstallAppButton compact />
-            <button onClick={handleLogout} style={s.mobileLogout} aria-label="Logout">
+            <button onClick={handleLogout} style={s.mobileLogout} className="student-mobile-logout" aria-label="Logout">
               <i className="fa-solid fa-arrow-right-from-bracket"></i>
             </button>
           </div>
