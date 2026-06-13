@@ -9,6 +9,14 @@ const teacherSchema = new mongoose.Schema({
   phone:            { type: String },
   assignedClasses:  [{ type: mongoose.Schema.Types.ObjectId, ref: "Class" }],
   assignedSubjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
+  pushTokens: [
+    {
+      token: { type: String, trim: true },
+      platform: { type: String, default: "android" },
+      label: { type: String, default: "" },
+      lastSeenAt: { type: Date, default: Date.now }
+    }
+  ],
   isActive:         { type: Boolean, default: true },
 }, { timestamps: true });
 

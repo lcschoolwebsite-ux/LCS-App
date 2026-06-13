@@ -16,6 +16,14 @@ const studentSchema = new mongoose.Schema({
   addedBy:      { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
   photoUrl:      { type: String, default: "" },
   photoPublicId: { type: String, default: "" },
+  pushTokens: [
+    {
+      token: { type: String, trim: true },
+      platform: { type: String, default: "android" },
+      label: { type: String, default: "" },
+      lastSeenAt: { type: Date, default: Date.now }
+    }
+  ],
   isActive:     { type: Boolean, default: true },
 }, { timestamps: true });
 

@@ -3,6 +3,7 @@ const Student = require("../models/Student");
 const AcademicYear = require("../models/AcademicYear");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const { notifyStudentById } = require("../utils/pushNotification");
 
 const hasRazorpayCredentials = () =>
   Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
@@ -133,6 +134,12 @@ exports.recordPayment = async (req, res) => {
     term.receiptGeneratedAt = new Date();
 
     await fee.save();
+    await notifyStudentById(
+      fee.student?._id || fee.student,
+      "Fee payment recorded",
+      `A payment of ₹${Number(amount)} has been recorded for your fee account.`,
+      { url: "/student/fees" }
+    ).catch(error => console.warn("Fee payment push failed:", error.message));
     res.json({ message: "Payment recorded", fee, receipt: term });
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -186,6 +193,12 @@ exports.verifyRazorpay = async (req, res) => {
     term.receiptGeneratedAt = new Date();
 
     await fee.save();
+    await notifyStudentById(
+      fee.student?._id || fee.student,
+      "Fee payment confirmed",
+      `Your online fee payment of ₹${Number(term.amount)} was verified successfully.`,
+      { url: "/student/fees" }
+    ).catch(error => console.warn("Fee verification push failed:", error.message));
     res.json({ message: "Payment verified and recorded", fee, receipt: term });
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -243,6 +256,12 @@ exports.verifyFlexiblePayment = async (req, res) => {
       receiptGeneratedAt: new Date()
     });
     await fee.save();
+    await notifyStudentById(
+      fee.student?._id || fee.student,
+      "Fee payment confirmed",
+      `Your online payment of ₹${Number(amount)} was verified successfully.`,
+      { url: "/student/fees" }
+    ).catch(error => console.warn("Fee verification push failed:", error.message));
     res.json({ message: "Payment verified", fee });
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -272,6 +291,12 @@ exports.recordFlexiblePayment = async (req, res) => {
     });
 
     await fee.save();
+    await notifyStudentById(
+      fee.student?._id || fee.student,
+      "Fee payment recorded",
+      `A payment of ₹${Number(amount)} has been added to your fee account.`,
+      { url: "/student/fees" }
+    ).catch(error => console.warn("Fee payment push failed:", error.message));
     res.json({ message: "Payment recorded", fee });
   } catch (e) {
     res.status(400).json({ message: e.message });

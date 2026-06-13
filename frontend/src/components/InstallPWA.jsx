@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { isNativeAndroidApp } from "../services/nativeBridge";
 
 export default function InstallPWA() {
   const [prompt, setPrompt] = useState(null);
@@ -27,6 +28,8 @@ export default function InstallPWA() {
   }, []);
 
   const isStudentPortal = location.pathname.startsWith("/student");
+
+  if (isNativeAndroidApp()) return null;
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isInStandaloneMode = window.matchMedia("(display-mode: standalone)").matches;

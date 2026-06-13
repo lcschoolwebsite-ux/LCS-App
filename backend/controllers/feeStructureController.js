@@ -2,6 +2,7 @@ const FeeStructure = require("../models/FeeStructure");
 const Student = require("../models/Student");
 const StudentFee = require("../models/StudentFee");
 const AcademicYear = require("../models/AcademicYear");
+const { notifyStudentById } = require("../utils/pushNotification");
 
 exports.getAll = async (req, res) => {
   try {
@@ -73,6 +74,7 @@ async function assignFeeStructureToStudents(structureId) {
   console.log(`Found ${students.length} students to update.`);
 
   let count = 0;
+  const notifications = [];
   for (const student of students) {
     console.log("Updating student:", student.name);
     let studentFee = await StudentFee.findOne({ 
@@ -104,8 +106,20 @@ async function assignFeeStructureToStudents(structureId) {
     }
 
     await studentFee.save();
+    notifications.push(
+      notifyStudentById(
+        student._id,
+        "Fee structure updated",
+        `Your fee record for the current academic year has been updated. Total due: ₹${studentFee.totalDue}.`,
+        { url: "/student/fees" }
+      ).catch(error => {
+        console.warn("Fee update push failed:", error.message);
+      })
+    );
     count++;
   }
+
+  await Promise.allSettled(notifications);
   return count;
 }
 

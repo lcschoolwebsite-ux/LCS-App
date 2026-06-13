@@ -1,6 +1,7 @@
 const Razorpay = require("razorpay");
 const crypto   = require("crypto");
 const Fee      = require("../models/Fee");
+const { notifyStudentById } = require("../utils/pushNotification");
 
 const hasRazorpayCredentials = () =>
   Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
@@ -90,6 +91,12 @@ exports.recordManualPayment = async (req, res) => {
       status: "captured"
     });
     await fee.save();
+    await notifyStudentById(
+      studentId,
+      "Fee payment recorded",
+      `A manual fee payment of ₹${Number(amount)} has been recorded.`,
+      { url: "/student/fees" }
+    ).catch(error => console.warn("Fee manual payment push failed:", error.message));
     res.json({ message: "Manual payment recorded", fee });
   } catch (e) { res.status(400).json({ message: e.message }); }
 };

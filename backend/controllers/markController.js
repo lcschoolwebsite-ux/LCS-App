@@ -2,6 +2,7 @@ const Mark = require("../models/Mark");
 const Student = require("../models/Student");
 const Exam = require("../models/Exam");
 const Teacher = require("../models/Teacher");
+const { notifyClassStudents } = require("../utils/pushNotification");
 
 const calculateGrade = (marksObtained, maxMarks, isAbsent) => {
   if (isAbsent) return "AB";
@@ -93,6 +94,12 @@ exports.saveMarks = async (req, res) => {
     }));
 
     if (bulkOps.length) await Mark.bulkWrite(bulkOps);
+    await notifyClassStudents(
+      exam.class,
+      "Results updated",
+      `${exam.title || "An exam"} results have been updated for your class.`,
+      { url: "/student/marks" }
+    ).catch(error => console.warn("Results push failed:", error.message));
     res.json({ message: "Marks saved successfully" });
   } catch (e) { res.status(400).json({ message: e.message }); }
 };

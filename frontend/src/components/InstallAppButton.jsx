@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { isNativeAndroidApp } from "../services/nativeBridge";
 
 export default function InstallAppButton({ compact = false }) {
   const [prompt, setPrompt] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
+
+  if (isNativeAndroidApp()) return null;
 
   useEffect(() => {
     const onBeforeInstallPrompt = (event) => {

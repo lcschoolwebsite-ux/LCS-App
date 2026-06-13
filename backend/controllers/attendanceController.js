@@ -3,6 +3,7 @@ const Student    = require("../models/Student");
 const AcademicYear = require("../models/AcademicYear");
 const Teacher = require("../models/Teacher");
 const { getIO } = require("../utils/socket");
+const { notifyClassStudents } = require("../utils/pushNotification");
 const { isHolidayDate, getHolidayCalendar, toLocalDateString } = require("../utils/holidayUtils");
 
 const ensureAssignedClass = async (req, classId) => {
@@ -136,6 +137,16 @@ exports.markAttendance = async (req, res) => {
       }
     } catch (err) {
       console.warn("Socket notification failed:", err.message);
+    }
+
+    try {
+      await notifyClassStudents(
+        classId,
+        "Attendance updated",
+        `Attendance has been marked for ${date}.`
+      );
+    } catch (err) {
+      console.warn("Push notification failed:", err.message);
     }
 
     res.json({ message: "Attendance marked", attendance });

@@ -12,10 +12,22 @@ import { useSocket } from "./context/useSocket";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Toast from "./components/Toast";
+import UpdateAvailableModal from "./components/UpdateAvailableModal";
+import {
+  bootstrapNativeShell,
+  checkRemoteVersion,
+  isNativeAndroidApp,
+  registerNativePushForUser,
+  subscribeToNetworkChanges
+} from "./services/nativeBridge";
+import { useAuth } from "./context/useAuth";
 
 function AppContent() {
+  const { user } = useAuth();
   const socket = useSocket();
   const [notification, setNotification] = useState(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [updateInfo, setUpdateInfo] = useState(null);
 
   useEffect(() => {
     if (socket) {
@@ -32,9 +44,52 @@ function AppContent() {
     }
   }, [socket]);
 
+  useEffect(() => {
+    let cleanup = () => {};
+    let mounted = true;
+
+    const bootstrap = async () => {
+      const { online } = await bootstrapNativeShell();
+      if (mounted) setIsOnline(online);
+
+      cleanup = await subscribeToNetworkChanges((nextOnline) => {
+        if (mounted) setIsOnline(nextOnline);
+      });
+
+      try {
+        const update = await checkRemoteVersion();
+        if (mounted) setUpdateInfo(update);
+      } catch (error) {
+        console.warn("Version check failed:", error.message);
+      }
+    };
+
+    if (isNativeAndroidApp()) {
+      bootstrap();
+    }
+
+    return () => {
+      mounted = false;
+      cleanup();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    registerNativePushForUser(user).catch((error) => {
+      console.warn("Push registration skipped:", error.message);
+    });
+  }, [user]);
+
   return (
     <>
+      {isNativeAndroidApp() && !isOnline && (
+        <div style={s.offlineBar}>
+          You are offline. Some data may not be up to date.
+        </div>
+      )}
       {notification && <Toast message={notification.message} onClose={() => setNotification(null)} />}
+      <UpdateAvailableModal update={updateInfo} onClose={() => setUpdateInfo(null)} />
       <Routes>
         <Route path="/" element={<PortalHome />} />
         <Route path="/head" element={<Login />} />
@@ -61,3 +116,19 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+
+const s = {
+  offlineBar: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10030,
+    background: "#111827",
+    color: "#fff",
+    textAlign: "center",
+    padding: "10px 14px",
+    fontSize: "0.82rem",
+    fontWeight: "700"
+  }
+};

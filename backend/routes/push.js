@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const auth = require("../middleware/auth");
 const PushSubscription = require("../models/PushSubscription");
+const { registerDeviceToken } = require("../utils/pushNotification");
 
 router.post("/subscribe", auth, async (req, res) => {
   try {
@@ -23,6 +24,21 @@ router.post("/subscribe", auth, async (req, res) => {
     );
 
     res.json({ message: "Subscribed for push notifications", subscription: saved });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+router.post("/register-device", auth, async (req, res) => {
+  try {
+    const result = await registerDeviceToken({
+      user: req.user,
+      token: req.body?.token,
+      platform: req.body?.platform,
+      label: req.body?.label || req.body?.browser || ""
+    });
+
+    res.json({ message: "Device registered for push notifications", device: result });
   } catch (e) {
     res.status(400).json({ message: e.message });
   }

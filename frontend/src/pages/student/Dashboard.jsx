@@ -4,6 +4,7 @@ import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import SectionTitle from "../../components/SectionTitle";
 import useActiveAcademicYear from "../../hooks/useActiveAcademicYear";
+import { isNativeAndroidApp, registerNativePushForUser } from "../../services/nativeBridge";
 
 const getMonthParts = () => {
   const today = new Date();
@@ -106,6 +107,12 @@ export default function Dashboard() {
   const enableNotifications = async () => {
     try {
       setNotifyStatus("");
+
+      if (isNativeAndroidApp()) {
+        await registerNativePushForUser(user);
+        setNotifyStatus("Push notifications enabled for this Android app.");
+        return;
+      }
 
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
         throw new Error("This browser does not support push notifications.");

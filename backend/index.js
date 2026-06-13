@@ -13,14 +13,21 @@ const app = express();
 app.set("trust proxy", 1);
 const server = http.createServer(app);
 
+const frontendOrigins = [
+  process.env.FRONTEND_ORIGIN,
+  process.env.CAPACITOR_SERVER_URL,
+  "https://portal.lorettocentralschool.edu.in",
+  "https://lcs-portal.pages.dev",
+  "capacitor://localhost",
+  "ionic://localhost",
+  "http://localhost",
+  "http://localhost:5173",
+  "http://localhost:3000"
+].filter(Boolean);
+
 mongoose.set("strictQuery", true);
 app.use(cors({
-  origin: [
-    "https://portal.lorettocentralschool.edu.in",
-    "https://lcs-portal.pages.dev",
-    "http://localhost:5173",
-    "http://localhost:3000"
-  ],
+  origin: frontendOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],

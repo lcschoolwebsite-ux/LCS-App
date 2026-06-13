@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "928997422511",
+    "project_id": "lcs-app-732ac",
+    "storage_bucket": "lcs-app-732ac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928997422511:android:ae22cbb9c3285487b4ab5a",
+        "android_client_info": {
+          "package_name": "edu.lorettocentralschool.portal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ6s3kHm7kRfdLDkP4svCIFhq0KXhq6t8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
