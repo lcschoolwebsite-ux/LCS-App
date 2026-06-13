@@ -72,7 +72,7 @@ const s = {
     background: "linear-gradient(180deg, #051a1a 0%, #094f4f 100%)",
     color: "var(--white)",
     boxShadow: "0 24px 60px rgba(0,0,0,0.28)",
-    padding: "30px 18px 18px",
+    padding: "38px 18px 18px",
     display: "flex",
     flexDirection: "column",
     gap: "16px"
