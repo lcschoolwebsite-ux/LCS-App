@@ -4,6 +4,7 @@ import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
 import InstallAppButton from "../components/InstallAppButton";
+import MobileBottomBar from "../components/MobileBottomBar";
 import MobileMenuDrawer from "../components/MobileMenuDrawer";
 
 // Lazy pages
@@ -136,6 +137,14 @@ export default function StudentLayout() {
             </button>
           </div>
         </div>
+
+        <MobileBottomBar
+          className="mobile-bottom-bar"
+          items={menuItems}
+          currentPath={location.pathname}
+          onMenuClick={() => setMenuOpen(true)}
+          onLogout={handleLogout}
+        />
 
         {/* Top Header */}
         <header style={s.header} className="student-header">

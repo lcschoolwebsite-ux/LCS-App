@@ -4,6 +4,7 @@ import { useAuth } from "../context/useAuth";
 import api from "../api/axios";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
+import MobileBottomBar from "../components/MobileBottomBar";
 import MobileMenuDrawer from "../components/MobileMenuDrawer";
 
 // Lazy pages
@@ -99,6 +100,14 @@ export default function TeacherLayout() {
           <i className="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
       </div>
+
+      <MobileBottomBar
+        className="mobile-bottom-bar"
+        items={MENU_GROUPS.flatMap(group => group.items).filter(item => allowTeacherStudentCreation || item.path !== "/teacher/students/add")}
+        currentPath={location.pathname}
+        onMenuClick={() => setMenuOpen(true)}
+        onLogout={handleLogout}
+      />
 
       {/* Sidebar */}
       <aside style={s.sidebar} className="teacher-sidebar">

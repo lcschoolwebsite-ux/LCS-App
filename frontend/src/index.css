@@ -631,7 +631,7 @@ input, select, textarea {
 
   .student-content {
     padding: 16px 14px 24px !important;
-    padding-bottom: 108px !important;
+    padding-bottom: 120px !important;
   }
 
   .student-dashboard-grid,
@@ -767,11 +767,16 @@ input, select, textarea {
     width: 100%;
     min-width: 0;
   }
+
+  .mobile-bottom-bar {
+    display: flex !important;
+  }
 }
 
 @media (max-width: 420px) {
   .student-content {
     padding: 14px !important;
+    padding-bottom: 120px !important;
   }
 
   .student-card,
@@ -941,6 +946,7 @@ table {
 
   .admin-content {
     padding: 16px 14px 24px !important;
+    padding-bottom: 104px !important;
   }
 
   .admin-content [style*="grid-template-columns"] {
@@ -1023,6 +1029,7 @@ table {
 
   .teacher-content {
     padding: 16px 14px 24px !important;
+    padding-bottom: 104px !important;
   }
 
   .teacher-hero-banner {
@@ -1114,5 +1121,9 @@ table {
 
   .student-mobile-topbar .student-mobile-install {
     display: none !important;
+  }
+
+  .mobile-bottom-bar {
+    display: flex !important;
   }
 }

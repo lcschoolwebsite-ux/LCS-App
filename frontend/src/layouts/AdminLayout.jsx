@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
+import MobileBottomBar from "../components/MobileBottomBar";
 import MobileMenuDrawer from "../components/MobileMenuDrawer";
 
 // Lazy pages
@@ -107,6 +108,14 @@ export default function AdminLayout() {
           <i className="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
       </div>
+
+      <MobileBottomBar
+        className="mobile-bottom-bar"
+        items={menuGroups.flatMap(group => group.items)}
+        currentPath={location.pathname}
+        onMenuClick={() => setMenuOpen(true)}
+        onLogout={handleLogout}
+      />
 
       <aside style={s.sidebar} className="admin-sidebar">
         <div style={s.logoArea}>
