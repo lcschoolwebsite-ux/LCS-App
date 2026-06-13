@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function MobileBottomBar({
@@ -10,43 +9,10 @@ export default function MobileBottomBar({
   logoutLabel = "Logout",
   className = "",
 }) {
-  const [atBottom, setAtBottom] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-
-    let rafId = 0;
-
-    const updateAtBottom = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
-      const docHeight = document.documentElement.scrollHeight || document.body.scrollHeight || 0;
-      const nextAtBottom = scrollTop + viewportHeight >= docHeight - 4;
-      setAtBottom(nextAtBottom);
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateAtBottom);
-    };
-
-    updateAtBottom();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", updateAtBottom);
-    window.addEventListener("orientationchange", updateAtBottom);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", updateAtBottom);
-      window.removeEventListener("orientationchange", updateAtBottom);
-    };
-  }, []);
-
   return (
     <nav
       className={className}
-      style={{ ...s.bar, ...(atBottom ? s.barAtBottom : null) }}
+      style={s.bar}
       aria-label="Mobile quick navigation"
     >
       <button type="button" onClick={onMenuClick} style={s.menuBtn} aria-label={menuLabel}>
@@ -85,28 +51,22 @@ const s = {
   bar: {
     display: "none",
     alignItems: "center",
-    gap: "8px",
+    gap: "6px",
     position: "fixed",
     left: 0,
     right: 0,
     bottom: 0,
     zIndex: 120,
-    padding: "10px 12px calc(10px + env(safe-area-inset-bottom, 0px))",
+    padding: "8px 10px calc(8px + env(safe-area-inset-bottom, 0px))",
     background: "linear-gradient(135deg, #051a1a 0%, #094f4f 100%)",
     borderTop: "1px solid rgba(200, 150, 12, 0.28)",
     boxShadow: "0 -10px 28px rgba(0,0,0,0.18)",
-    overflow: "hidden",
-    transition: "transform 0.25s ease, opacity 0.25s ease"
-  },
-  barAtBottom: {
-    transform: "translateY(110%)",
-    opacity: 0,
-    pointerEvents: "none"
+    overflow: "hidden"
   },
   menuBtn: {
-    minWidth: "66px",
-    minHeight: "50px",
-    borderRadius: "14px",
+    minWidth: "52px",
+    minHeight: "42px",
+    borderRadius: "12px",
     border: "1px solid rgba(255,255,255,0.12)",
     background: "rgba(255,255,255,0.08)",
     color: "var(--white)",
@@ -114,16 +74,16 @@ const s = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: "2px",
-    padding: "8px 10px",
-    fontSize: "0.64rem",
+    gap: "1px",
+    padding: "6px 8px",
+    fontSize: "0.56rem",
     fontWeight: 800,
     flex: "0 0 auto"
   },
   items: {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "6px",
     overflowX: "auto",
     flex: 1,
     minWidth: 0,
@@ -131,9 +91,9 @@ const s = {
     WebkitOverflowScrolling: "touch"
   },
   item: {
-    minWidth: "72px",
-    minHeight: "50px",
-    borderRadius: "14px",
+    minWidth: "58px",
+    minHeight: "42px",
+    borderRadius: "12px",
     border: "1px solid rgba(255,255,255,0.08)",
     background: "rgba(255,255,255,0.06)",
     color: "rgba(255,255,255,0.88)",
@@ -141,9 +101,9 @@ const s = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: "2px",
-    padding: "8px 10px",
-    fontSize: "0.64rem",
+    gap: "1px",
+    padding: "6px 8px",
+    fontSize: "0.56rem",
     fontWeight: 800,
     whiteSpace: "nowrap",
     flex: "0 0 auto"
@@ -154,13 +114,13 @@ const s = {
     borderColor: "var(--gold)"
   },
   icon: {
-    fontSize: "0.95rem",
+    fontSize: "0.86rem",
     lineHeight: 1
   },
   logoutBtn: {
-    minWidth: "70px",
-    minHeight: "50px",
-    borderRadius: "14px",
+    minWidth: "54px",
+    minHeight: "42px",
+    borderRadius: "12px",
     border: "1px solid rgba(200,150,12,0.3)",
     background: "rgba(255,255,255,0.08)",
     color: "var(--white)",
@@ -168,9 +128,9 @@ const s = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: "2px",
-    padding: "8px 10px",
-    fontSize: "0.62rem",
+    gap: "1px",
+    padding: "6px 8px",
+    fontSize: "0.54rem",
     fontWeight: 800,
     flex: "0 0 auto"
   }

@@ -54,6 +54,12 @@ export default function StudentLayout() {
   };
 
   const currentPathLabel = menuItems.find(i => i.path === location.pathname)?.label || "Dashboard";
+  const bottomBarItems = [
+    { label: "Notices", shortLabel: "Notices", path: "/student/announcements", icon: "fa-solid fa-bullhorn" },
+    { label: "Attendance", shortLabel: "Attend", path: "/student/attendance", icon: "fa-solid fa-calendar-check" },
+    { label: "Marks", shortLabel: "Marks", path: "/student/marks", icon: "fa-solid fa-ranking-star" },
+    { label: "Fee", shortLabel: "Fee", path: "/student/fees", icon: "fa-solid fa-wallet" },
+  ];
 
   return (
     <div style={s.container} className="student-shell">
@@ -121,7 +127,7 @@ export default function StudentLayout() {
 
         <MobileBottomBar
           className="mobile-bottom-bar"
-          items={menuItems}
+          items={bottomBarItems}
           currentPath={location.pathname}
           onMenuClick={() => setMenuOpen(true)}
           onLogout={handleLogout}

@@ -79,6 +79,12 @@ export default function AdminLayout() {
   };
 
   const currentPathLabel = menuGroups.flatMap(g => g.items).find(i => i.path === location.pathname)?.label || "Dashboard";
+  const bottomBarItems = [
+    { label: "Notices", shortLabel: "Notices", path: "/admin/announcements", icon: "fa-solid fa-bullhorn" },
+    { label: "Attendance", shortLabel: "Attend", path: "/admin/attendance", icon: "fa-solid fa-calendar-check" },
+    { label: "Marks", shortLabel: "Marks", path: "/admin/marks-overview", icon: "fa-solid fa-chart-column" },
+    { label: "Fee", shortLabel: "Fee", path: "/admin/fees", icon: "fa-solid fa-receipt" },
+  ];
 
   return (
     <div style={s.layout} className="admin-shell">
@@ -97,7 +103,7 @@ export default function AdminLayout() {
 
       <MobileBottomBar
         className="mobile-bottom-bar"
-        items={menuGroups.flatMap(group => group.items)}
+        items={bottomBarItems}
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
         onLogout={handleLogout}

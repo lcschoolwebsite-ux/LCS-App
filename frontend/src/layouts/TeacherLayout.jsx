@@ -71,6 +71,12 @@ export default function TeacherLayout() {
 
   const allMenuItems = MENU_GROUPS.flatMap(g => g.items);
   const currentPathLabel = allMenuItems.find(i => i.path === location.pathname)?.label || "Dashboard";
+  const bottomBarItems = [
+    { label: "Notices", shortLabel: "Notices", path: "/teacher/announcements", icon: "fa-solid fa-bullhorn" },
+    { label: "Attendance", shortLabel: "Attend", path: "/teacher/attendance", icon: "fa-solid fa-calendar-check" },
+    { label: "Marks", shortLabel: "Marks", path: "/teacher/marks", icon: "fa-solid fa-pen-to-square" },
+    { label: "Fee", shortLabel: "Fee", path: "/teacher/profile", icon: "fa-solid fa-wallet" },
+  ];
 
   return (
     <div style={s.container} className="teacher-shell">
@@ -89,7 +95,7 @@ export default function TeacherLayout() {
 
       <MobileBottomBar
         className="mobile-bottom-bar"
-        items={MENU_GROUPS.flatMap(group => group.items).filter(item => allowTeacherStudentCreation || item.path !== "/teacher/students/add")}
+        items={bottomBarItems}
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
         onLogout={handleLogout}
