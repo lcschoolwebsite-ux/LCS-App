@@ -268,7 +268,7 @@ const s = {
   heroSub: { color: "rgba(255,255,255,0.8)", fontSize: "0.85rem", margin: 0 },
   
   grid4: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px", marginBottom: "28px" },
-  grid2: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "24px", marginBottom: "28px" },
+  grid2: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", marginBottom: "28px" },
   card: { background: "var(--white)", borderRadius: "16px", padding: "28px", boxShadow: "var(--shadow-md)", border: "1px solid var(--border)", display: "flex", flexDirection: "column" },
   empty: { padding: "18px", background: "var(--light-bg)", border: "1px dashed var(--border)", borderRadius: "10px", color: "var(--text-muted)", fontWeight: "700", textAlign: "center" },
   

@@ -78,8 +78,33 @@ export default function AdminLayout() {
   const currentPathLabel = menuGroups.flatMap(g => g.items).find(i => i.path === location.pathname)?.label || "Dashboard";
 
   return (
-    <div style={s.layout}>
-      <aside style={s.sidebar}>
+    <div style={s.layout} className="admin-shell">
+      <div style={s.mobileTopbar} className="admin-mobile-topbar">
+        <div style={s.mobileBrand}>
+          <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
+          <div>
+            <h1 style={s.mobileSchoolName}>Loretto Admin</h1>
+            <p style={s.mobileUserLine}>{user?.name || "Administrator"} · Admin Portal</p>
+          </div>
+        </div>
+        <button onClick={handleLogout} style={s.mobileLogout} aria-label="Logout">
+          <i className="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+
+      <nav style={s.mobileNav} className="admin-mobile-nav" aria-label="Admin navigation">
+        {menuGroups.flatMap(group => group.items).map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link key={item.path} to={item.path} style={{ ...s.mobileNavItem, ...(isActive ? s.activeMobileNavItem : {}) }}>
+              <i className={item.icon}></i>
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <aside style={s.sidebar} className="admin-sidebar">
         <div style={s.logoArea}>
           <img src="/logo.png" alt="Logo" style={s.logoImg} />
           <div>
@@ -117,19 +142,19 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main style={s.main}>
-        <header style={s.header}>
+      <main style={s.main} className="admin-main">
+        <header style={s.header} className="admin-header">
           <div style={s.headerLeft}>
             <h2 style={s.pageTitle}>{currentPathLabel}</h2>
             <div style={s.breadcrumb}>Administrator / {currentPathLabel}</div>
           </div>
-          <div style={s.headerRight}>
+          <div style={s.headerRight} className="admin-header-right">
             <div style={s.badge}>AY {academicYearLabel}</div>
             <div style={s.adminAvatar}>{user?.name?.[0] || "A"}</div>
           </div>
         </header>
 
-        <div style={s.content}>
+        <div style={s.content} className="admin-content">
           <Suspense fallback={<div style={s.loading}><i className="fa-solid fa-circle-notch fa-spin"></i> Loading Page...</div>}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
@@ -159,6 +184,15 @@ export default function AdminLayout() {
 
 const s = {
   layout: { display: "flex", minHeight: "100vh", background: "var(--light-bg)" },
+  mobileTopbar: { display: "none" },
+  mobileBrand: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 },
+  mobileLogo: { width: "42px", height: "42px", objectFit: "contain", flex: "0 0 auto" },
+  mobileSchoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1rem", lineHeight: 1.1, margin: 0 },
+  mobileUserLine: { color: "var(--gold-light)", fontSize: "0.72rem", fontWeight: "800", margin: "3px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "240px" },
+  mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
+  mobileNav: { display: "none" },
+  mobileNavItem: { display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "999px", color: "rgba(255,255,255,0.72)", fontSize: "0.78rem", fontWeight: "800", whiteSpace: "nowrap", flex: "0 0 auto", border: "1px solid rgba(255,255,255,0.08)" },
+  activeMobileNavItem: { background: "var(--gold)", color: "var(--navy-dark)", border: "1px solid var(--gold)", boxShadow: "0 6px 16px rgba(0,0,0,0.2)" },
   sidebar: {
     width: "240px",
     background: "linear-gradient(180deg, #051a1a 0%, #094f4f 100%)",

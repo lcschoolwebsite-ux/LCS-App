@@ -39,8 +39,9 @@ export default function Table({
   const canGoNext = page < totalPages;
 
   return (
-    <div style={s.wrapper}>
-      <table style={s.table}>
+    <div style={s.wrapper} className="responsive-table-shell">
+      <div style={s.scrollArea}>
+        <table style={s.table}>
         <thead>
           <tr style={s.headerRow}>
             {tableHeaders.map((header, i) => (
@@ -65,7 +66,8 @@ export default function Table({
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
       
       <div style={s.pagination}>
         <span style={s.pageInfo}>Showing {start} to {end} of {total} entries</span>
@@ -101,6 +103,11 @@ const s = {
     boxShadow: "var(--shadow-md)",
     border: "1px solid var(--border)"
   },
+  scrollArea: {
+    width: "100%",
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch"
+  },
   table: { width: "100%", borderCollapse: "collapse", textAlign: "left" },
   headerRow: { background: "linear-gradient(135deg, var(--navy-dark), var(--navy))" },
   th: {
@@ -115,10 +122,10 @@ const s = {
   },
   row: { borderBottom: "1px solid #f0ebe0", transition: "var(--transition)" },
   td: { padding: "14px 20px", fontSize: "0.9rem", color: "var(--text)" },
-  pagination: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderTop: "1px solid #f0ebe0", background: "var(--white)" },
+  pagination: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", padding: "14px 20px", borderTop: "1px solid #f0ebe0", background: "var(--white)", flexWrap: "wrap" },
   pageInfo: { fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: "600" },
-  pageBtns: { display: "flex", gap: "0.25rem" },
-  pageBtn: { padding: "6px 12px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--white)", color: "var(--navy)", fontWeight: "600", fontSize: "0.85rem", cursor: "pointer" },
+  pageBtns: { display: "flex", gap: "0.25rem", flexWrap: "wrap", alignItems: "center" },
+  pageBtn: { minHeight: "40px", padding: "6px 12px", border: "1px solid var(--border)", borderRadius: "10px", background: "var(--white)", color: "var(--navy)", fontWeight: "600", fontSize: "0.85rem", cursor: "pointer" },
   disabledBtn: { opacity: 0.45, cursor: "not-allowed" },
   activePageBtn: { background: "var(--navy)", color: "var(--white)", borderColor: "var(--navy)" },
   empty: {

@@ -75,8 +75,16 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth <= 720);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -95,29 +103,29 @@ export default function Login() {
   };
 
   return (
-    <div style={s.page}>
+    <div style={{ ...s.page, justifyContent: isMobile ? "flex-start" : s.page.justifyContent, padding: isMobile ? "20px 12px 28px" : s.page.padding }}>
       <AnimatedBackground />
       
-      <div style={s.card}>
-        <div style={s.logoWrapper}>
-          <img src="/logo.png" alt="School Logo" style={s.logoImg} />
+      <div style={{ ...s.card, width: isMobile ? "100%" : s.card.width, padding: isMobile ? "30px 18px" : s.card.padding, borderRadius: isMobile ? "18px" : s.card.borderRadius }}>
+        <div style={{ ...s.logoWrapper, marginBottom: isMobile ? "16px" : s.logoWrapper.marginBottom }}>
+          <img src="/logo.png" alt="School Logo" style={{ ...s.logoImg, width: isMobile ? "80px" : s.logoImg.width, height: isMobile ? "80px" : s.logoImg.height }} />
         </div>
-        <h1 style={s.schoolName}>Loretto Central</h1>
-        <p style={s.tagline}>love through service</p>
+        <h1 style={{ ...s.schoolName, fontSize: isMobile ? "1.4rem" : s.schoolName.fontSize }}>Loretto Central</h1>
+        <p style={{ ...s.tagline, marginBottom: isMobile ? "18px" : s.tagline.marginBottom }}>love through service</p>
 
-        <div style={s.roleSwitcher}>
+        <div style={{ ...s.roleSwitcher, flexDirection: isMobile ? "column" : "row" }}>
           {["admin", "teacher"].map(r => (
-            <button key={r} onClick={() => setRole(r)} style={{...s.roleBtn, ...(role === r ? s.activeRoleBtn : {})}}>
+            <button key={r} onClick={() => setRole(r)} style={{...s.roleBtn, ...(role === r ? s.activeRoleBtn : {}), minHeight: isMobile ? "44px" : s.roleBtn.minHeight }}>
               {r.charAt(0).toUpperCase() + r.slice(1)}
             </button>
           ))}
         </div>
 
-        <p style={s.hintText}>Use your staff credentials to continue. Students have a dedicated login page.</p>
+        <p style={{ ...s.hintText, fontSize: isMobile ? "0.9rem" : s.hintText.fontSize }}>Use your staff credentials to continue. Students have a dedicated login page.</p>
 
-        <form onSubmit={handleLogin} style={s.form}>
+        <form onSubmit={handleLogin} style={{ ...s.form, gap: isMobile ? "12px" : s.form.gap }}>
           <input
-            style={s.input}
+            style={{ ...s.input, minHeight: isMobile ? "48px" : "unset" }}
             type="text"
             placeholder="Username"
             value={username}
@@ -125,19 +133,19 @@ export default function Login() {
             required
           />
           <input
-            style={s.input}
+            style={{ ...s.input, minHeight: isMobile ? "48px" : "unset" }}
             type="password"
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
           />
-          <button style={s.submitBtn} type="submit" disabled={loading}>
+          <button style={{ ...s.submitBtn, minHeight: "48px" }} type="submit" disabled={loading}>
             {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : "Sign In"}
           </button>
         </form>
 
-        <div style={s.studentLinkWrap}>
+        <div style={{ ...s.studentLinkWrap, flexDirection: isMobile ? "column" : "row", gap: isMobile ? "6px" : s.studentLinkWrap.gap }}>
           <span style={s.studentLinkText}>Student?</span>
           <Link to="/student-login" style={s.studentLink}>Go to student login</Link>
         </div>
@@ -151,18 +159,18 @@ export default function Login() {
 
 const s = {
   page: { width: "100%", minHeight: "100vh", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "24px", overflow: "hidden", padding: "32px 16px" },
-  card: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRadius: "20px", padding: "48px", width: "420px", boxShadow: "0 32px 80px rgba(0,0,0,0.4)", textAlign: "center", position: "relative", zIndex: 10 },
+  card: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRadius: "20px", padding: "48px", width: "min(420px, 100%)", boxShadow: "0 32px 80px rgba(0,0,0,0.4)", textAlign: "center", position: "relative", zIndex: 10 },
   logoWrapper: { display: "flex", justifyContent: "center", marginBottom: "20px" },
   logoImg: { width: "100px", height: "100px", objectFit: "contain", filter: "drop-shadow(0 0 10px var(--gold))", animation: "logoPulse 4s infinite" },
   schoolName: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1.6rem", margin: 0 },
   tagline: { color: "var(--gold-light)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.15em", margin: "4px 0 24px 0" },
   roleSwitcher: { display: "flex", background: "rgba(0,0,0,0.2)", borderRadius: "12px", padding: "4px", marginBottom: "16px" },
-  roleBtn: { flex: 1, padding: "10px", borderRadius: "8px", color: "var(--white)", fontSize: "0.85rem", fontWeight: "600", transition: "var(--transition)" },
+  roleBtn: { flex: 1, minHeight: "44px", padding: "10px", borderRadius: "8px", color: "var(--white)", fontSize: "0.85rem", fontWeight: "600", transition: "var(--transition)" },
   activeRoleBtn: { background: "linear-gradient(135deg, var(--gold), var(--gold-light))", color: "var(--navy-dark)", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" },
   hintText: { color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", marginBottom: "24px", minHeight: "20px" },
   form: { display: "flex", flexDirection: "column", gap: "16px" },
-  input: { background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.15)", color: "var(--white)", borderRadius: "12px", padding: "14px 18px", fontSize: "0.95rem", fontFamily: "var(--font-body)", transition: "var(--transition)" },
-  submitBtn: { background: "linear-gradient(135deg, #c8960c, #e8b020, #f5c842)", backgroundSize: "200% auto", color: "var(--navy-dark)", fontWeight: "800", borderRadius: "50px", padding: "15px", fontSize: "1rem", marginTop: "8px", animation: "shimmer 3s linear infinite", boxShadow: "0 8px 20px rgba(200,150,12,0.3)" },
+  input: { background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.15)", color: "var(--white)", borderRadius: "12px", padding: "14px 18px", fontSize: "0.95rem", fontFamily: "var(--font-body)", transition: "var(--transition)", width: "100%" },
+  submitBtn: { background: "linear-gradient(135deg, #c8960c, #e8b020, #f5c842)", backgroundSize: "200% auto", color: "var(--navy-dark)", fontWeight: "800", borderRadius: "50px", padding: "15px", fontSize: "1rem", marginTop: "8px", animation: "shimmer 3s linear infinite", boxShadow: "0 8px 20px rgba(200,150,12,0.3)", minHeight: "48px" },
   studentLinkWrap: { marginTop: "18px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", flexWrap: "wrap" },
   studentLinkText: { color: "rgba(255,255,255,0.55)", fontSize: "0.8rem" },
   studentLink: { color: "var(--gold-light)", fontSize: "0.82rem", fontWeight: "700", textDecoration: "underline", textUnderlineOffset: "3px" },

@@ -704,3 +704,243 @@ input, select, textarea {
     padding: 16px !important;
   }
 }
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+.btn-primary,
+.btn-gold,
+.btn-outline {
+  min-height: 44px;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+.responsive-table-shell {
+  min-width: 0;
+}
+
+@media (max-width: 1180px) {
+  .admin-dashboard-grid,
+  .admin-dashboard-split,
+  .teacher-dashboard-grid,
+  .teacher-quick-grid,
+  .student-dashboard-grid,
+  .student-quick-grid,
+  .student-news-grid,
+  .student-fee-options,
+  .student-attendance-stats,
+  .student-profile-grid,
+  .student-report-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-hero-banner,
+  .teacher-hero-banner {
+    align-items: stretch !important;
+  }
+
+  .admin-hero-actions,
+  .teacher-class-actions,
+  .student-fee-stats,
+  .student-fee-progress {
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-shell {
+    display: block !important;
+  }
+
+  .admin-sidebar {
+    display: none !important;
+  }
+
+  .admin-mobile-topbar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
+    border-bottom: 1px solid rgba(200, 150, 12, 0.28);
+    padding: 12px 16px;
+  }
+
+  .admin-mobile-nav {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    background: linear-gradient(135deg, #051a1a 0%, #0a5d5d 100%);
+    border-bottom: 3px solid var(--gold);
+    padding: 0 16px 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-mobile-nav a {
+    justify-content: center;
+    gap: 6px !important;
+    min-width: 0;
+    padding: 8px 6px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .admin-mobile-nav a span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-main {
+    margin-left: 0 !important;
+  }
+
+  .admin-header {
+    height: auto !important;
+    padding: 12px 16px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .admin-header-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px !important;
+  }
+
+  .admin-content {
+    padding: 16px 14px 24px !important;
+  }
+
+  .admin-content [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-content .responsive-table-shell {
+    border-radius: 14px;
+  }
+
+  .admin-content table {
+    min-width: 640px;
+  }
+
+  .admin-content button {
+    min-height: 44px;
+  }
+
+  .teacher-shell {
+    display: block !important;
+  }
+
+  .teacher-sidebar {
+    display: none !important;
+  }
+
+  .teacher-mobile-topbar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
+    border-bottom: 1px solid rgba(200, 150, 12, 0.28);
+    padding: 12px 16px;
+  }
+
+  .teacher-mobile-nav {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    background: linear-gradient(135deg, #051a1a 0%, #0a5d5d 100%);
+    border-bottom: 3px solid var(--gold);
+    padding: 0 16px 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .teacher-mobile-nav a {
+    justify-content: center;
+    gap: 6px !important;
+    min-width: 0;
+    padding: 8px 6px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .teacher-main {
+    margin-left: 0 !important;
+  }
+
+  .teacher-header {
+    height: auto !important;
+    padding: 12px 16px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .teacher-header-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px !important;
+  }
+
+  .teacher-content {
+    padding: 16px 14px 24px !important;
+  }
+
+  .teacher-hero-banner {
+    padding: 20px 18px !important;
+    border-radius: 14px !important;
+  }
+
+  .teacher-dashboard-grid,
+  .teacher-quick-grid,
+  .teacher-class-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .teacher-class-card,
+  .teacher-attendance-card {
+    border-radius: 14px !important;
+    padding: 18px !important;
+  }
+
+  .teacher-attendance-header,
+  .teacher-attendance-footer,
+  .teacher-attendance-actions {
+    align-items: stretch !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .teacher-attendance-header select,
+  .teacher-attendance-actions button {
+    width: 100%;
+  }
+
+  .teacher-attendance-list {
+    max-height: none !important;
+    padding-right: 0 !important;
+  }
+}

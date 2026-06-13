@@ -31,14 +31,14 @@ export default function Dashboard() {
   const COLORS = ["#10b981", "#ef4444"];
 
   return (
-    <div style={s.page}>
+    <div style={s.page} className="admin-dashboard-page">
       {/* Welcome Hero Banner */}
-      <div style={s.heroBanner}>
+      <div style={s.heroBanner} className="admin-hero-banner">
         <div>
           <h1 style={s.heroTitle}>Welcome back, Administrator 👋</h1>
           <p style={s.heroSub}>Today is {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} • AY {academicYearLabel}</p>
         </div>
-        <div style={s.heroActions}>
+        <div style={s.heroActions} className="admin-hero-actions">
           <button style={s.heroBtn} onClick={() => navigate("/admin/students?action=add")}>
             <i className="fa-solid fa-user-plus"></i> Add Student
           </button>
@@ -52,14 +52,14 @@ export default function Dashboard() {
       </div>
 
       {/* 4 Stat Cards */}
-      <div style={s.grid4}>
+      <div style={s.grid4} className="admin-dashboard-grid">
         <StatCard title="Total Students" value={stats.students} icon={<i className="fa-solid fa-user-graduate"></i>} color="navy" trend="+12%" />
         <StatCard title="Total Teachers" value={stats.teachers} icon={<i className="fa-solid fa-chalkboard-user"></i>} color="gold" trend="+2%" />
         <StatCard title="Fees Collected" value={`₹${(stats.fees/100000).toFixed(1)}L`} icon={<i className="fa-solid fa-sack-dollar"></i>} color="teal" trend="+5%" />
         <StatCard title="Fees Pending" value={`₹${(stats.pendingFees/100000).toFixed(1)}L`} icon={<i className="fa-solid fa-hourglass-half"></i>} color="red" trend="-2%" />
       </div>
 
-      <div style={s.grid2}>
+      <div style={s.grid2} className="admin-dashboard-split">
         {/* Left Col: Chart */}
         <div style={s.card}>
           <SectionTitle title="Students by Class" />
@@ -109,7 +109,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={s.grid2}>
+      <div style={s.grid2} className="admin-dashboard-split">
         {/* Recent Activity */}
         <div style={s.card}>
           <SectionTitle title="Recent Activity" />
@@ -161,14 +161,16 @@ const s = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: "20px",
+    flexWrap: "wrap",
     boxShadow: "var(--shadow-md)"
   },
   heroTitle: { fontFamily: "var(--font-heading)", color: "var(--white)", fontSize: "1.6rem", margin: "0 0 8px 0" },
   heroSub: { color: "var(--gold-light)", fontSize: "0.85rem", margin: 0, fontWeight: "600" },
-  heroActions: { display: "flex", gap: "12px" },
-  heroBtn: { background: "var(--gold)", color: "var(--navy-dark)", borderRadius: "50px", padding: "10px 20px", fontWeight: "700", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 10px rgba(0,0,0,0.2)", transition: "var(--transition)", animation: "shimmer 3s linear infinite" },
+  heroActions: { display: "flex", gap: "12px", flexWrap: "wrap" },
+  heroBtn: { background: "var(--gold)", color: "var(--navy-dark)", borderRadius: "50px", padding: "10px 20px", minHeight: "44px", fontWeight: "700", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 10px rgba(0,0,0,0.2)", transition: "var(--transition)", animation: "shimmer 3s linear infinite" },
   grid4: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px", marginBottom: "28px" },
-  grid2: { display: "grid", gridTemplateColumns: "60% calc(40% - 24px)", gap: "24px", marginBottom: "28px" },
+  grid2: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", marginBottom: "28px" },
   card: { background: "var(--white)", borderRadius: "16px", padding: "28px", boxShadow: "var(--shadow-md)", border: "1px solid var(--border)" },
   
   holidayBanner: {

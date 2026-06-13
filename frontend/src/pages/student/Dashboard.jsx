@@ -247,7 +247,7 @@ function formatNoticeText(announcement) {
 
 const s = {
   page: { width: "100%" },
-  grid2: { display: "grid", gridTemplateColumns: "minmax(280px, 0.9fr) minmax(0, 1.6fr)", gap: "24px", marginBottom: "32px" },
+  grid2: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", marginBottom: "32px" },
   card: { background: "var(--white)", borderRadius: "16px", padding: "32px", boxShadow: "var(--shadow-md)", border: "1px solid var(--border)" },
   loading: { padding: "24px", textAlign: "center", color: "var(--text-muted)", fontWeight: "800" },
   empty: { padding: "24px", textAlign: "center", color: "var(--text-muted)", background: "var(--light-bg)", borderRadius: "12px", border: "1px dashed var(--border)" },
@@ -269,6 +269,7 @@ const s = {
     background: "linear-gradient(135deg, var(--navy), var(--navy-dark))",
     color: "var(--white)",
     padding: "12px 18px",
+    minHeight: "44px",
     borderRadius: "999px",
     fontWeight: "800",
     cursor: "pointer",
