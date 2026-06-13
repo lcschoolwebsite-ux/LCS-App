@@ -4,6 +4,7 @@ import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
 import MobileMenuDrawer from "../components/MobileMenuDrawer";
+import TopStrip from "../components/TopStrip";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
@@ -81,6 +82,7 @@ export default function AdminLayout() {
 
   return (
     <div style={s.layout} className="admin-shell">
+      <TopStrip />
       <MobileMenuDrawer
         open={menuOpen}
         title="LCS Portal"
@@ -221,7 +223,7 @@ const s = {
   logoutBtn: { width: "100%", padding: "12px", background: "transparent", border: "none", color: "var(--white)", opacity: 0.7, cursor: "pointer", textAlign: "left", fontWeight: "600" },
 
   main: { flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minWidth: 0 },
-  header: { height: "72px", background: "var(--white)", borderBottom: "3px solid var(--gold)", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 32px", position: "sticky", top: 0, zIndex: 90 },
+  header: { height: "72px", background: "var(--white)", borderBottom: "3px solid var(--gold)", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 32px", position: "sticky", top: "4px", zIndex: 90 },
   headerLeft: { display: "flex", flexDirection: "column" },
   pageTitle: { margin: 0, fontSize: "1.25rem", color: "var(--navy)", fontFamily: "var(--font-heading)" },
   breadcrumb: { fontSize: "0.75rem", color: "var(--text-muted)" },

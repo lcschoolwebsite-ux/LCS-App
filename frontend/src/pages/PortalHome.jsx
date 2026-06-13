@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
+import TopStrip from "../components/TopStrip";
 import "./PortalHome.css";
 
 export default function PortalHome() {
   return (
     <div className="portal-page">
+      <TopStrip />
       <div className="portal-bg" />
       <div className="portal-overlay" />
 

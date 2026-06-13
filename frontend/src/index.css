@@ -32,6 +32,7 @@
   /* Layout */
   --sidebar-width: 240px;
   --header-height: 64px;
+  --top-strip-height: 4px;
 
   /* Shadows */
   --shadow-sm: 0 2px 8px rgba(14,107,107,0.06);
@@ -474,7 +475,7 @@ input, select, textarea {
 
   .teacher-header {
     position: sticky !important;
-    top: 0 !important;
+    top: 4px !important;
     height: auto !important;
     padding: 12px 14px !important;
     align-items: flex-start !important;
@@ -599,7 +600,7 @@ input, select, textarea {
 
   .student-header {
     position: sticky !important;
-    top: 0 !important;
+    top: 4px !important;
     height: auto !important;
     padding: 12px 14px !important;
     align-items: flex-start !important;
@@ -832,6 +833,24 @@ textarea {
   min-width: 0;
 }
 
+.top-strip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--top-strip-height);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+  z-index: 180;
+  pointer-events: none;
+}
+
+.admin-mobile-topbar,
+.teacher-mobile-topbar,
+.student-mobile-topbar {
+  margin-top: var(--top-strip-height);
+}
+
 table {
   max-width: 100%;
 }
@@ -918,6 +937,8 @@ table {
 
   .admin-header {
     height: auto !important;
+    position: sticky !important;
+    top: 4px !important;
     padding: 12px 14px !important;
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -1003,6 +1024,8 @@ table {
   }
 
   .teacher-header {
+    position: sticky !important;
+    top: 4px !important;
     height: auto !important;
     padding: 12px 14px !important;
     flex-direction: column !important;

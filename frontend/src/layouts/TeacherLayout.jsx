@@ -5,6 +5,7 @@ import api from "../api/axios";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
 import MobileMenuDrawer from "../components/MobileMenuDrawer";
+import TopStrip from "../components/TopStrip";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/teacher/Dashboard"));
@@ -73,6 +74,7 @@ export default function TeacherLayout() {
 
   return (
     <div style={s.container} className="teacher-shell">
+      <TopStrip />
       <MobileMenuDrawer
         open={menuOpen}
         title="LCS Portal"
@@ -217,7 +219,7 @@ const s = {
 
   /* Header Styles */
   main: { flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minWidth: 0 },
-  header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 90 },
+  header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: "4px", zIndex: 90 },
   pageTitle: { fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1.3rem", margin: 0, fontWeight: "700" },
   breadcrumb: { color: "var(--text-muted)", fontSize: "0.78rem", marginTop: "2px" },
   
