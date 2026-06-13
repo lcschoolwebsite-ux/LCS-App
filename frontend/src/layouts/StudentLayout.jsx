@@ -5,7 +5,6 @@ import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
 import InstallAppButton from "../components/InstallAppButton";
 import MobileMenuDrawer from "../components/MobileMenuDrawer";
-import TopStrip from "../components/TopStrip";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/student/Dashboard"));
@@ -57,7 +56,6 @@ export default function StudentLayout() {
 
   return (
     <div style={s.container} className="student-shell">
-      <TopStrip />
       <MobileMenuDrawer
         open={menuOpen}
         title="LCS Portal"
@@ -214,7 +212,7 @@ const s = {
   mobileUserLine: { color: "var(--gold-light)", fontSize: "0.66rem", fontWeight: "800", margin: 0, whiteSpace: "normal", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", wordBreak: "break-word" },
   mobileActions: { display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto" },
   mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
-  header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: "4px", zIndex: 90 },
+  header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 90 },
   pageTitle: { fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1.3rem", margin: 0, fontWeight: "700" },
   breadcrumb: { color: "var(--text-muted)", fontSize: "0.78rem", marginTop: "2px" },
   
