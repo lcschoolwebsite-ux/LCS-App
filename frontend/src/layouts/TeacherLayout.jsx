@@ -85,21 +85,7 @@ export default function TeacherLayout() {
         logoutLabel="Logout"
       />
 
-      <div style={s.mobileTopbar} className="teacher-mobile-topbar">
-        <button type="button" onClick={() => setMenuOpen(true)} style={s.mobileMenuBtn} aria-label="Open menu">
-          <i className="fa-solid fa-bars"></i>
-        </button>
-        <div style={s.mobileBrand}>
-          <img src="/logo.png" alt="Logo" style={s.mobileLogo} />
-          <div>
-            <h1 style={s.mobileSchoolName}>LCS Portal</h1>
-            <p style={s.mobileUserLine}>{user?.name || "Teacher"} · Teacher Portal</p>
-          </div>
-        </div>
-        <button onClick={handleLogout} style={s.mobileLogout} aria-label="Logout">
-          <i className="fa-solid fa-arrow-right-from-bracket"></i>
-        </button>
-      </div>
+      <div style={s.mobileTopbar} className="teacher-mobile-topbar" aria-hidden="true" />
 
       <MobileBottomBar
         className="mobile-bottom-bar"
