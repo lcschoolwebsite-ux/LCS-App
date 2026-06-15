@@ -1,5 +1,7 @@
 const generateToken = require("../utils/generateToken");
 
+const compactRefs = value => (Array.isArray(value) ? value.filter(Boolean) : value);
+
 exports.login = async (req, res) => {
   const { role, username, password } = req.body;
 
@@ -71,8 +73,8 @@ exports.login = async (req, res) => {
           id: teacher._id, 
           role: "teacher", 
           name: teacher.name,
-          assignedClasses: teacher.assignedClasses,
-          assignedSubjects: teacher.assignedSubjects
+          assignedClasses: compactRefs(teacher.assignedClasses),
+          assignedSubjects: compactRefs(teacher.assignedSubjects)
         }
       });
     }
@@ -164,7 +166,10 @@ exports.getMe = async (req, res) => {
         .populate("assignedClasses")
         .populate("assignedSubjects");
       if (!teacher) return res.status(404).json({ message: "Teacher not found" });
-      return res.json({ ...teacher.toObject(), role: "teacher" });
+      const teacherData = teacher.toObject();
+      teacherData.assignedClasses = compactRefs(teacherData.assignedClasses);
+      teacherData.assignedSubjects = compactRefs(teacherData.assignedSubjects);
+      return res.json({ ...teacherData, role: "teacher" });
     }
 
     if (role === "student") {

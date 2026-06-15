@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "whitelist-ip": "node scripts/whitelistIP.js"
+    "whitelist-ip": "node scripts/whitelistIP.js",
+    "repair-class-assignments": "node scripts/repairTeacherClassAssignments.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

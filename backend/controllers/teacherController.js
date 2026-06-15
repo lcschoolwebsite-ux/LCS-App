@@ -1,10 +1,17 @@
 const Teacher = require("../models/Teacher");
-const Class = require("../models/Class");
+const {
+  normalizeIdList,
+  syncTeacherAssignments
+} = require("../utils/classAssignmentSync");
 
-const normalizeIdList = value => {
-  if (!value) return [];
-  const list = Array.isArray(value) ? value : [value];
-  return [...new Set(list.filter(Boolean).map(id => id.toString()))];
+const compactRefs = value => (Array.isArray(value) ? value.filter(Boolean) : value);
+
+const hydrateTeacher = teacher => {
+  if (!teacher) return teacher;
+  const data = teacher.toObject ? teacher.toObject() : { ...teacher };
+  data.assignedClasses = compactRefs(data.assignedClasses);
+  data.assignedSubjects = compactRefs(data.assignedSubjects);
+  return data;
 };
 
 const normalizeTeacherPayload = body => {
@@ -18,29 +25,12 @@ const normalizeTeacherPayload = body => {
   return payload;
 };
 
-const syncClassAssignments = async (teacherId, classIds) => {
-  await Teacher.updateMany(
-    { _id: { $ne: teacherId } },
-    { $pull: { assignedClasses: { $in: classIds } } }
-  );
-
-  await Class.updateMany(
-    { _id: { $in: classIds } },
-    { classTeacher: teacherId }
-  );
-
-  await Class.updateMany(
-    { classTeacher: teacherId, _id: { $nin: classIds } },
-    { $unset: { classTeacher: "" } }
-  );
-};
-
 exports.getAll = async (req, res) =>
   res.json(
-    await Teacher.find({ isActive: true })
+    (await Teacher.find({ isActive: true })
       .select("-password")
       .populate("assignedClasses", "name section")
-      .populate("assignedSubjects", "name")
+      .populate("assignedSubjects", "name")).map(hydrateTeacher)
   );
 
 exports.create = async (req, res) => {
@@ -71,11 +61,11 @@ exports.update = async (req, res) => {
       t.set(payload);
       await t.save();
       const updated = await Teacher.findById(t._id).select("-password").populate("assignedClasses","name section").populate("assignedSubjects","name");
-      return res.json(updated);
+      return res.json(hydrateTeacher(updated));
     }
     const t = await Teacher.findByIdAndUpdate(req.params.id, payload, { new: true }).select("-password").populate("assignedClasses","name section").populate("assignedSubjects","name");
     if (!t) return res.status(404).json({ message: "Teacher not found" });
-    res.json(t);
+    res.json(hydrateTeacher(t));
   } catch (e) {
     const message = e.code === 11000 ? "Teacher username already exists" : e.message;
     res.status(400).json({ message });
@@ -100,13 +90,13 @@ exports.assignClass = async (req, res) => {
 
     t.assignedClasses = mergedIds;
     await t.save();
-    await syncClassAssignments(t._id, mergedIds);
+    await syncTeacherAssignments(t._id, mergedIds);
 
     const updated = await Teacher.findById(t._id)
       .select("-password")
       .populate("assignedClasses", "name section")
       .populate("assignedSubjects", "name");
-    res.json({ message: "Classes assigned", teacher: updated });
+    res.json({ message: "Classes assigned", teacher: hydrateTeacher(updated) });
   } catch (e) { res.status(400).json({ message: e.message }); }
 };
 
@@ -119,14 +109,14 @@ exports.setClasses = async (req, res) => {
 
     teacher.assignedClasses = classIds;
     await teacher.save();
-    await syncClassAssignments(teacher._id, classIds);
+    await syncTeacherAssignments(teacher._id, classIds);
 
     const t = await Teacher.findById(teacher._id)
       .select("-password")
       .populate("assignedClasses", "name section")
       .populate("assignedSubjects", "name");
 
-    res.json({ message: "Class assignments updated", teacher: t });
+    res.json({ message: "Class assignments updated", teacher: hydrateTeacher(t) });
   } catch (e) { res.status(400).json({ message: e.message }); }
 };
 

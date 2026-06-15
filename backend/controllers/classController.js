@@ -5,6 +5,9 @@ const Exam = require("../models/Exam");
 const Attendance = require("../models/Attendance");
 const FeeStructure = require("../models/FeeStructure");
 const Teacher = require("../models/Teacher");
+const {
+  syncClassTeacher
+} = require("../utils/classAssignmentSync");
 
 const normalizeClassPayload = body => {
   const payload = { ...body };
@@ -26,6 +29,9 @@ exports.create = async (req, res) => {
   try {
     const payload = normalizeClassPayload(req.body);
     const created = await Class.create(payload);
+    if (created.classTeacher) {
+      await syncClassTeacher(created._id, created.classTeacher);
+    }
     res.status(201).json(
       await Class.findById(created._id)
         .populate("academicYear", "year")
@@ -43,15 +49,26 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const payload = normalizeClassPayload(req.body);
+    const existing = await Class.findById(req.params.id).select("classTeacher");
+    if (!existing) return res.status(404).json({ message: "Class not found" });
+
     const updated = await Class.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true
-    })
+    });
+
+    if (!updated) return res.status(404).json({ message: "Class not found" });
+    if (Object.prototype.hasOwnProperty.call(payload, "classTeacher")) {
+      await syncClassTeacher(updated._id, payload.classTeacher || null, existing.classTeacher || null);
+    } else if (updated.classTeacher) {
+      await syncClassTeacher(updated._id, updated.classTeacher, existing.classTeacher || null);
+    }
+
+    const refreshed = await Class.findById(updated._id)
       .populate("academicYear", "year")
       .populate("classTeacher", "name");
 
-    if (!updated) return res.status(404).json({ message: "Class not found" });
-    res.json(updated);
+    res.json(refreshed);
   }
   catch (e) {
     if (e?.code === 11000) {
@@ -99,6 +116,12 @@ exports.remove = async (req, res) => {
       { assignedClasses: classDoc._id },
       { $pull: { assignedClasses: classDoc._id } }
     );
+
+    if (classDoc.classTeacher) {
+      await Teacher.findByIdAndUpdate(classDoc.classTeacher, {
+        $pull: { assignedClasses: classDoc._id }
+      });
+    }
 
     await Class.findByIdAndDelete(classDoc._id);
     res.json({ message: "Deleted" });
