@@ -5,8 +5,14 @@ import './index.css'
 import './i18n';
 import { Capacitor } from "@capacitor/core";
 import { SplashScreen } from "@capacitor/splash-screen";
+import { StatusBar, Style } from "@capacitor/status-bar";
 
 if (Capacitor.getPlatform() === "android" && Capacitor.isNativePlatform()) {
+  // Configure StatusBar for Android
+  StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+  StatusBar.setBackgroundColor({ color: "#051a1a" }).catch(() => {});
+  StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+  
   SplashScreen.hide().catch(() => {});
 }
 
