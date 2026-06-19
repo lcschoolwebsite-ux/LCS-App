@@ -13,7 +13,8 @@ if (Capacitor.getPlatform() === "android" && Capacitor.isNativePlatform()) {
   StatusBar.setBackgroundColor({ color: "#051a1a" }).catch(() => {});
   StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
   
-  SplashScreen.hide().catch(() => {});
+  // Hide native splash immediately
+  SplashScreen.hide({ fadeOutDuration: 0 }).catch(() => {});
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
