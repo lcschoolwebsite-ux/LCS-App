@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Toast from "./components/Toast";
 import UpdateAvailableModal from "./components/UpdateAvailableModal";
+import AnimatedSplash from "./components/AnimatedSplash";
 import {
   bootstrapNativeShell,
   checkRemoteVersion,
@@ -47,6 +48,7 @@ function AppContent() {
   const [notification, setNotification] = useState(null);
   const [isOnline, setIsOnline] = useState(true);
   const [updateInfo, setUpdateInfo] = useState(null);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     if (socket) {
@@ -102,6 +104,7 @@ function AppContent() {
 
   return (
     <>
+      {showSplash && <AnimatedSplash onComplete={() => setShowSplash(false)} />}
       {isNativeAndroidApp() && !isOnline && (
         <div style={s.offlineBar}>
           You are offline. Some data may not be up to date.
