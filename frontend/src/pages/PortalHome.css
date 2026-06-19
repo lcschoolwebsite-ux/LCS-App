@@ -579,25 +579,52 @@
   transform: translateX(4px);
 }
 
-/* Teacher Card - Slightly smaller */
+/* Teacher Card - Small button style */
 .portal-teacher-card {
-  padding: 24px 28px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-  border-color: rgba(200,150,12,0.2);
+  padding: 14px 28px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(200,150,12,0.25);
+  border-radius: 50px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  max-width: 320px;
+  margin: 0 auto;
+  gap: 12px;
 }
 
 .portal-teacher-card .portal-login-icon {
-  width: 64px;
-  height: 64px;
-  font-size: 1.75rem;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  border-radius: 8px;
+  background: rgba(200,150,12,0.15);
+  border: 1px solid rgba(200,150,12,0.3);
+}
+
+.portal-teacher-card .portal-login-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .portal-teacher-card .portal-login-title {
-  font-size: 1.4rem;
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 700;
 }
 
 .portal-teacher-card .portal-login-desc {
-  font-size: 0.88rem;
+  display: none;
+}
+
+.portal-teacher-card .portal-login-cta {
+  display: none;
+}
+
+.portal-teacher-card:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 36px rgba(200,150,12,0.3);
 }
 
 /* Admin Access Note */
@@ -680,26 +707,30 @@
     font-size: 1.75rem;
   }
 
-  .portal-teacher-card .portal-login-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 1.5rem;
-  }
-
   .portal-login-title {
     font-size: 1.4rem;
-  }
-
-  .portal-teacher-card .portal-login-title {
-    font-size: 1.25rem;
   }
 
   .portal-login-desc {
     font-size: 0.88rem;
   }
 
-  .portal-teacher-card .portal-login-desc {
-    font-size: 0.82rem;
+  /* Teacher button stays small on mobile */
+  .portal-teacher-card {
+    flex-direction: row;
+    text-align: left;
+    padding: 12px 24px;
+    max-width: 280px;
+  }
+
+  .portal-teacher-card .portal-login-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .portal-teacher-card .portal-login-title {
+    font-size: 0.95rem;
   }
 
   .portal-admin-note {
@@ -720,10 +751,6 @@
     border-radius: 20px;
   }
 
-  .portal-teacher-card {
-    padding: 18px 16px;
-  }
-
   .portal-login-icon {
     width: 56px;
     height: 56px;
@@ -731,10 +758,22 @@
     border-radius: 16px;
   }
 
+  /* Teacher button stays compact on small screens */
+  .portal-teacher-card {
+    padding: 10px 20px;
+    max-width: 260px;
+    border-radius: 40px;
+  }
+
   .portal-teacher-card .portal-login-icon {
-    width: 52px;
-    height: 52px;
-    font-size: 1.35rem;
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+
+  .portal-teacher-card .portal-login-title {
+    font-size: 0.9rem;
   }
 
   .portal-hero-brand .portal-logo {
