@@ -192,9 +192,6 @@ export default function Dashboard() {
     }
   };
 
-  const feeStatus = fee?.totalDue > 0 ? "Due" : fee ? "Paid" : "Unavailable";
-  const academicYear = academicYearLabel || fee?.academicYear?.year || "Academic Year";
-
   return (
     <div style={s.page} className="student-dashboard-page">
       {loading && <div style={s.loading}>Loading dashboard...</div>}
@@ -250,17 +247,6 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  );
-}
-
-function QuickCard({ to, icon, title, subtitle }) {
-  return (
-    <Link style={s.quickCard} className="student-quick-card" to={to}>
-      <div style={s.quickCardTop}></div>
-      <i className={icon} style={s.quickIcon}></i>
-      <h3 style={s.quickTitle}>{title}</h3>
-      <p style={s.quickSub}>{subtitle}</p>
-    </Link>
   );
 }
 
