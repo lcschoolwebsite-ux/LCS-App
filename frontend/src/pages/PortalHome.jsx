@@ -9,88 +9,73 @@ export default function PortalHome() {
 
       <div className="portal-content">
         <main className="portal-hero-centre">
+          {/* Modern Logo & Title */}
           <div className="portal-school-brand portal-hero-brand">
             <img src="/logo.png" alt="LCS Portal logo" className="portal-logo" />
             <div className="portal-school-name">
-              <small>Welcome to the</small>
+              <small>Welcome to</small>
               LCS Portal
             </div>
           </div>
-          <p className="portal-hero-eyebrow">School Portal</p>
-          <h1 className="portal-hero-title">LCS <span>Portal</span></h1>
+          
           <div className="portal-gold-bar" />
+          
+          <h1 className="portal-hero-title">Welcome to<br />LCS Portal</h1>
+          
           <p className="portal-hero-desc">
-            Your all-in-one academic gateway - access results, resources,
-            news, and more from one secure, modern portal.
+            Secure academic gateway for students and teachers
           </p>
-          <Link to="/student-login" className="portal-hero-cta">Login to Portal &nbsp;→</Link>
-        </main>
 
-        <section className="portal-info-row" aria-label="Portal highlights">
-          <article className="portal-info-card">
-            <div className="portal-info-icon" aria-hidden="true">
-              <i className="fa-solid fa-shield-halved"></i>
-            </div>
-            <div className="portal-info-text">
-              <h4>Secure Access</h4>
-              <p>Industry-standard encryption keeps your data safe on any device, anytime.</p>
-            </div>
-          </article>
-          <article className="portal-info-card">
-            <div className="portal-info-icon" aria-hidden="true">
-              <i className="fa-solid fa-book-open"></i>
-            </div>
-            <div className="portal-info-text">
-              <h4>Academic Records</h4>
-              <p>View attendance, exam results, progress reports and timetables at a glance.</p>
-            </div>
-          </article>
-          <article className="portal-info-card">
-            <div className="portal-info-icon" aria-hidden="true">
-              <i className="fa-solid fa-bullhorn"></i>
-            </div>
-            <div className="portal-info-text">
-              <h4>Live Updates</h4>
-              <p>Real-time school announcements, event schedules and important notices.</p>
-            </div>
-          </article>
-        </section>
+          {/* Login Options */}
+          <div className="portal-login-options">
+            {/* Student Login Card */}
+            <Link to="/student-login" className="portal-login-card portal-student-card">
+              <div className="portal-login-icon">
+                <i className="fa-solid fa-graduation-cap"></i>
+              </div>
+              <div className="portal-login-content">
+                <h3 className="portal-login-title">Student Portal</h3>
+                <p className="portal-login-desc">Access marks, attendance, fees & announcements</p>
+                <div className="portal-login-cta">
+                  <span>Login to Student Portal</span>
+                  <i className="fa-solid fa-arrow-right"></i>
+                </div>
+              </div>
+            </Link>
 
-        <section className="portal-quick-links" aria-label="Quick links">
-          <p className="portal-ql-label">Quick Links</p>
-          <div className="portal-ql-row">
-            <a href="https://lorettocentralschool.edu.in/news" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-regular fa-newspaper"></i></span>
-              <span className="portal-ql-name">News</span>
-              <span className="portal-ql-arrow">OPEN →</span>
-            </a>
-            <a href="https://lorettocentralschool.edu.in/school-information/school-gallery" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-regular fa-images"></i></span>
-              <span className="portal-ql-name">Gallery</span>
-              <span className="portal-ql-arrow">OPEN →</span>
-            </a>
-            <a href="https://lorettocentralschool.edu.in/about-us/1-school-profile" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-solid fa-school"></i></span>
-              <span className="portal-ql-name">School Info</span>
-              <span className="portal-ql-arrow">OPEN →</span>
-            </a>
-            <a href="https://lorettocentralschool.edu.in/e-magazine" className="portal-ql-card" target="_blank" rel="noopener noreferrer">
-              <span className="portal-ql-icon" aria-hidden="true"><i className="fa-solid fa-book-open-reader"></i></span>
-              <span className="portal-ql-name">E-Magazine</span>
-              <span className="portal-ql-arrow">OPEN →</span>
-            </a>
+            {/* Teacher Login Card */}
+            <Link to="/head" className="portal-login-card portal-teacher-card">
+              <div className="portal-login-icon">
+                <i className="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div className="portal-login-content">
+                <h3 className="portal-login-title">Teacher Portal</h3>
+                <p className="portal-login-desc">Manage classes, marks, attendance & announcements</p>
+                <div className="portal-login-cta">
+                  <span>Login to Teacher Portal</span>
+                  <i className="fa-solid fa-arrow-right"></i>
+                </div>
+              </div>
+            </Link>
           </div>
-        </section>
+
+          {/* Admin Access Note */}
+          <div className="portal-admin-note">
+            <i className="fa-solid fa-lock" style={{marginRight: '8px'}}></i>
+            <span>Administrator access requires separate credentials</span>
+          </div>
+        </main>
       </div>
 
+      {/* Updated Footer */}
       <footer className="portal-footer">
-        <span>© 2025 LCS Portal</span>
+        <span>© 2026 LCS Portal</span>
         <span className="portal-foot-divider" />
         <span>
-          Developed by <a href="https://www.appvertex.in" target="_blank" rel="noopener noreferrer">AppVertex</a>
+          Developed by <a href="https://www.appvertex.in" target="_blank" rel="noopener noreferrer" className="portal-dev-link">AppVertex</a>
         </span>
         <span className="portal-foot-divider" />
-        <span className="portal-footer-note">Built by Leston &amp; Lenstar</span>
+        <span className="portal-footer-note">Built by Leston & Lenstar</span>
       </footer>
     </div>
   );
