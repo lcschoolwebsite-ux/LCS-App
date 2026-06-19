@@ -25,22 +25,8 @@ const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const TeacherLayout = lazy(() => import("./layouts/TeacherLayout"));
 const StudentLayout = lazy(() => import("./layouts/StudentLayout"));
 
-// Loading component
-const PageLoader = () => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    background: 'var(--light-bg)',
-    color: 'var(--navy)',
-    fontSize: '1.2rem',
-    fontWeight: '700'
-  }}>
-    <i className="fa-solid fa-circle-notch fa-spin" style={{marginRight: '12px'}}></i>
-    Loading...
-  </div>
-);
+// Loading component - now empty since we have AnimatedSplash
+const PageLoader = () => null;
 
 function AppContent() {
   const { user } = useAuth();
@@ -105,24 +91,28 @@ function AppContent() {
   return (
     <>
       {showSplash && <AnimatedSplash onComplete={() => setShowSplash(false)} />}
-      {isNativeAndroidApp() && !isOnline && (
-        <div style={s.offlineBar}>
-          You are offline. Some data may not be up to date.
-        </div>
+      {!showSplash && (
+        <>
+          {isNativeAndroidApp() && !isOnline && (
+            <div style={s.offlineBar}>
+              You are offline. Some data may not be up to date.
+            </div>
+          )}
+          {notification && <Toast message={notification.message} onClose={() => setNotification(null)} />}
+          <UpdateAvailableModal update={updateInfo} onClose={() => setUpdateInfo(null)} />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<PortalHome />} />
+              <Route path="/head" element={<Login />} />
+              <Route path="/login" element={<Navigate to="/head" replace />} />
+              <Route path="/student-login" element={<StudentLogin />} />
+              <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>} />
+              <Route path="/teacher/*" element={<ProtectedRoute role="teacher"><TeacherLayout /></ProtectedRoute>} />
+              <Route path="/student/*" element={<ProtectedRoute role="student"><StudentLayout /></ProtectedRoute>} />
+            </Routes>
+          </Suspense>
+        </>
       )}
-      {notification && <Toast message={notification.message} onClose={() => setNotification(null)} />}
-      <UpdateAvailableModal update={updateInfo} onClose={() => setUpdateInfo(null)} />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<PortalHome />} />
-          <Route path="/head" element={<Login />} />
-          <Route path="/login" element={<Navigate to="/head" replace />} />
-          <Route path="/student-login" element={<StudentLogin />} />
-          <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>} />
-          <Route path="/teacher/*" element={<ProtectedRoute role="teacher"><TeacherLayout /></ProtectedRoute>} />
-          <Route path="/student/*" element={<ProtectedRoute role="student"><StudentLayout /></ProtectedRoute>} />
-        </Routes>
-      </Suspense>
     </>
   );
 }
