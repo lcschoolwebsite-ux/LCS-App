@@ -6,6 +6,7 @@ const helmet    = require("helmet");
 const mongoose  = require("mongoose");
 const mongoSanitize = require("express-mongo-sanitize");
 const { rateLimit } = require("express-rate-limit");
+const compression = require("compression");
 const connectDB = require("./config/db");
 const { initSocket } = require("./utils/socket");
 
@@ -26,6 +27,10 @@ const frontendOrigins = [
 ].filter(Boolean);
 
 mongoose.set("strictQuery", true);
+
+// Enable gzip compression
+app.use(compression());
+
 app.use(cors({
   origin: frontendOrigins,
   credentials: true,

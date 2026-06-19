@@ -87,6 +87,10 @@ const connectDB = async () => {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
+      maxPoolSize: 50,
+      minPoolSize: 10,
+      maxIdleTimeMS: 30000,
+      compressors: ['zlib'],
     });
     await ensureStudentIndexes();
     await ensurePushSubscriptionIndexes();

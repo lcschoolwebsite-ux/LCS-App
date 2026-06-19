@@ -1,11 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import Login from "./pages/Login";
-import PortalHome from "./pages/PortalHome";
-import StudentLogin from "./pages/StudentLogin";
-import AdminLayout from "./layouts/AdminLayout";
-import TeacherLayout from "./layouts/TeacherLayout";
-import StudentLayout from "./layouts/StudentLayout";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import { useSocket } from "./context/useSocket";
@@ -21,6 +15,31 @@ import {
   subscribeToNetworkChanges
 } from "./services/nativeBridge";
 import { useAuth } from "./context/useAuth";
+
+// Lazy load pages for better performance
+const Login = lazy(() => import("./pages/Login"));
+const PortalHome = lazy(() => import("./pages/PortalHome"));
+const StudentLogin = lazy(() => import("./pages/StudentLogin"));
+const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
+const TeacherLayout = lazy(() => import("./layouts/TeacherLayout"));
+const StudentLayout = lazy(() => import("./layouts/StudentLayout"));
+
+// Loading component
+const PageLoader = () => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    background: 'var(--light-bg)',
+    color: 'var(--navy)',
+    fontSize: '1.2rem',
+    fontWeight: '700'
+  }}>
+    <i className="fa-solid fa-circle-notch fa-spin" style={{marginRight: '12px'}}></i>
+    Loading...
+  </div>
+);
 
 function AppContent() {
   const { user } = useAuth();
@@ -90,15 +109,17 @@ function AppContent() {
       )}
       {notification && <Toast message={notification.message} onClose={() => setNotification(null)} />}
       <UpdateAvailableModal update={updateInfo} onClose={() => setUpdateInfo(null)} />
-      <Routes>
-        <Route path="/" element={<PortalHome />} />
-        <Route path="/head" element={<Login />} />
-        <Route path="/login" element={<Navigate to="/head" replace />} />
-        <Route path="/student-login" element={<StudentLogin />} />
-        <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>} />
-        <Route path="/teacher/*" element={<ProtectedRoute role="teacher"><TeacherLayout /></ProtectedRoute>} />
-        <Route path="/student/*" element={<ProtectedRoute role="student"><StudentLayout /></ProtectedRoute>} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<PortalHome />} />
+          <Route path="/head" element={<Login />} />
+          <Route path="/login" element={<Navigate to="/head" replace />} />
+          <Route path="/student-login" element={<StudentLogin />} />
+          <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>} />
+          <Route path="/teacher/*" element={<ProtectedRoute role="teacher"><TeacherLayout /></ProtectedRoute>} />
+          <Route path="/student/*" element={<ProtectedRoute role="student"><StudentLayout /></ProtectedRoute>} />
+        </Routes>
+      </Suspense>
     </>
   );
 }
