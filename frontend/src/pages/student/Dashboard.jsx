@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
@@ -33,6 +33,20 @@ const getBrowserLabel = () => {
   return "Browser";
 };
 
+// Memoized Quick Card Component
+const QuickCard = React.memo(({ to, icon, title, subtitle }) => {
+  return (
+    <Link style={s.quickCard} className="student-quick-card" to={to}>
+      <div style={s.quickCardTop}></div>
+      <i className={icon} style={s.quickIcon}></i>
+      <h3 style={s.quickTitle}>{title}</h3>
+      <p style={s.quickSub}>{subtitle}</p>
+    </Link>
+  );
+});
+
+QuickCard.displayName = 'QuickCard';
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { academicYearLabel } = useActiveAcademicYear(user?.academicYear?.year);
@@ -44,6 +58,17 @@ export default function Dashboard() {
   const [notifyStatus, setNotifyStatus] = useState("");
 
   const studentId = user?.id || user?._id;
+
+  // Memoize computed values
+  const feeStatus = useMemo(() => 
+    fee?.totalDue > 0 ? "Due" : fee ? "Paid" : "Unavailable",
+    [fee]
+  );
+
+  const academicYear = useMemo(() => 
+    academicYearLabel || fee?.academicYear?.year || "Academic Year",
+    [academicYearLabel, fee]
+  );
 
   useEffect(() => {
     const fetchDashboard = async () => {
