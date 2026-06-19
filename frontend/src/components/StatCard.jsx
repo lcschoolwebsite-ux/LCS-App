@@ -20,31 +20,37 @@ export default function StatCard({ title, value, icon, color = "navy", trend, tr
 
   const s = {
     card: {
-      background: "var(--white)",
-      padding: "24px 28px",
-      borderRadius: "16px",
-      borderTop: `4px solid ${getBorderColor()}`,
-      boxShadow: "var(--shadow-md)",
+      background: "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,255,255,0.99))",
+      padding: "28px 32px",
+      borderRadius: "22px",
+      borderTop: `8px solid ${getBorderColor()}`,
+      boxShadow: "0 12px 36px rgba(14,107,107,0.12)",
       transition: "transform 0.3s ease, box-shadow 0.3s ease",
       cursor: "default",
       position: "relative",
       display: "flex",
       flexDirection: "column",
-      gap: "1rem"
+      gap: "1.2rem",
+      backdropFilter: "blur(10px)",
+      border: "1px solid rgba(200,150,12,0.1)",
+      overflow: "hidden"
     },
     topRow: { display: "flex", justifyContent: "space-between", alignItems: "center" },
     iconWrap: {
-      width: "48px", height: "48px", borderRadius: "50%",
-      background: getIconBg(), color: getBorderColor(),
+      width: "56px", height: "56px", borderRadius: "50%",
+      background: "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95))",
+      color: getBorderColor(),
       display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: "1.2rem"
+      fontSize: "1.4rem",
+      border: "2px solid rgba(200,150,12,0.15)",
+      boxShadow: "0 4px 16px rgba(14,107,107,0.1)"
     },
-    menuIcon: { color: "var(--text-muted)", cursor: "pointer", fontSize: "1.2rem" },
-    value: { fontFamily: "var(--font-counter)", fontSize: "2.8rem", color: "var(--navy)", margin: 0, lineHeight: 1 },
-    title: { fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0, fontWeight: "700" },
-    bottomRow: { display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "auto" },
-    trendIcon: { color: isPositive ? "var(--success-text)" : "var(--danger-text)", fontSize: "0.9rem" },
-    trendLabel: { fontSize: "0.8rem", color: "var(--text-muted)" }
+    menuIcon: { color: "rgba(14,107,107,0.5)", cursor: "pointer", fontSize: "1.2rem", padding: "8px", borderRadius: "8px", transition: "all 0.3s ease" },
+    value: { fontFamily: "var(--font-counter)", fontSize: "3.2rem", color: "var(--navy-dark)", margin: 0, lineHeight: 1, fontWeight: "400", letterSpacing: "-0.02em" },
+    title: { fontFamily: "var(--font-body)", fontSize: "0.95rem", color: "var(--navy)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0, fontWeight: "800", opacity: 0.8 },
+    bottomRow: { display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "auto", padding: "12px 16px", background: "rgba(14,107,107,0.03)", borderRadius: "14px", border: "1px solid rgba(200,150,12,0.1)" },
+    trendIcon: { color: isPositive ? "var(--success-text)" : "var(--danger-text)", fontSize: "1rem", fontWeight: "800" },
+    trendLabel: { fontSize: "0.9rem", color: "var(--navy)", fontWeight: "600", opacity: 0.7 }
   };
 
   return (
