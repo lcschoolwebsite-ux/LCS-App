@@ -24,7 +24,6 @@
     radial-gradient(ellipse 50% 70% at 90% 20%, rgba(200,150,12,0.08) 0%, transparent 60%),
     linear-gradient(145deg, #051a1a 0%, #073535 50%, #051a1a 100%),
     url("https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
-  animation: portalSlowZoom 22s ease-in-out infinite alternate;
   z-index: 0;
 }
 
@@ -376,12 +375,35 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes portalSlowZoom {
-  from { transform: scale(1); }
-  to { transform: scale(1.07); }
-}
-
 @media (max-width: 700px) {
+  .portal-bg {
+    background:
+      radial-gradient(ellipse 75% 55% at 10% 20%, rgba(14,107,107,0.38) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 90% 10%, rgba(200,150,12,0.08) 0%, transparent 55%),
+      linear-gradient(145deg, #051a1a 0%, #073535 50%, #051a1a 100%);
+    animation: none !important;
+  }
+
+  .portal-overlay,
+  .portal-content,
+  .portal-top-bar,
+  .portal-hero-eyebrow,
+  .portal-hero-title,
+  .portal-gold-bar,
+  .portal-hero-desc,
+  .portal-login-options,
+  .portal-admin-note,
+  .portal-footer,
+  .portal-hero-brand {
+    animation: none !important;
+  }
+
+  .portal-login-card,
+  .portal-admin-note,
+  .portal-footer {
+    backdrop-filter: none;
+  }
+
   .portal-content {
     width: min(100% - 1.5rem, 1100px);
   }
