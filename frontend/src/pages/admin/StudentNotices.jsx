@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../../services/api";
+import api from "../../api/axios";
 
 export default function StudentNotices() {
   const [mode, setMode] = useState("students"); // "students" or "class"
