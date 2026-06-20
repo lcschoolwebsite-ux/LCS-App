@@ -7,16 +7,49 @@ import { Capacitor } from "@capacitor/core";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { StatusBar, Style } from "@capacitor/status-bar";
 
+document.documentElement.style.backgroundColor = "#051a1a";
+document.body.style.backgroundColor = "#051a1a";
+document.body.style.color = "#ffffff";
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations?.()
+    .then((registrations) => {
+      registrations.forEach((registration) => {
+        registration.unregister().catch(() => {});
+      });
+    })
+    .catch(() => {});
+}
+
+if ("caches" in window) {
+  caches.keys?.()
+    .then((keys) => {
+      keys.forEach((key) => {
+        caches.delete(key).catch(() => {});
+      });
+    })
+    .catch(() => {});
+}
+
+let nativeSplashHidden = false;
+const hideNativeSplash = () => {
+  if (nativeSplashHidden) return;
+  nativeSplashHidden = true;
+  SplashScreen.hide({ fadeOutDuration: 300 }).catch(() => {});
+};
+
 if (Capacitor.getPlatform() === "android" && Capacitor.isNativePlatform()) {
   // Configure StatusBar for Android
   StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
   StatusBar.setBackgroundColor({ color: "#051a1a" }).catch(() => {});
   StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
-  
-  // Hide native splash with smooth fade after brief display
-  setTimeout(() => {
-    SplashScreen.hide({ fadeOutDuration: 300 }).catch(() => {});
-  }, 300);
+
+  window.addEventListener("portal-app-ready", () => {
+    setTimeout(hideNativeSplash, 180);
+  }, { once: true });
+
+  // Safety net: never leave the app pinned to the native splash.
+  setTimeout(hideNativeSplash, 4000);
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

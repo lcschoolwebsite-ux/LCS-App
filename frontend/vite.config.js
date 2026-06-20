@@ -8,6 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: null,
       includeAssets: ['favicon.ico', 'logo.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'LC School Management',
