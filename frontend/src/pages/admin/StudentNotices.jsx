@@ -33,23 +33,25 @@ export default function StudentNotices() {
 
   const fetchClasses = async () => {
     try {
-      const { data } = await api.get("/api/student-notices/classes");
+      const { data } = await api.get("/student-notices/classes");
       setClasses(data);
     } catch (err) {
       console.error("Failed to fetch classes:", err);
+      setFeedback({ type: "error", message: "Failed to load classes. Please refresh the page." });
     }
   };
 
   const searchStudents = async (query) => {
     setSearching(true);
     try {
-      const { data } = await api.get("/api/student-notices/search", {
+      const { data } = await api.get("/student-notices/search", {
         params: { query }
       });
       setSearchResults(data);
     } catch (err) {
       console.error("Search failed:", err);
       setSearchResults([]);
+      setFeedback({ type: "error", message: "Search failed. Please try again." });
     } finally {
       setSearching(false);
     }
@@ -90,13 +92,13 @@ export default function StudentNotices() {
       let response;
       if (mode === "students") {
         const studentIds = selectedStudents.map(s => s._id);
-        response = await api.post("/api/student-notices/send-to-students", {
+        response = await api.post("/student-notices/send-to-students", {
           studentIds,
           title: title.trim(),
           message: message.trim()
         });
       } else {
-        response = await api.post("/api/student-notices/send-to-class", {
+        response = await api.post("/student-notices/send-to-class", {
           classId: selectedClass,
           title: title.trim(),
           message: message.trim()
