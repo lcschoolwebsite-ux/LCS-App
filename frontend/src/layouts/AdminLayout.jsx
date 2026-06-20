@@ -149,9 +149,12 @@ export default function AdminLayout() {
 
       <main style={s.main} className="admin-main">
         <header style={s.header} className="admin-header">
-          <div style={s.headerLeft}>
-            <h2 style={s.pageTitle}>{currentPathLabel}</h2>
-            <div style={s.breadcrumb}>LCS Portal / {currentPathLabel}</div>
+          <div style={s.headerBrand}>
+            <img src="/logo.png" alt="LCS Portal" style={s.headerLogo} />
+            <div style={s.headerLeft}>
+              <h2 style={s.pageTitle}>{currentPathLabel}</h2>
+              <div style={s.breadcrumb}>Loretto Central School</div>
+            </div>
           </div>
           <div style={s.headerRight} className="admin-header-right">
             <div style={s.badge}>AY {academicYearLabel}</div>
@@ -223,6 +226,8 @@ const s = {
 
   main: { flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minWidth: 0 },
   header: { height: "72px", background: "var(--white)", borderBottom: "3px solid var(--gold)", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 32px", position: "sticky", top: 0, zIndex: 90 },
+  headerBrand: { display: "flex", alignItems: "center", gap: "16px" },
+  headerLogo: { width: "42px", height: "42px", objectFit: "contain", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" },
   headerLeft: { display: "flex", flexDirection: "column" },
   pageTitle: { margin: 0, fontSize: "1.25rem", color: "var(--navy)", fontFamily: "var(--font-heading)" },
   breadcrumb: { fontSize: "0.75rem", color: "var(--text-muted)" },

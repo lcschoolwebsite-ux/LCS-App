@@ -135,9 +135,12 @@ export default function StudentLayout() {
 
         {/* Top Header */}
         <header style={s.header} className="student-header">
-          <div>
-            <h2 style={s.pageTitle}>{currentPathLabel}</h2>
-            <div style={s.breadcrumb} className="student-breadcrumb">LCS Portal / {currentPathLabel}</div>
+          <div style={s.headerBrand}>
+            <img src="/logo.png" alt="LCS Portal" style={s.headerLogo} />
+            <div>
+              <h2 style={s.pageTitle}>{currentPathLabel}</h2>
+              <div style={s.breadcrumb} className="student-breadcrumb">Loretto Central School</div>
+            </div>
           </div>
           
           <div style={s.headerRight} className="student-header-right">
@@ -209,6 +212,8 @@ const s = {
   mobileActions: { display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto" },
   mobileLogout: { width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "var(--gold-light)", border: "1px solid rgba(200,150,12,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" },
   header: { height: "64px", background: "var(--white)", borderBottom: "3px solid var(--gold)", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 90 },
+  headerBrand: { display: "flex", alignItems: "center", gap: "16px" },
+  headerLogo: { width: "42px", height: "42px", objectFit: "contain", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" },
   pageTitle: { fontFamily: "var(--font-heading)", color: "var(--navy)", fontSize: "1.3rem", margin: 0, fontWeight: "700" },
   breadcrumb: { color: "var(--text-muted)", fontSize: "0.78rem", marginTop: "2px" },
   
