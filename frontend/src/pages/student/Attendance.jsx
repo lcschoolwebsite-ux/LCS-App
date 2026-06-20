@@ -60,15 +60,41 @@ export default function Attendance() {
           return;
         }
         
-        // Fetch yearly stats by aggregating all 12 months
-        const currentYear = user?.academicYear?.year || new Date().getFullYear();
-        const monthlyPromises = [];
-        for (let month = 1; month <= 12; month++) {
-          monthlyPromises.push(
-            api.get(`/attendance/student-report?studentId=${studentId}&month=${month}&year=${currentYear}`)
-              .catch(() => ({ data: { total: 0, present: 0, absent: 0 } }))
-          );
+        // Fetch yearly stats by aggregating data from academic year start to current month
+        const academicYearStart = user?.academicYear?.startDate;
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // 1-12
+        
+        // Determine which months to fetch based on academic year
+        let startMonth = 6; // Default June start
+        let startYear = currentYear;
+        
+        if (academicYearStart) {
+          const academicStartDate = new Date(academicYearStart);
+          startMonth = academicStartDate.getMonth() + 1;
+          startYear = academicStartDate.getFullYear();
         }
+        
+        // Build array of months to fetch
+        const monthsToFetch = [];
+        let iterYear = startYear;
+        let iterMonth = startMonth;
+        
+        while (iterYear < currentYear || (iterYear === currentYear && iterMonth <= currentMonth)) {
+          monthsToFetch.push({ year: iterYear, month: iterMonth });
+          iterMonth++;
+          if (iterMonth > 12) {
+            iterMonth = 1;
+            iterYear++;
+          }
+        }
+        
+        // Fetch attendance for all relevant months
+        const monthlyPromises = monthsToFetch.map(({ year, month }) =>
+          api.get(`/attendance/student-report?studentId=${studentId}&month=${month}&year=${year}`)
+            .catch(() => ({ data: { total: 0, present: 0, absent: 0 } }))
+        );
         
         const monthlyResponses = await Promise.all(monthlyPromises);
         const yearlyTotals = monthlyResponses.reduce(
