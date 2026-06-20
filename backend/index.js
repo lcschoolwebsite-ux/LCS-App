@@ -17,7 +17,9 @@ const server = http.createServer(app);
 const frontendOrigins = [
   process.env.FRONTEND_ORIGIN,
   process.env.CAPACITOR_SERVER_URL,
+  process.env.CLIENT_URL,
   "https://portal.lorettocentralschool.edu.in",
+  "https://lorettocentralschool.edu.in",
   "https://lcs-portal.pages.dev",
   "capacitor://localhost",
   "ionic://localhost",
@@ -32,7 +34,18 @@ mongoose.set("strictQuery", true);
 app.use(compression());
 
 app.use(cors({
-  origin: frontendOrigins,
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list
+    if (frontendOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
