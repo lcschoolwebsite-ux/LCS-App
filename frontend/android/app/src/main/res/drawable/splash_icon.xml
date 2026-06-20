@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background color -->
+    <item android:drawable="@color/splash_bg" />
+    
+    <!-- Logo centered with proper padding -->
+    <item>
+        <bitmap
+            android:src="@drawable/lcs_logo"
+            android:gravity="center" />
+    </item>
+</layer-list>
