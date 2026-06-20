@@ -60,14 +60,26 @@ export default function Attendance() {
           return;
         }
         
-        // Fetch yearly stats (for the stats boxes at the top)
+        // Fetch yearly stats by aggregating all 12 months
         const currentYear = user?.academicYear?.year || new Date().getFullYear();
-        const yearlyResponse = await api.get(`/attendance/student-report?studentId=${studentId}&year=${currentYear}`);
-        setYearlyStats({
-          totalWorkingDays: yearlyResponse.data.total || 0,
-          present: yearlyResponse.data.present || 0,
-          absent: yearlyResponse.data.absent || 0
-        });
+        const monthlyPromises = [];
+        for (let month = 1; month <= 12; month++) {
+          monthlyPromises.push(
+            api.get(`/attendance/student-report?studentId=${studentId}&month=${month}&year=${currentYear}`)
+              .catch(() => ({ data: { total: 0, present: 0, absent: 0 } }))
+          );
+        }
+        
+        const monthlyResponses = await Promise.all(monthlyPromises);
+        const yearlyTotals = monthlyResponses.reduce(
+          (acc, response) => ({
+            totalWorkingDays: acc.totalWorkingDays + (response.data.total || 0),
+            present: acc.present + (response.data.present || 0),
+            absent: acc.absent + (response.data.absent || 0)
+          }),
+          { totalWorkingDays: 0, present: 0, absent: 0 }
+        );
+        setYearlyStats(yearlyTotals);
         
         // Fetch weekly data (for the table view)
         const monthKeys = Array.from(new Set(
