@@ -1,17 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
 import "./PortalHome.css";
 
 export default function PortalHome() {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const openStudentPortal = () => {
-    if (user?.role === "student") {
-      navigate("/student", { replace: false });
-      return;
-    }
-
     navigate("/student-login", { replace: false });
   };
 
