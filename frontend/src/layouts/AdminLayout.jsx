@@ -22,6 +22,7 @@ const Fees = lazy(() => import("../pages/admin/Fees"));
 const Announcements = lazy(() => import("../pages/admin/Announcements"));
 const Analytics = lazy(() => import("../pages/admin/Analytics"));
 const MarksOverview = lazy(() => import("../pages/admin/MarksOverview"));
+const StudentNotices = lazy(() => import("../pages/admin/StudentNotices"));
 
 const menuGroups = [
   {
@@ -55,6 +56,7 @@ const menuGroups = [
       { label: "Exams", path: "/admin/exams", icon: "fa-solid fa-file-invoice" },
       { label: "Marks Overview", path: "/admin/marks-overview", icon: "fa-solid fa-chart-column" },
       { label: "Announcements", path: "/admin/announcements", icon: "fa-solid fa-bullhorn" },
+      { label: "Student Notices", path: "/admin/student-notices", icon: "fa-solid fa-paper-plane" },
     ],
   },
   {
@@ -182,6 +184,7 @@ export default function AdminLayout() {
               <Route path="/fee-structure" element={<FeeStructure />} />
               <Route path="/fees" element={<Fees />} />
               <Route path="/announcements" element={<Announcements />} />
+              <Route path="/student-notices" element={<StudentNotices />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="*" element={<div style={s.loading}>Page Under Construction</div>} />
             </Routes>

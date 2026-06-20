@@ -2,7 +2,7 @@ const Mark = require("../models/Mark");
 const Student = require("../models/Student");
 const Exam = require("../models/Exam");
 const Teacher = require("../models/Teacher");
-const { notifyClassStudents } = require("../utils/pushNotification");
+const { notifyClassStudents, notifyStudentById } = require("../utils/pushNotification");
 
 const calculateGrade = (marksObtained, maxMarks, isAbsent) => {
   if (isAbsent) return "AB";
@@ -94,6 +94,50 @@ exports.saveMarks = async (req, res) => {
     }));
 
     if (bulkOps.length) await Mark.bulkWrite(bulkOps);
+    
+    // Send individual push notifications to each student about their marks
+    if (records && records.length > 0) {
+      try {
+        const examTitle = exam.title || "Exam";
+        const subjectName = exam.subject?.name || "Subject";
+        
+        // Populate subject name if it's just an ID
+        const populatedExam = await Exam.findById(examId).populate("subject", "name");
+        const subjectDisplayName = populatedExam?.subject?.name || subjectName;
+
+        for (const record of records) {
+          try {
+            const isAbsent = record.isAbsent || false;
+            const grade = calculateGrade(record.marksObtained, exam.maxMarks, isAbsent);
+            
+            let notificationBody;
+            if (isAbsent) {
+              notificationBody = `Your ${examTitle} (${subjectDisplayName}) result is available. Status: Absent`;
+            } else {
+              notificationBody = `Your ${examTitle} (${subjectDisplayName}) result is available. Grade: ${grade}`;
+            }
+
+            await notifyStudentById(
+              record.studentId,
+              "Exam Results Published",
+              notificationBody,
+              { 
+                url: "/student/marks",
+                type: "marks",
+                examId: examId,
+                grade: grade
+              }
+            );
+          } catch (notifyErr) {
+            console.warn(`Failed to notify student ${record.studentId}:`, notifyErr.message);
+          }
+        }
+      } catch (err) {
+        console.warn("Push notification to students failed:", err.message);
+      }
+    }
+
+    // Also send general notification to entire class
     await notifyClassStudents(
       exam.class,
       "Results updated",

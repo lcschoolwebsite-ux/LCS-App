@@ -23,5 +23,6 @@ router.use("/student-logins", require("./studentLoginLog"));
 router.use("/export",         require("./export"));
 router.use("/reports",        require("./report"));
 router.use("/search",         require("./search"));
+router.use("/student-notices", require("./studentNotice"));
 
 module.exports = router;

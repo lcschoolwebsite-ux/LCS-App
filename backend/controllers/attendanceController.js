@@ -3,7 +3,7 @@ const Student    = require("../models/Student");
 const AcademicYear = require("../models/AcademicYear");
 const Teacher = require("../models/Teacher");
 const { getIO } = require("../utils/socket");
-const { notifyClassStudents } = require("../utils/pushNotification");
+const { notifyClassStudents, notifyStudentById } = require("../utils/pushNotification");
 const { isHolidayDate, getHolidayCalendar, toLocalDateString } = require("../utils/holidayUtils");
 
 const ensureAssignedClass = async (req, classId) => {
@@ -139,6 +139,37 @@ exports.markAttendance = async (req, res) => {
       console.warn("Socket notification failed:", err.message);
     }
 
+    // Send individual push notifications to absent students
+    if (absentIds && absentIds.length > 0) {
+      try {
+        const dateFormatted = new Date(date).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+
+        for (const studentId of absentIds) {
+          try {
+            await notifyStudentById(
+              studentId,
+              "Attendance Alert",
+              `You were marked absent on ${dateFormatted}. Please contact your teacher if this is incorrect.`,
+              { 
+                url: "/student/attendance",
+                type: "attendance",
+                date: date
+              }
+            );
+          } catch (notifyErr) {
+            console.warn(`Failed to notify student ${studentId}:`, notifyErr.message);
+          }
+        }
+      } catch (err) {
+        console.warn("Push notification to absent students failed:", err.message);
+      }
+    }
+
+    // Notify entire class about attendance update
     try {
       await notifyClassStudents(
         classId,
