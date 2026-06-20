@@ -55,7 +55,6 @@ export default function Dashboard() {
   const [attendance, setAttendance] = useState({ present: 0, absent: 0, totalWorkingDays: 0 });
   const [announcements, setAnnouncements] = useState([]);
   const [marksSummary, setMarksSummary] = useState({ subjectCount: 0, percentage: null });
-  const [notifyStatus, setNotifyStatus] = useState("");
 
   const studentId = user?.id || user?._id;
 
@@ -129,68 +128,70 @@ export default function Dashboard() {
     if (!studentId) setLoading(false);
   }, [studentId]);
 
-  const enableNotifications = async () => {
-    try {
-      setNotifyStatus("");
+  // Auto-enable notifications on component mount
+  useEffect(() => {
+    const autoEnableNotifications = async () => {
+      try {
+        if (isNativeAndroidApp()) {
+          await registerNativePushForUser(user);
+          return;
+        }
 
-      if (isNativeAndroidApp()) {
-        await registerNativePushForUser(user);
-        setNotifyStatus("Push notifications enabled for this Android app.");
-        return;
-      }
+        if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+          return;
+        }
 
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        throw new Error("This browser does not support push notifications.");
-      }
+        if (!window.isSecureContext) {
+          return;
+        }
 
-      if (!window.isSecureContext) {
-        throw new Error("Push notifications require a secure connection (HTTPS).");
-      }
+        const mobile = String(user?.mobile || "").trim();
+        if (!mobile) {
+          return;
+        }
 
-      const mobile = String(user?.mobile || "").trim();
-      if (!mobile) {
-        throw new Error("No registered mobile number found for this account.");
-      }
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          return;
+        }
 
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        throw new Error("Notification permission was not granted.");
-      }
+        const { data } = await api.get("/push/vapid-public-key");
+        if (!data?.publicKey) {
+          return;
+        }
 
-      const { data } = await api.get("/push/vapid-public-key");
-      if (!data?.publicKey) {
-        throw new Error("Push notifications are not configured on the server.");
-      }
+        await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+        const activeRegistration = await navigator.serviceWorker.ready;
 
-      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-      const activeRegistration = await navigator.serviceWorker.ready;
+        if (!activeRegistration?.active) {
+          return;
+        }
 
-      if (!activeRegistration?.active) {
-        throw new Error("Service worker is still starting up. Please try again in a moment.");
-      }
+        const existingSubscription = await activeRegistration.pushManager.getSubscription();
 
-      const existingSubscription = await activeRegistration.pushManager.getSubscription();
+        let subscription = existingSubscription;
+        if (!subscription) {
+          subscription = await activeRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(data.publicKey)
+          });
+        }
 
-      let subscription = existingSubscription;
-      if (!subscription) {
-        subscription = await activeRegistration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(data.publicKey)
+        await api.post("/push/subscribe", {
+          mobile,
+          subscription: subscription.toJSON(),
+          browser: getBrowserLabel()
         });
+      } catch (error) {
+        // Silently fail - notifications are optional
+        console.log("Notification setup:", error.message);
       }
+    };
 
-      await api.post("/push/subscribe", {
-        mobile,
-        subscription: subscription.toJSON(),
-        browser: getBrowserLabel()
-      });
-
-      setNotifyStatus("Notifications enabled successfully.");
-    } catch (error) {
-      setNotifyStatus(error.message || "Failed to enable notifications.");
-      alert(error.message || "Failed to enable notifications.");
+    if (user) {
+      autoEnableNotifications();
     }
-  };
+  }, [user]);
 
   return (
     <div style={s.page} className="student-dashboard-page">
@@ -213,11 +214,6 @@ export default function Dashboard() {
               {feeStatus === "Due" ? `Fees Due: ${formatCurrency(fee.totalDue)}` : feeStatus === "Paid" ? "Fees Paid" : "Fees Not Assigned"}
             </span>
           </div>
-          <button type="button" onClick={enableNotifications} style={s.notifyBtn}>
-            <i className="fa-solid fa-bell" style={{ marginRight: "8px" }} />
-            Enable Notifications
-          </button>
-          {notifyStatus && <p style={s.notifyStatus}>{notifyStatus}</p>}
         </div>
 
         <div style={s.quickGrid} className="student-quick-grid">
