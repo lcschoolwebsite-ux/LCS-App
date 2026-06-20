@@ -3,7 +3,6 @@ import { App } from "@capacitor/app";
 import { Network } from "@capacitor/network";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { LocalNotifications } from "@capacitor/local-notifications";
-import { SplashScreen } from "@capacitor/splash-screen";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import api from "../api/axios";
 import { APP_VERSION_CODE, VERSION_MANIFEST_URL } from "../config/appVersion";
@@ -29,10 +28,6 @@ export const bootstrapNativeShell = async () => {
   try {
     await StatusBar.setStyle({ style: Style.Dark });
     await StatusBar.setBackgroundColor({ color: "#051a1a" });
-  } catch (_) {}
-
-  try {
-    await SplashScreen.hide();
   } catch (_) {}
 
   let online = true;
