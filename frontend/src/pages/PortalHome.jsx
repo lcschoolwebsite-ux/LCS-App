@@ -1,7 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import "./PortalHome.css";
 
 export default function PortalHome() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const openStudentPortal = () => {
+    if (user?.role === "student") {
+      navigate("/student", { replace: false });
+      return;
+    }
+
+    navigate("/student-login", { replace: false });
+  };
+
   return (
     <div className="portal-page">
       <div className="portal-bg" />
@@ -29,7 +42,7 @@ export default function PortalHome() {
           {/* Login Options */}
           <div className="portal-login-options">
             {/* Student Login Card */}
-            <Link to="/student-login" className="portal-login-card portal-student-card">
+            <button type="button" onClick={openStudentPortal} className="portal-login-card portal-student-card">
               <div className="portal-login-icon">
                 <i className="fa-solid fa-graduation-cap"></i>
               </div>
@@ -41,7 +54,7 @@ export default function PortalHome() {
                   <i className="fa-solid fa-arrow-right"></i>
                 </div>
               </div>
-            </Link>
+            </button>
 
             {/* Teacher Login Card */}
             <Link to="/head" className="portal-login-card portal-teacher-card">
