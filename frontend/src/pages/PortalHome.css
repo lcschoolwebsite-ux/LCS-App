@@ -14,24 +14,26 @@
   font-family: "DM Sans", sans-serif;
   color: var(--white);
   background: var(--navy-dark);
+  isolation: isolate;
 }
 
 .portal-bg {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background:
     radial-gradient(ellipse 70% 60% at 10% 50%, rgba(14,107,107,0.45) 0%, transparent 65%),
     radial-gradient(ellipse 50% 70% at 90% 20%, rgba(200,150,12,0.08) 0%, transparent 60%),
-    linear-gradient(145deg, #051a1a 0%, #073535 50%, #051a1a 100%),
-    url("https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
+    linear-gradient(145deg, #051a1a 0%, #073535 50%, #051a1a 100%);
   z-index: 0;
+  pointer-events: none;
 }
 
 .portal-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: linear-gradient(160deg, rgba(4,35,35,0.97) 0%, rgba(6,50,50,0.95) 50%, rgba(4,35,35,0.97) 100%);
   z-index: 1;
+  pointer-events: none;
 }
 
 .portal-content {
@@ -51,7 +53,6 @@
   gap: 16px;
   padding: 1.1rem 0 0.6rem;
   border-bottom: 1px solid rgba(255,255,255,0.12);
-  animation: portalFadeDown 0.7s ease both;
 }
 
 .portal-school-brand {
@@ -121,7 +122,6 @@
   text-transform: uppercase;
   color: var(--gold-light);
   margin-bottom: 0.7rem;
-  animation: portalFadeUp 0.8s 0.1s ease both;
 }
 
 .portal-hero-title {
@@ -131,7 +131,6 @@
   line-height: 1.05;
   color: var(--white);
   text-shadow: 0 2px 24px rgba(0,0,0,0.3);
-  animation: portalFadeUp 0.8s 0.2s ease both;
 }
 
 .portal-hero-title span {
@@ -144,7 +143,6 @@
   background: var(--gold);
   border-radius: 2px;
   margin: 1rem auto;
-  animation: portalFadeUp 0.8s 0.3s ease both;
 }
 
 .portal-hero-desc {
@@ -152,7 +150,6 @@
   color: rgba(255,255,255,0.72);
   line-height: 1.7;
   max-width: 540px;
-  animation: portalFadeUp 0.8s 0.4s ease both;
 }
 
 .portal-hero-cta {
@@ -182,7 +179,6 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 0.9rem;
   padding: 0 0 1rem;
-  animation: portalFadeUp 0.8s 0.55s ease both;
 }
 
 .portal-info-card {
@@ -193,7 +189,6 @@
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  backdrop-filter: blur(6px);
   transition: background 0.22s, transform 0.22s;
 }
 
@@ -248,14 +243,12 @@
   color: var(--gold-light);
   margin-bottom: 0.55rem;
   font-weight: 600;
-  animation: portalFadeUp 0.8s 0.6s ease both;
 }
 
 .portal-ql-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
-  animation: portalFadeUp 0.8s 0.65s ease both;
 }
 
 .portal-ql-card {
@@ -329,9 +322,7 @@
   padding: 0.8rem 1.5rem;
   font-size: 0.72rem;
   color: rgba(255,255,255,0.38);
-  animation: portalFadeUp 0.8s 0.7s ease both;
   background: rgba(9,79,79,0.35);
-  backdrop-filter: blur(4px);
 }
 
 .portal-footer span {
@@ -365,23 +356,12 @@
   color: rgba(255,255,255,0.25);
 }
 
-@keyframes portalFadeDown {
-  from { opacity: 0; transform: translateY(-16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes portalFadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @media (max-width: 700px) {
   .portal-bg {
     background:
       radial-gradient(ellipse 75% 55% at 10% 20%, rgba(14,107,107,0.38) 0%, transparent 60%),
       radial-gradient(ellipse 60% 60% at 90% 10%, rgba(200,150,12,0.08) 0%, transparent 55%),
       linear-gradient(145deg, #051a1a 0%, #073535 50%, #051a1a 100%);
-    animation: none !important;
   }
 
   .portal-overlay,
@@ -394,14 +374,10 @@
   .portal-login-options,
   .portal-admin-note,
   .portal-footer,
-  .portal-hero-brand {
+  .portal-hero-brand,
+  .portal-info-row,
+  .portal-ql-row {
     animation: none !important;
-  }
-
-  .portal-login-card,
-  .portal-admin-note,
-  .portal-footer {
-    backdrop-filter: none;
   }
 
   .portal-content {
@@ -486,7 +462,6 @@
   width: 100%;
   max-width: 520px;
   margin: 32px auto 0;
-  animation: portalFadeUp 0.8s 0.5s ease both;
 }
 
 .portal-login-card {
@@ -494,7 +469,6 @@
   align-items: center;
   gap: 24px;
   background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  backdrop-filter: blur(20px);
   border: 2px solid rgba(200,150,12,0.25);
   border-radius: 24px;
   padding: 28px 32px;
@@ -661,8 +635,6 @@
   border-radius: 50px;
   font-size: 0.85rem;
   color: rgba(255,255,255,0.6);
-  backdrop-filter: blur(10px);
-  animation: portalFadeUp 0.8s 0.6s ease both;
 }
 
 .portal-admin-note i {
@@ -686,7 +658,6 @@
 /* Hero Brand for modern design */
 .portal-hero-brand {
   margin-bottom: 24px;
-  animation: portalFadeUp 0.8s 0.1s ease both;
 }
 
 .portal-hero-brand .portal-logo {
