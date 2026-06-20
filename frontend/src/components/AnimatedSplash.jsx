@@ -5,13 +5,17 @@ export default function AnimatedSplash({ onComplete }) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    // Auto-hide after 2.5 seconds
+    // Auto-hide after 1.5 seconds
     const timer = setTimeout(() => {
       setVisible(false);
       setTimeout(() => {
-        if (onComplete) onComplete();
-      }, 500); // Wait for fade out animation
-    }, 2500);
+        try {
+          if (onComplete) onComplete();
+        } catch (error) {
+          console.error("Splash onComplete error:", error);
+        }
+      }, 300); // Wait for fade out animation
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [onComplete]);

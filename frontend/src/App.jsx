@@ -25,8 +25,22 @@ const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const TeacherLayout = lazy(() => import("./layouts/TeacherLayout"));
 const StudentLayout = lazy(() => import("./layouts/StudentLayout"));
 
-// Loading component - now empty since we have AnimatedSplash
-const PageLoader = () => null;
+// Loading component - show a simple loader instead of blank
+const PageLoader = () => (
+  <div style={{
+    position: 'fixed',
+    inset: 0,
+    background: 'linear-gradient(145deg, #051a1a 0%, #073535 50%, #051a1a 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    gap: '20px'
+  }}>
+    <i className="fa-solid fa-circle-notch fa-spin" style={{ fontSize: '3rem', color: '#c8960c' }}></i>
+    <p style={{ color: '#fff', fontSize: '1rem' }}>Loading...</p>
+  </div>
+);
 
 function AppContent() {
   const { user } = useAuth();
@@ -35,6 +49,18 @@ function AppContent() {
   const [isOnline, setIsOnline] = useState(true);
   const [updateInfo, setUpdateInfo] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
+
+  // Fallback: Force hide splash after max 3 seconds
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      if (showSplash) {
+        console.warn("Splash screen fallback timeout triggered");
+        setShowSplash(false);
+      }
+    }, 3000);
+
+    return () => clearTimeout(fallbackTimer);
+  }, [showSplash]);
 
   useEffect(() => {
     if (socket) {

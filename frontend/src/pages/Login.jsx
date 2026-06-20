@@ -96,7 +96,10 @@ export default function Login() {
       else if (user.role === "teacher") navigate("/teacher");
       else navigate("/student");
     } catch (e) {
-      setError(e.response?.data?.message || "Login failed");
+      console.error("Login error:", e);
+      console.error("Error response:", e.response);
+      const errorMsg = e.response?.data?.message || e.message || "Login failed";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
