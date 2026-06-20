@@ -99,6 +99,8 @@ export default function TeacherLayout() {
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
         onLogout={handleLogout}
+        schoolName="Loretto Central School"
+        logoUrl="/logo.png"
       />
 
       {/* Sidebar */}

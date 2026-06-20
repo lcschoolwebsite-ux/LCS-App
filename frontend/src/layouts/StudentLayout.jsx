@@ -131,6 +131,8 @@ export default function StudentLayout() {
           currentPath={location.pathname}
           onMenuClick={() => setMenuOpen(true)}
           onLogout={handleLogout}
+          schoolName="Loretto Central School"
+          logoUrl="/logo.png"
         />
 
         {/* Top Header */}

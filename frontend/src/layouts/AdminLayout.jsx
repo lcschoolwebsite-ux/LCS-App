@@ -107,6 +107,8 @@ export default function AdminLayout() {
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
         onLogout={handleLogout}
+        schoolName="Loretto Central School"
+        logoUrl="/logo.png"
       />
 
       <aside style={s.sidebar} className="admin-sidebar">
