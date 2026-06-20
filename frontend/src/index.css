@@ -473,17 +473,17 @@ input, select, textarea {
     top: 0 !important;
     height: auto !important;
     padding: 12px 14px !important;
-    align-items: flex-start !important;
-    flex-direction: column !important;
+    align-items: center !important;
+    flex-direction: row !important;
     gap: 10px !important;
   }
 
   .teacher-header-right {
-    width: 100%;
-    flex-wrap: wrap !important;
-    justify-content: flex-start;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
     gap: 8px !important;
-    margin-left: 0;
+    margin-left: auto !important;
+    overflow-x: auto !important;
   }
 
   .teacher-header-right button,
@@ -592,17 +592,17 @@ input, select, textarea {
     top: 0 !important;
     height: auto !important;
     padding: 12px 14px !important;
-    align-items: flex-start !important;
-    flex-direction: column !important;
+    align-items: center !important;
+    flex-direction: row !important;
     gap: 10px !important;
   }
 
   .student-header-right {
-    width: 100%;
-    flex-wrap: wrap !important;
-    justify-content: flex-start;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
     gap: 8px !important;
-    margin-left: 0;
+    margin-left: auto !important;
+    overflow-x: auto !important;
   }
 
   .student-header-right button,
@@ -911,16 +911,17 @@ table {
     position: sticky !important;
     top: 0 !important;
     padding: 12px 14px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
+    flex-direction: row !important;
+    align-items: center !important;
     gap: 10px !important;
   }
 
   .admin-header-right {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
     gap: 8px !important;
+    margin-left: auto !important;
+    overflow-x: auto !important;
   }
 
   .admin-header-right button,
