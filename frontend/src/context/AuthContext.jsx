@@ -18,6 +18,15 @@ const applyAuthSession = ({ token, user }) => {
   return user || null;
 };
 
+const hydrateCurrentUser = async (fallbackUser = null) => {
+  try {
+    const { data } = await api.get("/auth/me");
+    return data || fallbackUser || null;
+  } catch (_) {
+    return fallbackUser || null;
+  }
+};
+
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,13 +75,20 @@ export function AuthProvider({ children }) {
       username, 
       password 
     });
-    setUser(applyAuthSession(data));
-    return data;
+    const sessionUser = applyAuthSession(data);
+    const hydratedUser = await hydrateCurrentUser(sessionUser);
+    setUser(hydratedUser);
+    return {
+      ...data,
+      user: hydratedUser
+    };
   };
 
   const restoreSession = async ({ token, user: nextUser }) => {
-    setUser(applyAuthSession({ token, user: nextUser }));
-    return nextUser || null;
+    const sessionUser = applyAuthSession({ token, user: nextUser });
+    const hydratedUser = await hydrateCurrentUser(sessionUser);
+    setUser(hydratedUser);
+    return hydratedUser;
   };
 
   const logout = () => {

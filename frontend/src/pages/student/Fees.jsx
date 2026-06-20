@@ -54,6 +54,11 @@ const numberToIndianWords = (amount) => {
   return `${parts.join(" ")} Rupees Only`;
 };
 
+const getStudentId = (user) => {
+  const rawId = user?.id || user?._id || user?.studentId || user?.profileId;
+  return rawId ? String(rawId) : "";
+};
+
 export default function StudentFees() {
   const { user } = useAuth();
   const { academicYearLabel } = useActiveAcademicYear(user?.academicYear?.year);
@@ -62,7 +67,7 @@ export default function StudentFees() {
   const [error, setError] = useState("");
 
   const fetchFeeData = async () => {
-    const studentId = user?.id || user?._id;
+    const studentId = getStudentId(user);
     if (!studentId) {
       setLoading(false);
       return;

@@ -30,6 +30,11 @@ const getWeekStart = (date) => {
   return start;
 };
 
+const getStudentId = (user) => {
+  const rawId = user?.id || user?._id || user?.studentId || user?.profileId;
+  return rawId ? String(rawId) : "";
+};
+
 export default function Attendance() {
   const { user } = useAuth();
   const [report, setReport] = useState(null);
@@ -53,7 +58,7 @@ export default function Attendance() {
     const fetchReport = async () => {
       setLoading(true);
       try {
-        const studentId = user?._id || user?.id;
+        const studentId = getStudentId(user);
         if (!studentId) {
           setReport({ log: [] });
           setYearlyStats({ totalWorkingDays: 0, present: 0, absent: 0 });

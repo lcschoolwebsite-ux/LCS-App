@@ -16,6 +16,11 @@ const getMonthParts = () => {
 
 const formatCurrency = (amount = 0) => `₹${Number(amount || 0).toLocaleString("en-IN")}`;
 
+const getStudentId = (user) => {
+  const rawId = user?.id || user?._id || user?.studentId || user?.profileId;
+  return rawId ? String(rawId) : "";
+};
+
 const urlBase64ToUint8Array = (base64String) => {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -56,7 +61,7 @@ export default function Dashboard() {
   const [announcements, setAnnouncements] = useState([]);
   const [marksSummary, setMarksSummary] = useState({ subjectCount: 0, percentage: null });
 
-  const studentId = user?.id || user?._id;
+  const studentId = getStudentId(user);
 
   // Memoize computed values
   const feeStatus = useMemo(() => 

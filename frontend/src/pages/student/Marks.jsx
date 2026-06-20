@@ -50,6 +50,11 @@ const fitText = (doc, text, maxWidth) => {
   return `${output}...`;
 };
 
+const getStudentId = (user) => {
+  const rawId = user?.id || user?._id || user?.studentId || user?.profileId;
+  return rawId ? String(rawId) : "";
+};
+
 export default function Marks() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -60,7 +65,7 @@ export default function Marks() {
   const [error, setError] = useState("");
   const { academicYearLabel } = useActiveAcademicYear(user?.academicYear?.year);
 
-  const studentId = user?._id || user?.id;
+  const studentId = getStudentId(user);
   const activeType = examType ? decodeURIComponent(examType) : "";
 
   useEffect(() => {
