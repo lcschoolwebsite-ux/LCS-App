@@ -44,9 +44,15 @@ if (Capacitor.getPlatform() === "android" && Capacitor.isNativePlatform()) {
   StatusBar.setBackgroundColor({ color: "#051a1a" }).catch(() => {});
   StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
 
-  window.addEventListener("portal-app-ready", () => {
-    setTimeout(hideNativeSplash, 180);
-  }, { once: true });
+  const scheduleHide = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(hideNativeSplash, 120);
+      });
+    });
+  };
+
+  window.addEventListener("load", scheduleHide, { once: true });
 
   // Safety net: never leave the app pinned to the native splash.
   setTimeout(hideNativeSplash, 4000);

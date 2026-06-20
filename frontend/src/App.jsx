@@ -31,10 +31,6 @@ function AppContent() {
   const [updateInfo, setUpdateInfo] = useState(null);
   const [showSplash, setShowSplash] = useState(!isNativeAndroidApp());
 
-  useEffect(() => {
-    window.dispatchEvent(new Event("portal-app-ready"));
-  }, []);
-
   // Fallback: Force hide splash after max 3 seconds on web.
   useEffect(() => {
     if (isNativeAndroidApp()) return;
