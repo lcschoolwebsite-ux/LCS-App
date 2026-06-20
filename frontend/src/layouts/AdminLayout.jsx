@@ -84,6 +84,7 @@ export default function AdminLayout() {
     { label: "Notices", shortLabel: "Notices", path: "/admin/announcements", icon: "fa-solid fa-bullhorn" },
     { label: "Attendance", shortLabel: "Attend", path: "/admin/attendance", icon: "fa-solid fa-calendar-check" },
     { label: "Marks", shortLabel: "Marks", path: "/admin/marks-overview", icon: "fa-solid fa-chart-column" },
+    { label: "Fees", shortLabel: "Fees", path: "/admin/fees", icon: "fa-solid fa-receipt" },
   ];
 
   return (

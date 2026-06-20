@@ -76,6 +76,7 @@ export default function TeacherLayout() {
     { label: "Notices", shortLabel: "Notices", path: "/teacher/announcements", icon: "fa-solid fa-bullhorn" },
     { label: "Attendance", shortLabel: "Attend", path: "/teacher/attendance", icon: "fa-solid fa-clipboard-user" },
     { label: "Marks", shortLabel: "Marks", path: "/teacher/marks", icon: "fa-solid fa-pen-to-square" },
+    { label: "Students", shortLabel: "Students", path: "/teacher/students", icon: "fa-solid fa-users" },
   ];
 
   return (

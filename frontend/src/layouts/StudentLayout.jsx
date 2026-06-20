@@ -59,6 +59,7 @@ export default function StudentLayout() {
     { label: "Notices", shortLabel: "Notices", path: "/student/announcements", icon: "fa-solid fa-bullhorn" },
     { label: "Attendance", shortLabel: "Attend", path: "/student/attendance", icon: "fa-solid fa-calendar-check" },
     { label: "Marks", shortLabel: "Marks", path: "/student/marks", icon: "fa-solid fa-ranking-star" },
+    { label: "Fees", shortLabel: "Fees", path: "/student/fees", icon: "fa-solid fa-wallet" },
   ];
 
   return (

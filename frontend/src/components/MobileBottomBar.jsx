@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function MobileBottomBar({
   items = [],
@@ -7,10 +8,35 @@ export default function MobileBottomBar({
   menuLabel = "Menu",
   className = "",
 }) {
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < 10) {
+        // Always show when at the top
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        // Scrolling down - hide
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up - show
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   return (
     <nav
       className={className}
-      style={s.bar}
+      style={{...s.bar, transform: isVisible ? 'translateY(0)' : 'translateY(100%)'}}
       aria-label="Mobile quick navigation"
     >
       <button type="button" onClick={onMenuClick} style={s.menuBtn} aria-label={menuLabel}>
@@ -42,69 +68,72 @@ const s = {
   bar: {
     display: "none",
     alignItems: "center",
-    gap: "6px",
+    justifyContent: "center",
+    gap: "8px",
     position: "fixed",
     left: 0,
     right: 0,
     bottom: 0,
     zIndex: 120,
-    padding: "8px 10px calc(8px + env(safe-area-inset-bottom, 0px))",
+    padding: "10px 12px calc(10px + env(safe-area-inset-bottom, 0px))",
     background: "linear-gradient(135deg, #051a1a 0%, #094f4f 100%)",
-    borderTop: "2px solid rgba(200, 150, 12, 0.4)",
-    boxShadow: "0 -10px 28px rgba(0,0,0,0.18)"
+    borderTop: "2px solid rgba(200, 150, 12, 0.5)",
+    boxShadow: "0 -4px 20px rgba(0,0,0,0.25)",
+    transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
   },
   menuBtn: {
-    minWidth: "52px",
-    minHeight: "42px",
-    borderRadius: "12px",
-    border: "1px solid rgba(255,255,255,0.12)",
-    background: "rgba(255,255,255,0.08)",
-    color: "var(--white)",
+    minWidth: "56px",
+    minHeight: "46px",
+    borderRadius: "14px",
+    border: "1px solid rgba(200,150,12,0.3)",
+    background: "rgba(200,150,12,0.15)",
+    color: "var(--gold-light)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: "1px",
-    padding: "6px 8px",
-    fontSize: "0.56rem",
+    gap: "2px",
+    padding: "6px 10px",
+    fontSize: "0.58rem",
     fontWeight: 800,
-    flex: "0 0 auto"
+    flex: "0 0 auto",
+    transition: "all 0.2s ease"
   },
   items: {
     display: "flex",
     alignItems: "center",
-    gap: "6px",
-    overflowX: "auto",
-    flex: 1,
-    minWidth: 0,
-    paddingBottom: "2px",
-    WebkitOverflowScrolling: "touch"
+    justifyContent: "center",
+    gap: "8px",
+    flex: "0 0 auto"
   },
   item: {
-    minWidth: "58px",
-    minHeight: "42px",
-    borderRadius: "12px",
-    border: "1px solid rgba(255,255,255,0.08)",
-    background: "rgba(255,255,255,0.06)",
-    color: "rgba(255,255,255,0.88)",
+    minWidth: "62px",
+    minHeight: "46px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(255,255,255,0.08)",
+    color: "rgba(255,255,255,0.9)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: "1px",
-    padding: "6px 8px",
-    fontSize: "0.56rem",
+    gap: "2px",
+    padding: "6px 10px",
+    fontSize: "0.58rem",
     fontWeight: 800,
     whiteSpace: "nowrap",
-    flex: "0 0 auto"
+    flex: "0 0 auto",
+    transition: "all 0.2s ease"
   },
   activeItem: {
-    background: "var(--gold)",
+    background: "linear-gradient(135deg, var(--gold), var(--gold-light))",
     color: "var(--navy-dark)",
-    borderColor: "var(--gold)"
+    borderColor: "var(--gold-light)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 4px 12px rgba(200, 150, 12, 0.4)"
   },
   icon: {
-    fontSize: "0.86rem",
+    fontSize: "0.95rem",
     lineHeight: 1
   }
 };
