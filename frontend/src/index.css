@@ -496,6 +496,10 @@ input, select, textarea {
     padding: 16px 14px 24px !important;
   }
 
+  .teacher-logout-btn {
+    display: block !important;
+  }
+
   .teacher-hero-banner {
     padding: 20px 18px !important;
     border-radius: 14px !important;
@@ -618,6 +622,10 @@ input, select, textarea {
   .student-content {
     padding: 16px 14px 24px !important;
     padding-bottom: 120px !important;
+  }
+
+  .student-logout-btn {
+    display: block !important;
   }
 
   .student-dashboard-grid,
@@ -924,6 +932,10 @@ table {
   .admin-content {
     padding: 16px 14px 24px !important;
     padding-bottom: 104px !important;
+  }
+
+  .admin-logout-btn {
+    display: block !important;
   }
 
   .admin-content [style*="grid-template-columns"] {

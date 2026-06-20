@@ -80,10 +80,10 @@ export default function AdminLayout() {
 
   const currentPathLabel = menuGroups.flatMap(g => g.items).find(i => i.path === location.pathname)?.label || "Dashboard";
   const bottomBarItems = [
+    { label: "Dashboard", shortLabel: "Home", path: "/admin", icon: "fa-solid fa-gauge-high" },
     { label: "Notices", shortLabel: "Notices", path: "/admin/announcements", icon: "fa-solid fa-bullhorn" },
     { label: "Attendance", shortLabel: "Attend", path: "/admin/attendance", icon: "fa-solid fa-calendar-check" },
     { label: "Marks", shortLabel: "Marks", path: "/admin/marks-overview", icon: "fa-solid fa-chart-column" },
-    { label: "Fee", shortLabel: "Fee", path: "/admin/fees", icon: "fa-solid fa-receipt" },
   ];
 
   return (
@@ -106,9 +106,6 @@ export default function AdminLayout() {
         items={bottomBarItems}
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
-        onLogout={handleLogout}
-        schoolName="Loretto Central School"
-        logoUrl="/logo.png"
       />
 
       <aside style={s.sidebar} className="admin-sidebar">
@@ -160,6 +157,9 @@ export default function AdminLayout() {
           </div>
           <div style={s.headerRight} className="admin-header-right">
             <div style={s.badge}>AY {academicYearLabel}</div>
+            <button onClick={handleLogout} style={s.logoutBtn} className="admin-logout-btn">
+              <i className="fa-solid fa-right-from-bracket"></i>
+            </button>
             <div style={s.adminAvatar}>{user?.name?.[0] || "A"}</div>
           </div>
         </header>
@@ -235,6 +235,7 @@ const s = {
   breadcrumb: { fontSize: "0.75rem", color: "var(--text-muted)" },
   headerRight: { display: "flex", alignItems: "center", gap: "16px" },
   badge: { background: "var(--gold-pale)", color: "var(--navy-dark)", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "800" },
+  logoutBtn: { display: "none", background: "none", border: "none", fontSize: "1.2rem", color: "var(--navy)", cursor: "pointer" },
   adminAvatar: { width: "40px", height: "40px", borderRadius: "50%", background: "var(--gold)", color: "var(--navy-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800" },
   content: { padding: "32px", flex: 1 },
   loading: { padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "1.1rem" }

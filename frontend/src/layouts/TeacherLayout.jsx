@@ -72,10 +72,10 @@ export default function TeacherLayout() {
   const allMenuItems = MENU_GROUPS.flatMap(g => g.items);
   const currentPathLabel = allMenuItems.find(i => i.path === location.pathname)?.label || "Dashboard";
   const bottomBarItems = [
+    { label: "Dashboard", shortLabel: "Home", path: "/teacher", icon: "fa-solid fa-chart-line" },
     { label: "Notices", shortLabel: "Notices", path: "/teacher/announcements", icon: "fa-solid fa-bullhorn" },
-    { label: "Attendance", shortLabel: "Attend", path: "/teacher/attendance", icon: "fa-solid fa-calendar-check" },
+    { label: "Attendance", shortLabel: "Attend", path: "/teacher/attendance", icon: "fa-solid fa-clipboard-user" },
     { label: "Marks", shortLabel: "Marks", path: "/teacher/marks", icon: "fa-solid fa-pen-to-square" },
-    { label: "Fee", shortLabel: "Fee", path: "/teacher/profile", icon: "fa-solid fa-wallet" },
   ];
 
   return (
@@ -98,9 +98,6 @@ export default function TeacherLayout() {
         items={bottomBarItems}
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
-        onLogout={handleLogout}
-        schoolName="Loretto Central School"
-        logoUrl="/logo.png"
       />
 
       {/* Sidebar */}
@@ -163,6 +160,9 @@ export default function TeacherLayout() {
               <i className="fa-regular fa-bell"></i>
             </button>
             <div style={s.headerYearPill}>{academicYearLabel}</div>
+            <button onClick={handleLogout} style={s.logoutBtn} className="teacher-logout-btn">
+              <i className="fa-solid fa-right-from-bracket"></i>
+            </button>
             <div style={s.headerAvatar}>{user?.name?.[0] || 'T'}</div>
           </div>
         </header>
@@ -231,6 +231,7 @@ const s = {
   
   headerRight: { display: "flex", alignItems: "center", gap: "20px" },
   bellBtn: { background: "none", border: "none", fontSize: "1.2rem", color: "var(--navy)", position: "relative", cursor: "pointer" },
+  logoutBtn: { display: "none", background: "none", border: "none", fontSize: "1.2rem", color: "var(--navy)", cursor: "pointer" },
   headerYearPill: { background: "var(--navy)", color: "var(--gold)", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "800" },
   headerAvatar: { width: "36px", height: "36px", borderRadius: "50%", background: "linear-gradient(135deg, var(--gold), var(--gold-light))", color: "var(--navy-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", cursor: "pointer", fontSize: "0.9rem" },
 
