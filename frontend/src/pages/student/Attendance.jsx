@@ -33,6 +33,7 @@ const getWeekStart = (date) => {
 export default function Attendance() {
   const { user } = useAuth();
   const [report, setReport] = useState(null);
+  const [yearlyStats, setYearlyStats] = useState({ totalWorkingDays: 0, present: 0, absent: 0 });
   const [selectedDate, setSelectedDate] = useState(() => formatDate(new Date()));
   const [loading, setLoading] = useState(true);
 
@@ -55,8 +56,20 @@ export default function Attendance() {
         const studentId = user?._id || user?.id;
         if (!studentId) {
           setReport({ log: [] });
+          setYearlyStats({ totalWorkingDays: 0, present: 0, absent: 0 });
           return;
         }
+        
+        // Fetch yearly stats (for the stats boxes at the top)
+        const currentYear = user?.academicYear?.year || new Date().getFullYear();
+        const yearlyResponse = await api.get(`/attendance/student-report?studentId=${studentId}&year=${currentYear}`);
+        setYearlyStats({
+          totalWorkingDays: yearlyResponse.data.total || 0,
+          present: yearlyResponse.data.present || 0,
+          absent: yearlyResponse.data.absent || 0
+        });
+        
+        // Fetch weekly data (for the table view)
         const monthKeys = Array.from(new Set(
           selectedWeek.map(({ date }) => `${date.getFullYear()}-${date.getMonth() + 1}`)
         ));
@@ -71,6 +84,7 @@ export default function Attendance() {
       } catch (e) {
         console.error(e);
         setReport({ log: [] });
+        setYearlyStats({ totalWorkingDays: 0, present: 0, absent: 0 });
       } finally {
         setLoading(false);
       }
@@ -93,12 +107,6 @@ export default function Attendance() {
     [attendanceByDate, selectedWeek]
   );
 
-  const weeklyStats = useMemo(() => ({
-    totalWorkingDays: weeklyRows.filter(row => row.status !== "Not Marked").length,
-    present: weeklyRows.filter(row => row.status === "Present").length,
-    absent: weeklyRows.filter(row => row.status === "Absent").length
-  }), [weeklyRows]);
-
   const weekLabel = `${selectedWeek[0].date.toLocaleDateString(undefined, { month: "short", day: "numeric" })} - ${selectedWeek[6].date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
 
   const changeWeek = (direction) => {
@@ -111,13 +119,13 @@ export default function Attendance() {
     <div>
       <SectionTitle 
         title="My Attendance" 
-        subtitle="Track your attendance one week at a time." 
+        subtitle="Track your attendance for the complete academic year." 
       />
       
       <div style={s.statsGrid} className="student-attendance-stats">
-        <StatBox label="Total Working Days" value={weeklyStats.totalWorkingDays} color="var(--navy)" icon="fa-solid fa-calendar-days" />
-        <StatBox label="Days Present" value={weeklyStats.present} color="var(--success-text)" icon="fa-solid fa-user-check" />
-        <StatBox label="Days Absent" value={weeklyStats.absent} color="var(--danger-text)" icon="fa-solid fa-user-xmark" />
+        <StatBox label="Total Working Days" value={yearlyStats.totalWorkingDays} color="var(--navy)" icon="fa-solid fa-calendar-days" />
+        <StatBox label="Days Present" value={yearlyStats.present} color="var(--success-text)" icon="fa-solid fa-user-check" />
+        <StatBox label="Days Absent" value={yearlyStats.absent} color="var(--danger-text)" icon="fa-solid fa-user-xmark" />
       </div>
 
       <div style={s.card} className="student-table-card">
