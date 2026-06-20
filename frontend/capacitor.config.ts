@@ -4,10 +4,6 @@ const config: CapacitorConfig = {
   appId: "edu.lorettocentralschool.portal",
   appName: "LCS Portal",
   webDir: "dist",
-  server: {
-    url: "https://lcs-portal.pages.dev",
-    cleartext: false
-  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,
