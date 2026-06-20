@@ -29,14 +29,16 @@ function AppContent() {
   const [notification, setNotification] = useState(null);
   const [isOnline, setIsOnline] = useState(true);
   const [updateInfo, setUpdateInfo] = useState(null);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(!isNativeAndroidApp());
 
   useEffect(() => {
     window.dispatchEvent(new Event("portal-app-ready"));
   }, []);
 
-  // Fallback: Force hide splash after max 3 seconds
+  // Fallback: Force hide splash after max 3 seconds on web.
   useEffect(() => {
+    if (isNativeAndroidApp()) return;
+
     const fallbackTimer = setTimeout(() => {
       if (showSplash) {
         console.warn("Splash screen fallback timeout triggered");

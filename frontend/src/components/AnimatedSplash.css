@@ -64,7 +64,7 @@
 .splash-gradient-3 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, #10b981 0%, transparent 70%);
+  background: radial-gradient(circle, #c8960c 0%, transparent 70%);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
