@@ -7,6 +7,7 @@ export default function MobileBottomBar({
   onMenuClick,
   menuLabel = "Menu",
   className = "",
+  forceVisible = false,
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -35,7 +36,7 @@ export default function MobileBottomBar({
 
   return (
     <nav
-      className={className}
+      className={`${className} ${forceVisible ? "force-visible" : ""}`.trim()}
       style={{...s.bar, transform: isVisible ? 'translateY(0)' : 'translateY(100%)'}}
       aria-label="Mobile quick navigation"
     >

@@ -362,6 +362,10 @@ input, select, textarea {
   min-width: 0 !important;
 }
 
+.mobile-bottom-bar.force-visible {
+  display: flex !important;
+}
+
 .teacher-table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -765,6 +769,10 @@ input, select, textarea {
   .mobile-bottom-bar {
     display: flex !important;
   }
+
+  .mobile-bottom-bar.force-visible {
+    display: flex !important;
+  }
 }
 
 @media (max-width: 420px) {
@@ -1106,6 +1114,10 @@ table {
   }
 
   .mobile-bottom-bar {
+    display: flex !important;
+  }
+
+  .mobile-bottom-bar.force-visible {
     display: flex !important;
   }
 }

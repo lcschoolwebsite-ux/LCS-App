@@ -5,6 +5,7 @@ import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
 import AppFooter from "../components/AppFooter";
 import MobileBottomBar from "../components/MobileBottomBar";
 import MobileMenuDrawer from "../components/MobileMenuDrawer";
+import { isNativeAndroidApp } from "../services/nativeBridge";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
@@ -109,6 +110,7 @@ export default function AdminLayout() {
         items={bottomBarItems}
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
+        forceVisible={isNativeAndroidApp()}
       />
 
       <aside style={s.sidebar} className="admin-sidebar">

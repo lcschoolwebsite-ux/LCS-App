@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import useActiveAcademicYear from "../hooks/useActiveAcademicYear";
+import { isNativeAndroidApp } from "../services/nativeBridge";
 import AppFooter from "../components/AppFooter";
 import InstallAppButton from "../components/InstallAppButton";
 import MobileBottomBar from "../components/MobileBottomBar";
@@ -126,12 +127,13 @@ export default function StudentLayout() {
       <main style={s.main} className="student-main">
         <div style={s.mobileTopbar} className="student-mobile-topbar" aria-hidden="true" />
 
-        <MobileBottomBar
-          className="mobile-bottom-bar"
-          items={bottomBarItems}
-          currentPath={location.pathname}
-          onMenuClick={() => setMenuOpen(true)}
-        />
+      <MobileBottomBar
+        className="mobile-bottom-bar"
+        items={bottomBarItems}
+        currentPath={location.pathname}
+        onMenuClick={() => setMenuOpen(true)}
+        forceVisible={isNativeAndroidApp()}
+      />
 
         {/* Top Header */}
         <header style={s.header} className="student-header">
