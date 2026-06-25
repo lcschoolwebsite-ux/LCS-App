@@ -2,6 +2,9 @@ const defaultOrigins = [
   "https://lorettocentralschool.edu.in",
   "https://portal.lorettocentralschool.edu.in",
   "https://lcs-portal.pages.dev",
+  "capacitor://localhost",
+  "ionic://localhost",
+  "app://localhost",
   "http://localhost:3000",
   "http://localhost:5173"
 ];
@@ -13,7 +16,7 @@ const configuredOrigins = (process.env.CLIENT_URL || "")
 
 const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
-const localhostDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/;
+const localhostDevOrigin = /^(https?|capacitor|ionic|app):\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/;
 
 const isAllowedOrigin = origin => {
   if (!origin) return true;

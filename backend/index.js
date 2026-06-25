@@ -23,10 +23,16 @@ const frontendOrigins = [
   "https://lcs-portal.pages.dev",
   "capacitor://localhost",
   "ionic://localhost",
+  "app://localhost",
   "http://localhost",
   "http://localhost:5173",
-  "http://localhost:3000"
+  "http://localhost:3000",
+  "https://localhost",
+  "https://localhost:5173",
+  "https://localhost:3000"
 ].filter(Boolean);
+
+const localhostOriginPattern = /^(https?|capacitor|ionic|app):\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/;
 
 mongoose.set("strictQuery", true);
 
@@ -39,7 +45,7 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     // Check if origin is in allowed list
-    if (frontendOrigins.indexOf(origin) !== -1) {
+    if (frontendOrigins.indexOf(origin) !== -1 || localhostOriginPattern.test(origin)) {
       callback(null, true);
     } else {
       console.warn(`CORS blocked origin: ${origin}`);
