@@ -548,7 +548,16 @@ input, select, textarea {
   }
 
   .student-mobile-topbar {
-    display: none !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: linear-gradient(135deg, #051a1a 0%, #094f4f 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 12px 14px calc(12px + env(safe-area-inset-top, 0px));
+    position: sticky;
+    top: 0;
+    z-index: 95;
   }
 
   .student-mobile-brand-copy {
@@ -588,17 +597,11 @@ input, select, textarea {
 
   .student-main {
     margin-left: 0 !important;
-    padding-top: 10px !important;
+    padding-top: 0 !important;
   }
 
   .student-header {
-    position: sticky !important;
-    top: 0 !important;
-    height: auto !important;
-    padding: 12px 14px !important;
-    align-items: center !important;
-    flex-direction: row !important;
-    gap: 10px !important;
+    display: none !important;
   }
 
   .student-header-right {
@@ -629,7 +632,7 @@ input, select, textarea {
   }
 
   .student-logout-btn {
-    display: block !important;
+    display: none !important;
   }
 
   .student-dashboard-grid,
@@ -1068,18 +1071,11 @@ table {
 
 @media (max-width: 420px) {
   .student-mobile-topbar {
-    grid-template-columns: 40px minmax(0, 1fr) 40px;
-    padding: 10px 10px 10px;
-    padding-top: calc(10px + var(--safe-area-inset-top));
-    gap: 6px;
+    padding: 10px 10px calc(10px + var(--safe-area-inset-top));
     min-height: 60px;
   }
 
   .student-mobile-brand-copy {
-    display: none !important;
-  }
-
-  .student-mobile-topbar .student-mobile-subtitle {
     display: none !important;
   }
 
@@ -1089,28 +1085,17 @@ table {
   }
 
   .student-mobile-school-name {
-    font-size: 0.84rem;
+    font-size: 0.82rem;
   }
 
-  .student-mobile-menu-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+  .student-mobile-year-pill {
+    padding: 5px 9px;
+    font-size: 0.62rem;
   }
 
   .student-mobile-logout {
     width: 34px;
     height: 34px;
-  }
-
-  .student-mobile-topbar .student-mobile-menu-btn,
-  .student-mobile-topbar .student-mobile-logout {
-    min-width: 34px;
-    min-height: 34px;
-  }
-
-  .student-mobile-topbar .student-mobile-install {
-    display: none !important;
   }
 
   .mobile-bottom-bar {
