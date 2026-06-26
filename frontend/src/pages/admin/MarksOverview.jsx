@@ -18,7 +18,7 @@ const blankStudent = {
 
 export default function MarksOverview() {
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ classId: "", examType: "", search: "" });
+  const [filters, setFilters] = useState({ classId: "", examType: "", search: "", teacherId: "" });
   const [classes, setClasses] = useState([]);
   const [examTypes, setExamTypes] = useState([]);
   const [overview, setOverview] = useState({
@@ -32,11 +32,16 @@ export default function MarksOverview() {
       teacherCount: 0
     },
     teachers: [],
+    marks: [],
     students: [],
     failedBreakdown: [],
     exams: []
   });
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const selectedTeacher = useMemo(
+    () => overview.teachers.find(teacher => teacher.id === filters.teacherId) || null,
+    [overview.teachers, filters.teacherId]
+  );
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -61,7 +66,8 @@ export default function MarksOverview() {
         const params = {
           ...(filters.classId ? { classId: filters.classId } : {}),
           ...(filters.examType ? { examType: filters.examType } : {}),
-          ...(filters.search.trim() ? { search: filters.search.trim() } : {})
+          ...(filters.search.trim() ? { search: filters.search.trim() } : {}),
+          ...(filters.teacherId ? { teacherId: filters.teacherId } : {})
         };
         const { data } = await api.get("/marks/admin/overview", { params });
         setOverview(data);
@@ -76,7 +82,7 @@ export default function MarksOverview() {
       }
     };
     fetchOverview();
-  }, [filters.classId, filters.examType, filters.search]);
+  }, [filters.classId, filters.examType, filters.search, filters.teacherId]);
 
   const selectedStudent = useMemo(
     () => overview.students.find(student => student.studentId === selectedStudentId) || overview.students[0] || blankStudent,
@@ -110,7 +116,7 @@ export default function MarksOverview() {
         </div>
         <button
           type="button"
-          onClick={() => setFilters({ classId: "", examType: "", search: "" })}
+          onClick={() => setFilters({ classId: "", examType: "", search: "", teacherId: "" })}
           style={s.resetBtn}
         >
           <i className="fa-solid fa-rotate-right" style={{ marginRight: 8 }} />
@@ -187,22 +193,57 @@ export default function MarksOverview() {
           </div>
 
           <div style={s.teacherList} className="marks-overview-teacher-list">
-            {overview.teachers.length ? overview.teachers.map(teacher => (
-              <div key={teacher.id} style={s.teacherRow}>
+            {overview.teachers.length ? overview.teachers.map(teacher => {
+              const isActive = teacher.id === filters.teacherId;
+              return (
+              <button
+                key={teacher.id}
+                type="button"
+                onClick={() => setFilters(prev => ({ ...prev, teacherId: prev.teacherId === teacher.id ? "" : teacher.id }))}
+                style={{ ...s.teacherRow, ...(isActive ? s.teacherRowActive : {}) }}
+              >
                 <div>
                   <div style={s.teacherName}>{teacher.name}</div>
                   <div style={s.teacherMeta}>{teacher.marksCount} marks across {teacher.examCount} exams</div>
+                  <div style={s.teacherInfoLine}>
+                    <span style={s.teacherInfoLabel}>Classes:</span>
+                    <span style={s.teacherInfoValue}>{teacher.classes?.length ? teacher.classes.join(", ") : "N/A"}</span>
+                  </div>
+                  <div style={s.teacherInfoLine}>
+                    <span style={s.teacherInfoLabel}>Subjects:</span>
+                    <span style={s.teacherInfoValue}>{teacher.subjects?.length ? teacher.subjects.join(", ") : "N/A"}</span>
+                  </div>
                 </div>
                 <div style={s.teacherCount}>{teacher.marksCount}</div>
-              </div>
-            )) : <div style={s.empty}>No marks uploaded yet.</div>}
+              </button>
+            )}) : <div style={s.empty}>No marks uploaded yet.</div>}
           </div>
         </section>
 
         <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
-            <h2 style={s.panelTitle}>Failed Students and Subjects</h2>
-            <span style={s.panelBadge}>{overview.failedBreakdown.length} entries</span>
+            <h2 style={s.panelTitle}>Uploaded Marks</h2>
+            <div style={s.panelBadgeRow}>
+              {selectedTeacher ? (
+                <span style={s.panelBadge}>{selectedTeacher.name}</span>
+              ) : (
+                <span style={s.panelBadge}>{overview.marks.length} records</span>
+              )}
+              {selectedTeacher && (
+                <button
+                  type="button"
+                  onClick={() => setFilters(prev => ({ ...prev, teacherId: "" }))}
+                  style={s.clearFilterBtn}
+                >
+                  Clear Teacher
+                </button>
+              )}
+            </div>
+          </div>
+          <div style={s.panelNote}>
+            {selectedTeacher
+              ? "Showing the marks uploaded by the selected teacher."
+              : "Click a teacher on the left to narrow the uploaded marks list."}
           </div>
 
           <div style={s.tableWrap} className="marks-overview-table-wrap">
@@ -214,11 +255,13 @@ export default function MarksOverview() {
                   <th>Subject</th>
                   <th>Exam</th>
                   <th>Score</th>
+                  <th>Grade</th>
+                  <th>Teacher</th>
                 </tr>
               </thead>
               <tbody>
-                {overview.failedBreakdown.length ? overview.failedBreakdown.map((row, idx) => (
-                  <tr key={`${row.studentId}-${row.examTitle}-${row.subjectName}-${idx}`}>
+                {overview.marks.length ? overview.marks.map((row, idx) => (
+                  <tr key={`${row.studentId}-${row.examTitle}-${row.subjectName}-${row.teacherName}-${idx}`}>
                     <td>
                       <div style={s.cellTitle}>{row.name}</div>
                       <div style={s.cellSub}>{row.satCode || "SAT code not set"}</div>
@@ -230,14 +273,16 @@ export default function MarksOverview() {
                       <div style={s.cellSub}>{row.examType}</div>
                     </td>
                     <td>
-                      <span style={row.marksObtained === "AB" ? s.absentPill : s.failPill}>
+                      <span style={row.status === "Pass" ? s.goodPill : row.status === "Absent" ? s.absentPill : s.failPill}>
                         {row.marksObtained === "AB" ? "Absent" : `${row.marksObtained}/${row.maxMarks}`}
                       </span>
                     </td>
+                    <td>{row.grade || "-"}</td>
+                    <td>{row.teacherName}</td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={5} style={s.emptyCell}>No failed marks found for the current filter.</td>
+                    <td colSpan={7} style={s.emptyCell}>No marks uploaded for the current filter.</td>
                   </tr>
                 )}
               </tbody>
@@ -299,6 +344,11 @@ export default function MarksOverview() {
                     {selectedStudent.satCode || "SAT code not set"}
                     {selectedStudent.className ? ` • ${selectedStudent.className}` : ""}
                   </div>
+                  {selectedTeacher && (
+                    <div style={s.detailTeacherNote}>
+                      Filtered by {selectedTeacher.name}
+                    </div>
+                  )}
                 </div>
                 <div style={s.detailStat}>
                   <div style={s.detailStatValue}>{selectedStudent.average}</div>
@@ -469,6 +519,7 @@ const s = {
     gap: "12px",
     marginBottom: "16px"
   },
+  panelBadgeRow: { display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end" },
   panelTitle: { margin: 0, fontSize: "1.05rem", color: "var(--navy)", fontFamily: "var(--font-heading)" },
   panelBadge: {
     fontSize: "0.72rem",
@@ -480,8 +531,24 @@ const s = {
     padding: "7px 10px",
     borderRadius: "999px"
   },
+  panelNote: {
+    margin: "-6px 0 14px",
+    fontSize: "0.84rem",
+    color: "var(--text-muted)",
+    lineHeight: 1.5
+  },
+  clearFilterBtn: {
+    border: "1px solid var(--border)",
+    background: "var(--white)",
+    color: "var(--navy)",
+    fontSize: "0.72rem",
+    fontWeight: 800,
+    padding: "7px 10px",
+    borderRadius: "999px"
+  },
   teacherList: { display: "flex", flexDirection: "column", gap: "12px", maxHeight: "340px", overflow: "auto" },
   teacherRow: {
+    width: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -489,10 +556,19 @@ const s = {
     padding: "14px 16px",
     borderRadius: "14px",
     background: "#f8fbfb",
-    border: "1px solid #edf3f5"
+    border: "1px solid #edf3f5",
+    textAlign: "left"
+  },
+  teacherRowActive: {
+    borderColor: "var(--gold)",
+    background: "#fffdf5",
+    boxShadow: "0 8px 20px rgba(200,150,12,0.12)"
   },
   teacherName: { fontWeight: 800, color: "var(--navy)" },
   teacherMeta: { marginTop: "4px", fontSize: "0.82rem", color: "var(--text-muted)" },
+  teacherInfoLine: { marginTop: "6px", display: "flex", gap: "6px", flexWrap: "wrap", fontSize: "0.78rem", lineHeight: 1.4 },
+  teacherInfoLabel: { fontWeight: 800, color: "var(--navy-dark)" },
+  teacherInfoValue: { color: "var(--text-muted)" },
   teacherCount: {
     width: "42px",
     height: "42px",
@@ -510,7 +586,7 @@ const s = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    minWidth: "680px"
+    minWidth: "920px"
   },
   emptyCell: {
     textAlign: "center",
@@ -606,6 +682,7 @@ const s = {
   },
   detailName: { fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)" },
   detailMeta: { marginTop: "6px", color: "var(--text-muted)", fontSize: "0.86rem" },
+  detailTeacherNote: { marginTop: "8px", fontSize: "0.78rem", fontWeight: 800, color: "var(--gold)" },
   detailStat: {
     background: "var(--white)",
     borderRadius: "14px",

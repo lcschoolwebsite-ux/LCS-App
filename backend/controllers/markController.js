@@ -165,7 +165,7 @@ exports.getReportCard = async (req, res) => {
 
 exports.getAdminOverview = async (req, res) => {
   try {
-    const { classId, examType, search } = req.query;
+    const { classId, examType, search, teacherId } = req.query;
     const examQuery = {};
     if (classId) examQuery.class = classId;
     if (examType) examQuery.examType = examType;
@@ -189,6 +189,7 @@ exports.getAdminOverview = async (req, res) => {
           teacherCount: 0
         },
         teachers: [],
+        marks: [],
         students: [],
         failedBreakdown: [],
         exams: []
@@ -213,7 +214,7 @@ exports.getAdminOverview = async (req, res) => {
       .lean();
 
     const normalizedSearch = String(search || "").trim().toLowerCase();
-    const filteredMarks = normalizedSearch
+    const searchedMarks = normalizedSearch
       ? marks.filter(mark => {
           const studentName = mark.student?.name || "";
           const satCode = mark.student?.satCode || "";
@@ -223,11 +224,65 @@ exports.getAdminOverview = async (req, res) => {
         })
       : marks;
 
+    const selectedTeacherId = String(teacherId || "").trim();
+    const visibleMarks = selectedTeacherId
+      ? searchedMarks.filter(mark => String(mark.enteredBy?._id || "") === selectedTeacherId)
+      : searchedMarks;
+
+    const teacherMap = new Map();
+    searchedMarks.forEach(mark => {
+      const enteredTeacherId = mark.enteredBy?._id?.toString();
+      if (!enteredTeacherId) return;
+
+      const current = teacherMap.get(enteredTeacherId) || {
+        id: enteredTeacherId,
+        name: mark.enteredBy?.name || "Teacher",
+        marksCount: 0,
+        exams: new Set(),
+        classes: new Set(),
+        subjects: new Set()
+      };
+
+      current.marksCount += 1;
+      if (mark.exam?._id) current.exams.add(mark.exam._id.toString());
+      const classNameValue = mark.exam?.class ? [mark.exam.class.name, mark.exam.class.section].filter(Boolean).join(" ") : "";
+      const subjectNameValue = mark.subject?.name || mark.exam?.subject?.name || "";
+      if (classNameValue) current.classes.add(classNameValue);
+      if (subjectNameValue) current.subjects.add(subjectNameValue);
+      teacherMap.set(enteredTeacherId, current);
+    });
+
     const studentMap = new Map();
     const failedBreakdown = [];
-    const teacherMap = new Map();
+    const marksList = visibleMarks.map(mark => {
+      const studentClass = mark.student?.class;
+      const className = studentClass ? [studentClass.name, studentClass.section].filter(Boolean).join(" ") : "N/A";
+      const examPassMark = Number(mark.exam?.passMark || 0);
+      const examMaxMarks = Number(mark.exam?.maxMarks || 0);
+      const marksObtained = Number(mark.marksObtained || 0);
+      const isAbsent = Boolean(mark.isAbsent);
+      const isPass = !isAbsent && marksObtained >= examPassMark;
 
-    filteredMarks.forEach(mark => {
+      return {
+        studentId: mark.student?._id?.toString() || "",
+        name: mark.student?.name || "Student",
+        satCode: mark.student?.satCode || "",
+        penCode: mark.student?.penCode || "",
+        className,
+        examTitle: mark.exam?.title || "Exam",
+        examType: mark.exam?.examType || "Exam",
+        subjectName: mark.subject?.name || mark.exam?.subject?.name || "Subject",
+        date: mark.exam?.date || "",
+        marksObtained: isAbsent ? "AB" : marksObtained,
+        maxMarks: examMaxMarks,
+        passMark: examPassMark,
+        grade: mark.grade || "",
+        status: isAbsent ? "Absent" : isPass ? "Pass" : "Fail",
+        teacherName: mark.enteredBy?.name || "N/A"
+      };
+    });
+
+    visibleMarks.forEach(mark => {
       const studentId = mark.student?._id?.toString();
       if (!studentId) return;
 
@@ -293,19 +348,6 @@ exports.getAdminOverview = async (req, res) => {
           teacherName: mark.enteredBy?.name || "N/A"
         });
       }
-
-      const teacherId = mark.enteredBy?._id?.toString();
-      if (teacherId) {
-        const current = teacherMap.get(teacherId) || {
-          id: teacherId,
-          name: mark.enteredBy?.name || "Teacher",
-          marksCount: 0,
-          exams: new Set()
-        };
-        current.marksCount += 1;
-        if (mark.exam?._id) current.exams.add(mark.exam._id.toString());
-        teacherMap.set(teacherId, current);
-      }
     });
 
     const students = [...studentMap.values()].map(student => ({
@@ -322,7 +364,7 @@ exports.getAdminOverview = async (req, res) => {
     const summary = {
       totalStudents: students.length,
       totalExams: exams.length,
-      totalMarks: filteredMarks.length,
+      totalMarks: visibleMarks.length,
       passedCount: students.reduce((sum, student) => sum + student.passes, 0),
       failedCount: failedBreakdown.filter(row => row.marksObtained !== "AB").length,
       absentCount: failedBreakdown.filter(row => row.marksObtained === "AB").length,
@@ -335,8 +377,16 @@ exports.getAdminOverview = async (req, res) => {
         id: teacher.id,
         name: teacher.name,
         marksCount: teacher.marksCount,
-        examCount: teacher.exams.size
+        examCount: teacher.exams.size,
+        classes: [...teacher.classes].sort((a, b) => a.localeCompare(b)),
+        subjects: [...teacher.subjects].sort((a, b) => a.localeCompare(b))
       })).sort((a, b) => b.marksCount - a.marksCount),
+      marks: marksList.sort((a, b) => {
+        if (a.date && b.date && a.date !== b.date) return a.date < b.date ? 1 : -1;
+        if (a.teacherName !== b.teacherName) return a.teacherName.localeCompare(b.teacherName);
+        if (a.className !== b.className) return a.className.localeCompare(b.className);
+        return a.name.localeCompare(b.name);
+      }),
       students,
       failedBreakdown: failedBreakdown.sort((a, b) => a.name.localeCompare(b.name)),
       exams: exams.map(exam => ({
