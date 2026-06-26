@@ -16,6 +16,7 @@ const Holidays = lazy(() => import("../pages/admin/Holidays"));
 const Students = lazy(() => import("../pages/admin/Students"));
 const Teachers = lazy(() => import("../pages/admin/Teachers"));
 const Subjects = lazy(() => import("../pages/admin/Subjects"));
+const ClassManagement = lazy(() => import("../pages/admin/ClassManagement"));
 const Exams = lazy(() => import("../pages/admin/Exams"));
 const Attendance = lazy(() => import("../pages/admin/Attendance"));
 const FeeStructure = lazy(() => import("../pages/admin/FeeStructure"));
@@ -81,7 +82,9 @@ export default function AdminLayout() {
     navigate("/");
   };
 
-  const currentPathLabel = menuGroups.flatMap(g => g.items).find(i => i.path === location.pathname)?.label || "Dashboard";
+  const currentPathLabel = menuGroups
+    .flatMap(g => g.items)
+    .find(i => location.pathname === i.path || location.pathname.startsWith(`${i.path}/`))?.label || "Dashboard";
   const bottomBarItems = [
     { label: "Dashboard", shortLabel: "Home", path: "/admin", icon: "fa-solid fa-gauge-high" },
     { label: "Notices", shortLabel: "Notices", path: "/admin/announcements", icon: "fa-solid fa-bullhorn" },
@@ -179,6 +182,7 @@ export default function AdminLayout() {
               <Route path="/students" element={<Students />} />
               <Route path="/teachers" element={<Teachers />} />
               <Route path="/subjects" element={<Subjects />} />
+              <Route path="/subjects/:classId" element={<ClassManagement />} />
               <Route path="/exams" element={<Exams />} />
               <Route path="/marks-overview" element={<MarksOverview />} />
               <Route path="/attendance" element={<Attendance />} />

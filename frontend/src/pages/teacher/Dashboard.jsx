@@ -26,28 +26,40 @@ export default function Dashboard() {
 
   useEffect(() => {
     const assignedClasses = user?.assignedClasses || [];
-    const firstClassId = assignedClasses[0]?._id || "";
+    const assignedClassIds = new Set(assignedClasses.map(cls => cls?._id || cls?.id || cls).filter(Boolean).map(String));
 
     const loadDashboard = async () => {
       setLoading(true);
       try {
-        const [studentResponses, examsRes, announcementsRes, attendanceRes] = await Promise.all([
+        const [classesRes, studentResponses, examsRes, announcementsRes] = await Promise.all([
+          api.get("/classes"),
           Promise.all(assignedClasses.map(cls => api.get(`/students?classId=${cls._id}`))),
           api.get("/exams"),
-          api.get("/announcements"),
-          firstClassId ? api.get(`/attendance?classId=${firstClassId}&date=${getLocalDate()}`) : Promise.resolve({ data: { students: [], alreadyMarked: false } })
+          api.get("/announcements")
         ]);
 
+        const classList = (classesRes.data || []).filter(cls => assignedClassIds.has(String(cls._id)));
+        const classTeacherClasses = classList.filter(cls => String(cls.classTeacher?._id || cls.classTeacher) === String(user?.id || ""));
+        const firstAttendanceClassId = classTeacherClasses[0]?._id || "";
+        const attendanceRes = firstAttendanceClassId
+          ? await api.get(`/attendance?classId=${firstAttendanceClassId}&date=${getLocalDate()}`)
+          : { data: { students: [], alreadyMarked: false } };
+
         const exams = examsRes.data || [];
-        const classCards = assignedClasses.map((cls, index) => {
-          const students = studentResponses[index]?.data || [];
+        const studentResponseByClassId = new Map(
+          assignedClasses.map((cls, index) => [String(cls._id), studentResponses[index]?.data || []])
+        );
+
+        const classCards = classList.map((cls) => {
+          const students = studentResponseByClassId.get(String(cls._id)) || [];
           const classExams = exams.filter(exam => exam.class?._id === cls._id);
           return {
             id: cls._id,
             name: formatClassName(cls),
             students: students.length,
             examCount: classExams.length,
-            firstExamId: classExams[0]?._id || ""
+            firstExamId: classExams[0]?._id || "",
+            canTakeAttendance: String(cls.classTeacher?._id || cls.classTeacher) === String(user?.id || "")
           };
         });
 
@@ -65,7 +77,7 @@ export default function Dashboard() {
           announcements: announcementsRes.data?.length || 0,
           classes: classCards,
           quickAttendance,
-          selectedClassId: firstClassId
+          selectedClassId: firstAttendanceClassId
         });
       } catch (e) {
         console.error("Failed to load teacher dashboard", e);
@@ -93,6 +105,7 @@ export default function Dashboard() {
   const absentCount = stats.quickAttendance.filter(s => s.status === 'absent').length;
   const presentCount = stats.quickAttendance.filter(s => s.status === 'present').length;
   const selectedClass = stats.classes.find(cls => cls.id === stats.selectedClassId);
+  const attendanceClasses = stats.classes.filter(cls => cls.canTakeAttendance);
 
   const goToStudents = classId => navigate(`/teacher/students${classId ? `?classId=${classId}` : ""}`);
   const goToAttendance = classId => navigate(`/teacher/attendance${classId ? `?classId=${classId}` : ""}`);
@@ -164,7 +177,14 @@ export default function Dashboard() {
       {/* 4 Stat Cards */}
       <div style={s.grid4} className="teacher-dashboard-grid">
         <StatCard title="My Students" value={stats.myStudents} icon={<i className="fa-solid fa-users"></i>} color="navy" />
-        <StatCard title="Today's Attendance" value={stats.attendanceMarked ? "Marked" : "Pending"} icon={<i className="fa-solid fa-clipboard-user"></i>} color={stats.attendanceMarked ? "teal" : "gold"} trend={stats.attendanceMarked ? "Done" : "Action Required"} trendLabel="" />
+        <StatCard
+          title="Today's Attendance"
+          value={!attendanceClasses.length ? "Restricted" : stats.attendanceMarked ? "Marked" : "Pending"}
+          icon={<i className="fa-solid fa-clipboard-user"></i>}
+          color={!attendanceClasses.length ? "navy" : stats.attendanceMarked ? "teal" : "gold"}
+          trend={!attendanceClasses.length ? "Class Teacher Only" : stats.attendanceMarked ? "Done" : "Action Required"}
+          trendLabel=""
+        />
         <StatCard title="Active Exams" value={stats.pendingMarks} icon={<i className="fa-solid fa-pen-to-square"></i>} color="red" />
         <StatCard title="Announcements" value={stats.announcements} icon={<i className="fa-solid fa-bullhorn"></i>} color="navy" />
       </div>
@@ -194,7 +214,13 @@ export default function Dashboard() {
                 </div>
 
                 <div style={s.classActions} className="teacher-class-actions">
-                  <button style={s.btnGold} onClick={() => goToAttendance(cls.id)}>Mark Attendance</button>
+                  <button
+                    style={{ ...s.btnGold, opacity: cls.canTakeAttendance ? 1 : 0.55, cursor: cls.canTakeAttendance ? "pointer" : "not-allowed" }}
+                    onClick={() => cls.canTakeAttendance && goToAttendance(cls.id)}
+                    disabled={!cls.canTakeAttendance}
+                  >
+                    {cls.canTakeAttendance ? "Mark Attendance" : "Attendance Locked"}
+                  </button>
                   <button style={s.btnOutline} onClick={() => cls.firstExamId ? goToMarks(cls.firstExamId) : goToExams(cls.id)}>
                     {cls.firstExamId ? "Enter Marks" : "Schedule Exam"}
                   </button>
@@ -208,52 +234,57 @@ export default function Dashboard() {
         {/* Quick Attendance Panel */}
         <div style={s.card} className="teacher-attendance-card">
           <SectionTitle title="Quick Attendance" subtitle={stats.attendanceMarked ? "Today's record already exists. Saving will update it." : "Mark absentees for today and save directly."} />
-          
-          <div style={s.attendanceHeader} className="teacher-attendance-header">
-            <select style={s.select} value={stats.selectedClassId} onChange={e => handleQuickClassChange(e.target.value)}>
-              {stats.classes.map(cls => <option key={cls.id} value={cls.id}>{cls.name}</option>)}
-            </select>
-            <div style={s.datePill}>{new Date().toLocaleDateString('en-GB')}</div>
-          </div>
-
-          <div style={s.studentList} className="teacher-attendance-list">
-            {attendanceLoading && (
-              <div style={s.empty}>Loading students...</div>
-            )}
-            {stats.quickAttendance.length === 0 && (
-              <div style={s.empty}>{selectedClass ? "No students found in this class." : "Select an assigned class to start attendance."}</div>
-            )}
-            {stats.quickAttendance.map(student => (
-              <div key={student.id} style={s.studentRow}>
-                <div style={s.studentInfo}>
-                  <div style={s.studentAvatar}>{student.name.charAt(0)}</div>
-                  <div>
-                    <p style={s.studentName}>{student.name}</p>
-                    <p style={s.studentCode}>{student.code}</p>
-                  </div>
-                </div>
-                <button 
-                  style={student.status === "present" ? s.btnPresent : s.btnAbsent}
-                  onClick={() => toggleStatus(student.id)}
-                >
-                  {student.status === "present" ? <><i className="fa-solid fa-check"></i> Present</> : <><i className="fa-solid fa-xmark"></i> Absent</>}
-                </button>
+          {attendanceClasses.length === 0 ? (
+            <div style={s.empty}>Attendance is only available for classes where you are the class teacher.</div>
+          ) : (
+            <>
+              <div style={s.attendanceHeader} className="teacher-attendance-header">
+                <select style={s.select} value={stats.selectedClassId} onChange={e => handleQuickClassChange(e.target.value)}>
+                  {attendanceClasses.map(cls => <option key={cls.id} value={cls.id}>{cls.name}</option>)}
+                </select>
+                <div style={s.datePill}>{new Date().toLocaleDateString('en-GB')}</div>
               </div>
-            ))}
-          </div>
 
-          <div style={s.attendanceFooter} className="teacher-attendance-footer">
-            <div style={s.attnSummary}>
-              <span style={{color: 'var(--danger-text)'}}><strong>{absentCount}</strong> Absent</span> • <span style={{color: 'var(--success-text)'}}><strong>{presentCount}</strong> Present</span>
-            </div>
-            <div style={s.attendanceActions} className="teacher-attendance-actions">
-              <button style={s.btnGhost} onClick={() => goToAttendance(stats.selectedClassId)}>Open Full Page</button>
-              <button style={s.btnSave} onClick={saveQuickAttendance} disabled={attendanceSaving || !stats.selectedClassId || stats.quickAttendance.length === 0}>
-                {attendanceSaving ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </div>
-          {attendanceMessage && <div style={s.inlineMessage}>{attendanceMessage}</div>}
+              <div style={s.studentList} className="teacher-attendance-list">
+                {attendanceLoading && (
+                  <div style={s.empty}>Loading students...</div>
+                )}
+                {stats.quickAttendance.length === 0 && (
+                  <div style={s.empty}>{selectedClass ? "No students found in this class." : "Select a class-teacher assignment to start attendance."}</div>
+                )}
+                {stats.quickAttendance.map(student => (
+                  <div key={student.id} style={s.studentRow}>
+                    <div style={s.studentInfo}>
+                      <div style={s.studentAvatar}>{student.name.charAt(0)}</div>
+                      <div>
+                        <p style={s.studentName}>{student.name}</p>
+                        <p style={s.studentCode}>{student.code}</p>
+                      </div>
+                    </div>
+                    <button 
+                      style={student.status === "present" ? s.btnPresent : s.btnAbsent}
+                      onClick={() => toggleStatus(student.id)}
+                    >
+                      {student.status === "present" ? <><i className="fa-solid fa-check"></i> Present</> : <><i className="fa-solid fa-xmark"></i> Absent</>}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div style={s.attendanceFooter} className="teacher-attendance-footer">
+                <div style={s.attnSummary}>
+                  <span style={{color: 'var(--danger-text)'}}><strong>{absentCount}</strong> Absent</span> • <span style={{color: 'var(--success-text)'}}><strong>{presentCount}</strong> Present</span>
+                </div>
+                <div style={s.attendanceActions} className="teacher-attendance-actions">
+                  <button style={s.btnGhost} onClick={() => goToAttendance(stats.selectedClassId)}>Open Full Page</button>
+                  <button style={s.btnSave} onClick={saveQuickAttendance} disabled={attendanceSaving || !stats.selectedClassId || stats.quickAttendance.length === 0}>
+                    {attendanceSaving ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </div>
+              {attendanceMessage && <div style={s.inlineMessage}>{attendanceMessage}</div>}
+            </>
+          )}
         </div>
       </div>
     </div>

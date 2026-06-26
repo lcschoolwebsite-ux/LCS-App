@@ -10,6 +10,7 @@ export default function Marks() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [canEdit, setCanEdit] = useState(true);
 
   const exam = exams.find(item => item._id === selectedExamId);
 
@@ -48,7 +49,9 @@ export default function Marks() {
       setLoading(true);
       try {
         const { data } = await api.get(`/marks/exam/${selectedExamId}`);
-        setStudents(data.map(student => ({
+        const studentList = Array.isArray(data) ? data : (data.students || []);
+        setCanEdit(Array.isArray(data) ? true : data.canEdit !== false);
+        setStudents(studentList.map(student => ({
           _id: student.studentId,
           name: student.name,
           satCode: student.satCode,
@@ -90,8 +93,10 @@ export default function Marks() {
   };
 
   const marksEnteredCount = students.filter(s => s.marks !== "" || s.absent).length;
+  const readOnly = !canEdit;
 
   const handleSave = async () => {
+    if (readOnly) return;
     if (!selectedExamId) return;
     setSaving(true);
     try {
@@ -116,6 +121,11 @@ export default function Marks() {
   return (
     <div>
       <SectionTitle title="Enter Marks" subtitle="Update academic scores for your students." />
+      {readOnly && (
+        <div style={s.readOnlyBanner}>
+          You can view this exam, but editing is restricted to the assigned subject teacher or class teacher.
+        </div>
+      )}
 
       <div style={s.selectorRow}>
         <label style={s.selectorLabel}>Select Exam</label>
@@ -181,7 +191,7 @@ export default function Marks() {
                       }}
                       value={student.marks}
                       onChange={e => handleMarkChange(student._id, e.target.value)}
-                      disabled={student.absent}
+                      disabled={student.absent || readOnly}
                       min="0" max={exam.maxMarks}
                     />
                   </td>
@@ -195,7 +205,8 @@ export default function Marks() {
                       <input 
                         type="checkbox" 
                         checked={student.absent} 
-                        onChange={() => handleAbsentToggle(student._id)} 
+                        onChange={() => !readOnly && handleAbsentToggle(student._id)} 
+                        disabled={readOnly}
                         style={s.checkbox}
                       />
                       <span style={s.checkmark}></span>
@@ -206,7 +217,8 @@ export default function Marks() {
                       type="text" 
                       style={s.remarkInput}
                       value={student.remarks}
-                      onChange={e => handleRemarkChange(student._id, e.target.value)}
+                      onChange={e => !readOnly && handleRemarkChange(student._id, e.target.value)}
+                      disabled={readOnly}
                       placeholder="Optional"
                     />
                   </td>
@@ -217,8 +229,8 @@ export default function Marks() {
         </table>
       </div>
 
-      <button style={s.saveBtn} onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save Marks"}
+      <button style={s.saveBtn} onClick={handleSave} disabled={saving || readOnly}>
+        {readOnly ? "Read Only" : saving ? "Saving..." : "Save Marks"}
       </button>
         </>
       )}
@@ -229,6 +241,7 @@ export default function Marks() {
 
 const s = {
   selectorRow: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px", background: "var(--white)", border: "1px solid var(--border)", borderRadius: "12px", padding: "14px 16px", boxShadow: "var(--shadow-sm)" },
+  readOnlyBanner: { marginBottom: "16px", padding: "14px 16px", borderRadius: "12px", background: "var(--gold-pale)", color: "var(--navy-dark)", border: "1px solid rgba(200,150,12,0.25)", fontWeight: "800" },
   selectorLabel: { color: "var(--navy)", fontWeight: "800", fontSize: "0.85rem", textTransform: "uppercase" },
   examSelect: { flex: 1, padding: "10px 12px", borderRadius: "8px", border: "1.5px solid var(--border)", fontSize: "0.95rem", background: "var(--white)" },
   empty: { padding: "28px", textAlign: "center", background: "var(--white)", border: "1px dashed var(--border)", borderRadius: "12px", color: "var(--text-muted)", fontWeight: "800" },

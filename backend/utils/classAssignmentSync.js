@@ -1,5 +1,6 @@
 const Teacher = require("../models/Teacher");
 const Class = require("../models/Class");
+const Subject = require("../models/Subject");
 
 const normalizeIdList = value => {
   if (!value) return [];
@@ -17,19 +18,40 @@ const filterExistingClassIds = async classIds => {
   return classes.map(cls => cls._id.toString());
 };
 
-const syncTeacherAssignments = async (teacherId, classIds) => {
-  const validClassIds = await filterExistingClassIds(classIds);
+const syncTeacherClassAccess = async (teacherId) => {
+  if (!teacherId) return [];
+
+  const [classTeacherClasses, subjectClasses] = await Promise.all([
+    Class.find({ classTeacher: teacherId }).select("_id").lean(),
+    Subject.find({ teacher: teacherId }).select("class").lean()
+  ]);
+
+  const classIds = [
+    ...new Set([
+      ...classTeacherClasses.map(cls => cls._id.toString()),
+      ...subjectClasses.map(subject => subject.class?.toString()).filter(Boolean)
+    ])
+  ];
 
   await Teacher.findByIdAndUpdate(teacherId, {
-    $set: { assignedClasses: validClassIds }
+    $set: { assignedClasses: classIds }
   });
 
-  if (validClassIds.length > 0) {
-    await Teacher.updateMany(
-      { _id: { $ne: teacherId }, assignedClasses: { $in: validClassIds } },
-      { $pull: { assignedClasses: { $in: validClassIds } } }
-    );
-  }
+  return classIds;
+};
+
+const syncTeacherAssignments = async (teacherId, classIds) => {
+  const validClassIds = await filterExistingClassIds(classIds);
+  const previousClasses = await Class.find({ _id: { $in: validClassIds } })
+    .select("_id classTeacher")
+    .lean();
+  const previousTeacherIds = [
+    ...new Set(
+      previousClasses
+        .map(cls => cls.classTeacher?.toString())
+        .filter(Boolean)
+    )
+  ];
 
   await Class.updateMany(
     { _id: { $in: validClassIds } },
@@ -41,6 +63,11 @@ const syncTeacherAssignments = async (teacherId, classIds) => {
     { $unset: { classTeacher: "" } }
   );
 
+  await Promise.all([
+    syncTeacherClassAccess(teacherId),
+    ...previousTeacherIds.filter(id => id !== teacherId?.toString()).map(id => syncTeacherClassAccess(id))
+  ]);
+
   return validClassIds;
 };
 
@@ -51,44 +78,30 @@ const syncClassTeacher = async (classId, nextTeacherId, previousTeacherId = null
 
   if (!normalizedClassId) return;
 
-  if (normalizedPreviousTeacherId && normalizedPreviousTeacherId !== normalizedNextTeacherId) {
-    await Teacher.findByIdAndUpdate(normalizedPreviousTeacherId, {
-      $pull: { assignedClasses: normalizedClassId }
-    });
-  }
-
   if (normalizedNextTeacherId) {
-    await Teacher.findByIdAndUpdate(normalizedNextTeacherId, {
-      $addToSet: { assignedClasses: normalizedClassId }
-    });
-
-    await Teacher.updateMany(
-      {
-        _id: { $ne: normalizedNextTeacherId },
-        assignedClasses: normalizedClassId
-      },
-      { $pull: { assignedClasses: normalizedClassId } }
-    );
-
     await Class.findByIdAndUpdate(normalizedClassId, {
       $set: { classTeacher: normalizedNextTeacherId }
     });
+    await Promise.all([
+      syncTeacherClassAccess(normalizedNextTeacherId),
+      normalizedPreviousTeacherId && normalizedPreviousTeacherId !== normalizedNextTeacherId
+        ? syncTeacherClassAccess(normalizedPreviousTeacherId)
+        : Promise.resolve()
+    ]);
     return;
   }
-
-  await Teacher.updateMany(
-    { assignedClasses: normalizedClassId },
-    { $pull: { assignedClasses: normalizedClassId } }
-  );
 
   await Class.findByIdAndUpdate(normalizedClassId, {
     $unset: { classTeacher: "" }
   });
+
+  await syncTeacherClassAccess(normalizedPreviousTeacherId);
 };
 
 module.exports = {
   normalizeIdList,
   filterExistingClassIds,
+  syncTeacherClassAccess,
   syncTeacherAssignments,
   syncClassTeacher
 };

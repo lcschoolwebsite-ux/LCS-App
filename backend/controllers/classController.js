@@ -22,7 +22,39 @@ const duplicateClassMessage = () =>
 exports.getAll = async (req, res) => {
   const { academicYear } = req.query;
   const q = academicYear ? { academicYear } : {};
-  res.json(await Class.find(q).populate("academicYear","year").populate("classTeacher","name"));
+  res.json(await Class.find(q).populate("academicYear","year").populate("classTeacher","name phone"));
+};
+
+exports.getManagement = async (req, res) => {
+  try {
+    const classDoc = await Class.findById(req.params.id)
+      .populate("academicYear", "year")
+      .populate("classTeacher", "name phone username")
+      .lean();
+
+    if (!classDoc) {
+      return res.status(404).json({ message: "Class not found" });
+    }
+
+    const [subjects, teachers] = await Promise.all([
+      Subject.find({ class: classDoc._id })
+        .populate("teacher", "name phone")
+        .sort({ name: 1 })
+        .lean(),
+      Teacher.find({ isActive: true })
+        .select("name phone username assignedClasses assignedSubjects")
+        .sort({ name: 1 })
+        .lean()
+    ]);
+
+    res.json({
+      class: classDoc,
+      subjects,
+      teachers
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
 };
 
 exports.create = async (req, res) => {

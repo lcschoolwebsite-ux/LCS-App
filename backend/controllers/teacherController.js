@@ -1,7 +1,8 @@
 const Teacher = require("../models/Teacher");
 const {
   normalizeIdList,
-  syncTeacherAssignments
+  syncTeacherAssignments,
+  syncTeacherClassAccess
 } = require("../utils/classAssignmentSync");
 
 const compactRefs = value => (Array.isArray(value) ? value.filter(Boolean) : value);
@@ -123,9 +124,11 @@ exports.setClasses = async (req, res) => {
 exports.assignSubject = async (req, res) => {
   try {
     const t = await Teacher.findById(req.params.id);
+    if (!t) return res.status(404).json({ message: "Teacher not found" });
     if (!t.assignedSubjects.includes(req.body.subjectId))
       t.assignedSubjects.push(req.body.subjectId);
     await t.save();
+    await syncTeacherClassAccess(t._id);
     res.json({ message: "Subject assigned" });
   } catch (e) { res.status(400).json({ message: e.message }); }
 };

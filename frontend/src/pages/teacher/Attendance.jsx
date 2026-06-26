@@ -24,6 +24,7 @@ export default function Attendance() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedClass, setSelectedClass] = useState(searchParams.get("classId") || "");
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
+  const [classes, setClasses] = useState([]);
   const [markedDates, setMarkedDates] = useState([]);
   const [alreadyMarked, setAlreadyMarked] = useState(false);
   const [holidayInfo, setHolidayInfo] = useState(null);
@@ -39,15 +40,32 @@ export default function Attendance() {
       setSelectedClass(classFromUrl);
       return;
     }
+  }, [selectedClass, searchParams]);
 
-    if (user?.assignedClasses?.length > 0 && !selectedClass) {
-      const defaultClassId = user.assignedClasses[0]._id;
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const { data } = await api.get("/classes");
+        setClasses(data || []);
+      } catch (e) {
+        console.error("Failed to load class list", e);
+      }
+    };
+    fetchClasses();
+  }, []);
+
+  const allowedClasses = classes.filter(c => String(c.classTeacher?._id || c.classTeacher) === String(user?.id || ""));
+
+  useEffect(() => {
+    if (searchParams.get("classId")) return;
+    if (allowedClasses.length > 0 && !selectedClass) {
+      const defaultClassId = allowedClasses[0]._id;
       setSelectedClass(defaultClassId);
       const next = new URLSearchParams(searchParams);
       next.set("classId", defaultClassId);
       setSearchParams(next, { replace: true });
     }
-  }, [user, selectedClass, searchParams, setSearchParams]);
+  }, [allowedClasses, selectedClass, searchParams, setSearchParams]);
 
   const handleClassChange = (value) => {
     setSelectedClass(value);
@@ -58,7 +76,7 @@ export default function Attendance() {
   };
 
   const fetchMarkedDates = useCallback(async () => {
-    if (!selectedClass) return;
+    if (!selectedClass || !allowedClasses.some(c => String(c._id) === String(selectedClass))) return;
     try {
       const { data } = await api.get(`/attendance/dates?classId=${selectedClass}`);
       setMarkedDates(data);
@@ -66,7 +84,7 @@ export default function Attendance() {
       console.error("Failed to load attendance dates", e);
       setMarkedDates([]);
     }
-  }, [selectedClass]);
+  }, [selectedClass, allowedClasses]);
 
   useEffect(() => {
     fetchMarkedDates();
@@ -86,7 +104,7 @@ export default function Attendance() {
   }, []);
 
   const fetchAttendance = useCallback(async () => {
-    if (!selectedClass || !selectedDate) return;
+    if (!selectedClass || !selectedDate || !allowedClasses.some(c => String(c._id) === String(selectedClass))) return;
     setLoading(true);
     try {
       const { data } = await api.get(`/attendance?classId=${selectedClass}&date=${selectedDate}`);
@@ -102,7 +120,7 @@ export default function Attendance() {
     } finally {
       setLoading(false);
     }
-  }, [selectedClass, selectedDate]);
+  }, [selectedClass, selectedDate, allowedClasses]);
 
   useEffect(() => {
     fetchAttendance();
@@ -119,7 +137,7 @@ export default function Attendance() {
   };
 
   const handleSave = async () => {
-    if (!selectedClass) return alert("Please select a class");
+    if (!selectedClass || !allowedClasses.some(c => String(c._id) === String(selectedClass))) return alert("Please select a class you teach.");
     setSaving(true);
     const absentIds = students.filter(s => s.status === "absent").map(s => s._id);
     try {
@@ -148,6 +166,11 @@ export default function Attendance() {
     <div>
       <SectionTitle title="Mark Attendance" subtitle="Select a date and class to record student presence." />
 
+      {allowedClasses.length === 0 ? (
+        <div style={s.empty}>Attendance is only available for classes where you are assigned as the class teacher.</div>
+      ) : (
+        <>
+
       <div style={s.headerCard}>
         <div style={s.controlsRow}>
           <div style={{flex: 1.5}}>
@@ -156,7 +179,7 @@ export default function Attendance() {
               <i className="fa-solid fa-users-rectangle" style={s.inputIcon}></i>
               <select style={s.inputWithIcon} value={selectedClass} onChange={e => handleClassChange(e.target.value)}>
                 <option value="" disabled>Choose a class...</option>
-                {user?.assignedClasses?.map(c => (
+                {allowedClasses.map(c => (
                   <option key={c._id} value={c._id}>{c.name} {c.section}</option>
                 ))}
               </select>
@@ -287,6 +310,9 @@ export default function Attendance() {
           <button style={s.saveBtn} onClick={handleSave} disabled={saving}>
             {saving ? <><i className="fa-solid fa-circle-notch fa-spin"></i> Processing...</> : <><i className="fa-solid fa-cloud-arrow-up"></i> Save Attendance for {formatAttendanceDate(selectedDate)}</>}
           </button>
+        </>
+      )}
+
         </>
       )}
 

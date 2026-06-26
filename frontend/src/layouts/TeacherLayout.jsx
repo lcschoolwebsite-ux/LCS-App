@@ -49,21 +49,29 @@ export default function TeacherLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [allowTeacherStudentCreation, setAllowTeacherStudentCreation] = useState(true);
+  const [canTakeAttendance, setCanTakeAttendance] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { academicYearLabel } = useActiveAcademicYear();
 
   useEffect(() => {
     const fetchStudentRegistrationSettings = async () => {
       try {
-        const { data } = await api.get("/settings/student-registration");
-        setAllowTeacherStudentCreation(Boolean(data.allowTeacherStudentCreation));
+        const [settingsRes, classesRes] = await Promise.all([
+          api.get("/settings/student-registration"),
+          api.get("/classes")
+        ]);
+        setAllowTeacherStudentCreation(Boolean(settingsRes.data.allowTeacherStudentCreation));
+        const hasClassTeacherAccess = (classesRes.data || []).some(
+          cls => String(cls.classTeacher?._id || cls.classTeacher) === String(user?.id || "")
+        );
+        setCanTakeAttendance(hasClassTeacherAccess);
       } catch (e) {
         console.error("Unable to load teacher permissions", e);
       }
     };
 
     fetchStudentRegistrationSettings();
-  }, []);
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -75,7 +83,7 @@ export default function TeacherLayout() {
   const bottomBarItems = [
     { label: "Dashboard", shortLabel: "Home", path: "/teacher", icon: "fa-solid fa-chart-line" },
     { label: "Notices", shortLabel: "Notices", path: "/teacher/announcements", icon: "fa-solid fa-bullhorn" },
-    { label: "Attendance", shortLabel: "Attend", path: "/teacher/attendance", icon: "fa-solid fa-clipboard-user" },
+    ...(canTakeAttendance ? [{ label: "Attendance", shortLabel: "Attend", path: "/teacher/attendance", icon: "fa-solid fa-clipboard-user" }] : []),
     { label: "Marks", shortLabel: "Marks", path: "/teacher/marks", icon: "fa-solid fa-pen-to-square" },
     { label: "Students", shortLabel: "Students", path: "/teacher/students", icon: "fa-solid fa-users" },
   ];
@@ -86,7 +94,11 @@ export default function TeacherLayout() {
         open={menuOpen}
         title="LCS Portal"
         subtitle={user?.name || "Teacher"}
-        items={MENU_GROUPS.flatMap(group => group.items).filter(item => allowTeacherStudentCreation || item.path !== "/teacher/students/add")}
+        items={MENU_GROUPS.flatMap(group => group.items).filter(item => {
+          if (!allowTeacherStudentCreation && item.path === "/teacher/students/add") return false;
+          if (!canTakeAttendance && item.path === "/teacher/attendance") return false;
+          return true;
+        })}
         currentPath={location.pathname}
         onClose={() => setMenuOpen(false)}
         onLogout={handleLogout}
@@ -125,7 +137,11 @@ export default function TeacherLayout() {
           {MENU_GROUPS.map((group, gIdx) => (
             <div key={gIdx} style={s.navGroup}>
               <div style={s.groupLabel}>{group.label}</div>
-              {group.items.filter(item => allowTeacherStudentCreation || item.path !== "/teacher/students/add").map(item => {
+              {group.items.filter(item => {
+                if (!allowTeacherStudentCreation && item.path === "/teacher/students/add") return false;
+                if (!canTakeAttendance && item.path === "/teacher/attendance") return false;
+                return true;
+              }).map(item => {
                 const isActive = item.path === "/teacher" ? location.pathname === item.path : location.pathname.startsWith(item.path);
                 return (
                   <Link key={item.path} to={item.path} style={{...s.navItem, ...(isActive ? s.activeNav : {})}}>

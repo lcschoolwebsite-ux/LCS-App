@@ -1,16 +1,14 @@
 const Attendance = require("../models/Attendance");
 const Student    = require("../models/Student");
 const AcademicYear = require("../models/AcademicYear");
-const Teacher = require("../models/Teacher");
 const { getIO } = require("../utils/socket");
 const { notifyClassStudents, notifyStudentById } = require("../utils/pushNotification");
 const { isHolidayDate, getHolidayCalendar, toLocalDateString } = require("../utils/holidayUtils");
+const { canTakeAttendance } = require("../utils/teacherAccess");
 
 const ensureAssignedClass = async (req, classId) => {
   if (req.user.role !== "teacher") return true;
-  const teacher = await Teacher.findById(req.user.id).select("assignedClasses");
-  const assignedClassIds = teacher?.assignedClasses?.map(id => id.toString()) || [];
-  return assignedClassIds.includes(classId);
+  return canTakeAttendance(req, classId);
 };
 
 exports.getOrInit = async (req, res) => {

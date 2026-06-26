@@ -1,8 +1,8 @@
 const Mark = require("../models/Mark");
 const Student = require("../models/Student");
 const Exam = require("../models/Exam");
-const Teacher = require("../models/Teacher");
 const { notifyClassStudents, notifyStudentById } = require("../utils/pushNotification");
+const { canViewExam, canEditExam } = require("../utils/teacherAccess");
 
 const calculateGrade = (marksObtained, maxMarks, isAbsent) => {
   if (isAbsent) return "AB";
@@ -21,16 +21,9 @@ exports.getExamMarks = async (req, res) => {
     const exam = await Exam.findById(req.params.examId);
     if (!exam) return res.status(404).json({ message: "Exam not found" });
 
-    if (req.user.role === "teacher") {
-      const teacher = await Teacher.findById(req.user.id).select("assignedClasses assignedSubjects");
-      const assignedClassIds = teacher?.assignedClasses?.map(id => id.toString()) || [];
-      const assignedSubjectIds = teacher?.assignedSubjects?.map(id => id.toString()) || [];
-      const classAllowed = assignedClassIds.includes(exam.class.toString());
-      const subjectAllowed = !assignedSubjectIds.length || assignedSubjectIds.includes(exam.subject.toString());
-
-      if (!classAllowed || !subjectAllowed) {
-        return res.status(403).json({ message: "Exam not assigned to teacher" });
-      }
+    const canEdit = req.user.role !== "teacher" ? true : await canEditExam(req, exam);
+    if (req.user.role === "teacher" && !(await canViewExam(req, exam))) {
+      return res.status(403).json({ message: "Exam not assigned to teacher" });
     }
 
     const students = await Student.find({ class: exam.class, isActive: true })
@@ -54,7 +47,10 @@ exports.getExamMarks = async (req, res) => {
       };
     });
 
-    res.json(result);
+    res.json({
+      canEdit,
+      students: result
+    });
   } catch (e) { res.status(500).json({ message: e.message }); }
 };
 
@@ -64,16 +60,8 @@ exports.saveMarks = async (req, res) => {
     const exam = await Exam.findById(examId);
     if (!exam) return res.status(404).json({ message: "Exam not found" });
 
-    if (req.user.role === "teacher") {
-      const teacher = await Teacher.findById(req.user.id).select("assignedClasses assignedSubjects");
-      const assignedClassIds = teacher?.assignedClasses?.map(id => id.toString()) || [];
-      const assignedSubjectIds = teacher?.assignedSubjects?.map(id => id.toString()) || [];
-      const classAllowed = assignedClassIds.includes(exam.class.toString());
-      const subjectAllowed = !assignedSubjectIds.length || assignedSubjectIds.includes(exam.subject.toString());
-
-      if (!classAllowed || !subjectAllowed) {
-        return res.status(403).json({ message: "Exam not assigned to teacher" });
-      }
+    if (req.user.role === "teacher" && !(await canEditExam(req, exam))) {
+      return res.status(403).json({ message: "Exam not assigned to teacher" });
     }
 
     const bulkOps = records.map(r => ({
