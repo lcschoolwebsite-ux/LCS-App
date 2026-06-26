@@ -257,6 +257,7 @@ exports.getAdminOverview = async (req, res) => {
     const marksList = visibleMarks.map(mark => {
       const studentClass = mark.student?.class;
       const className = studentClass ? [studentClass.name, studentClass.section].filter(Boolean).join(" ") : "N/A";
+      const classId = studentClass?._id?.toString() || mark.exam?.class?._id?.toString() || "";
       const examPassMark = Number(mark.exam?.passMark || 0);
       const examMaxMarks = Number(mark.exam?.maxMarks || 0);
       const marksObtained = Number(mark.marksObtained || 0);
@@ -268,7 +269,9 @@ exports.getAdminOverview = async (req, res) => {
         name: mark.student?.name || "Student",
         satCode: mark.student?.satCode || "",
         penCode: mark.student?.penCode || "",
+        classId,
         className,
+        teacherId: mark.enteredBy?._id?.toString() || "",
         examTitle: mark.exam?.title || "Exam",
         examType: mark.exam?.examType || "Exam",
         subjectName: mark.subject?.name || mark.exam?.subject?.name || "Subject",

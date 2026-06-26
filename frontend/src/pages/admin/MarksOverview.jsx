@@ -38,10 +38,72 @@ export default function MarksOverview() {
     exams: []
   });
   const [selectedStudentId, setSelectedStudentId] = useState("");
-  const selectedTeacher = useMemo(
-    () => overview.teachers.find(teacher => teacher.id === filters.teacherId) || null,
-    [overview.teachers, filters.teacherId]
+  const selectedClass = useMemo(
+    () => classes.find(cls => cls._id === filters.classId) || null,
+    [classes, filters.classId]
   );
+  const selectedClassLabel = selectedClass
+    ? [selectedClass.name, selectedClass.section].filter(Boolean).join(" ")
+    : "All Classes";
+  const selectedClassMarks = useMemo(
+    () => (selectedClass ? overview.marks : []),
+    [overview.marks, selectedClass]
+  );
+  const selectedClassOverview = useMemo(() => {
+    const grouped = new Map();
+    const teacherSet = new Set();
+    const subjectSet = new Set();
+    let passCount = 0;
+    let failCount = 0;
+    let absentCount = 0;
+
+    selectedClassMarks.forEach(mark => {
+      if (mark.teacherName) teacherSet.add(mark.teacherName);
+      if (mark.subjectName) subjectSet.add(mark.subjectName);
+      if (mark.status === "Pass") passCount += 1;
+      else if (mark.status === "Absent") absentCount += 1;
+      else failCount += 1;
+
+      const key = [
+        mark.teacherId || mark.teacherName,
+        mark.subjectName,
+        mark.examTitle
+      ].join("::");
+      const current = grouped.get(key) || {
+        id: key,
+        teacherName: mark.teacherName || "Teacher",
+        subjectName: mark.subjectName || "Subject",
+        examTitle: mark.examTitle || "Exam",
+        examType: mark.examType || "Exam",
+        maxMarks: Number(mark.maxMarks || 0),
+        passCount: 0,
+        failCount: 0,
+        absentCount: 0,
+        marksCount: 0
+      };
+
+      current.marksCount += 1;
+      current.maxMarks = Math.max(current.maxMarks, Number(mark.maxMarks || 0));
+      if (mark.status === "Pass") current.passCount += 1;
+      else if (mark.status === "Absent") current.absentCount += 1;
+      else current.failCount += 1;
+      grouped.set(key, current);
+    });
+
+    return {
+      rows: [...grouped.values()].sort((a, b) => {
+        if (a.teacherName !== b.teacherName) return a.teacherName.localeCompare(b.teacherName);
+        if (a.subjectName !== b.subjectName) return a.subjectName.localeCompare(b.subjectName);
+        return a.examTitle.localeCompare(b.examTitle);
+      }),
+      teacherCount: teacherSet.size,
+      subjectCount: subjectSet.size,
+      passCount,
+      failCount,
+      absentCount,
+      totalMarks: selectedClassMarks.length
+    };
+  }, [selectedClassMarks]);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -126,22 +188,6 @@ export default function MarksOverview() {
 
       <div style={s.filterBar} className="marks-overview-filters">
         <label style={s.field}>
-          <span style={s.label}>Class</span>
-          <select
-            value={filters.classId}
-            onChange={e => setFilters(prev => ({ ...prev, classId: e.target.value }))}
-            style={s.input}
-          >
-            <option value="">All Classes</option>
-            {classes.map(cls => (
-              <option key={cls._id} value={cls._id}>
-                {[cls.name, cls.section].filter(Boolean).join(" ")}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label style={s.field}>
           <span style={s.label}>Exam Type</span>
           <select
             value={filters.examType}
@@ -171,6 +217,42 @@ export default function MarksOverview() {
         </label>
       </div>
 
+      <section style={s.classShelf} className="marks-overview-class-shelf">
+        <div style={s.classShelfHeader}>
+          <div>
+            <h2 style={s.classShelfTitle}>Classes</h2>
+            <p style={s.classShelfNote}>All classes are visible here. Click one to open its marks overview on the left.</p>
+          </div>
+          <span style={s.panelBadge}>{classes.length} classes</span>
+        </div>
+
+        <div style={s.classGrid} className="marks-overview-class-grid">
+          <button
+            type="button"
+            onClick={() => setFilters(prev => ({ ...prev, classId: "", teacherId: "" }))}
+            style={{ ...s.classCard, ...(filters.classId === "" ? s.classCardActive : {}) }}
+          >
+            <div style={s.classCardTitle}>All Classes</div>
+            <div style={s.classCardMeta}>View every uploaded mark</div>
+          </button>
+          {classes.map(cls => {
+            const className = [cls.name, cls.section].filter(Boolean).join(" ");
+            const isActive = filters.classId === cls._id;
+            return (
+              <button
+                key={cls._id}
+                type="button"
+                onClick={() => setFilters(prev => ({ ...prev, classId: cls._id, teacherId: "" }))}
+                style={{ ...s.classCard, ...(isActive ? s.classCardActive : {}) }}
+              >
+                <div style={s.classCardTitle}>{className}</div>
+                <div style={s.classCardMeta}>Tap to open the class overview</div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       <div style={s.statsGrid} className="marks-overview-stats">
         {summaryCards.map(card => (
           <div key={card.title} style={s.statCard}>
@@ -188,62 +270,92 @@ export default function MarksOverview() {
       <div style={s.panelGrid} className="marks-overview-panels">
         <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
-            <h2 style={s.panelTitle}>Teachers Who Uploaded Marks</h2>
-            <span style={s.panelBadge}>{overview.teachers.length} teachers</span>
+            <h2 style={s.panelTitle}>{selectedClass ? `${selectedClassLabel} Overview` : "Class Marks Overview"}</h2>
+            <span style={s.panelBadge}>{selectedClass ? `${selectedClassOverview.rows.length} groups` : "Select a class"}</span>
           </div>
-
-          <div style={s.teacherList} className="marks-overview-teacher-list">
-            {overview.teachers.length ? overview.teachers.map(teacher => {
-              const isActive = teacher.id === filters.teacherId;
-              return (
-              <button
-                key={teacher.id}
-                type="button"
-                onClick={() => setFilters(prev => ({ ...prev, teacherId: prev.teacherId === teacher.id ? "" : teacher.id }))}
-                style={{ ...s.teacherRow, ...(isActive ? s.teacherRowActive : {}) }}
-              >
-                <div>
-                  <div style={s.teacherName}>{teacher.name}</div>
-                  <div style={s.teacherMeta}>{teacher.marksCount} marks across {teacher.examCount} exams</div>
-                  <div style={s.teacherInfoLine}>
-                    <span style={s.teacherInfoLabel}>Classes:</span>
-                    <span style={s.teacherInfoValue}>{teacher.classes?.length ? teacher.classes.join(", ") : "N/A"}</span>
-                  </div>
-                  <div style={s.teacherInfoLine}>
-                    <span style={s.teacherInfoLabel}>Subjects:</span>
-                    <span style={s.teacherInfoValue}>{teacher.subjects?.length ? teacher.subjects.join(", ") : "N/A"}</span>
-                  </div>
+          {selectedClass ? (
+            <>
+              <div style={s.classOverviewStats} className="marks-overview-class-overview-stats">
+                <div style={s.classOverviewStat}>
+                  <div style={s.classOverviewValue}>{selectedClassOverview.totalMarks}</div>
+                  <div style={s.classOverviewLabel}>Marks</div>
                 </div>
-                <div style={s.teacherCount}>{teacher.marksCount}</div>
-              </button>
-            )}) : <div style={s.empty}>No marks uploaded yet.</div>}
-          </div>
+                <div style={s.classOverviewStat}>
+                  <div style={s.classOverviewValue}>{selectedClassOverview.teacherCount}</div>
+                  <div style={s.classOverviewLabel}>Teachers</div>
+                </div>
+                <div style={s.classOverviewStat}>
+                  <div style={s.classOverviewValue}>{selectedClassOverview.subjectCount}</div>
+                  <div style={s.classOverviewLabel}>Subjects</div>
+                </div>
+                <div style={s.classOverviewStat}>
+                  <div style={s.classOverviewValue}>{selectedClassOverview.passCount}</div>
+                  <div style={s.classOverviewLabel}>Pass</div>
+                </div>
+                <div style={s.classOverviewStat}>
+                  <div style={s.classOverviewValue}>{selectedClassOverview.failCount}</div>
+                  <div style={s.classOverviewLabel}>Fail</div>
+                </div>
+              </div>
+
+              <div style={s.tableWrap} className="marks-overview-table-wrap">
+                <table style={s.table}>
+                  <thead>
+                    <tr>
+                      <th>Teacher</th>
+                      <th>Subject</th>
+                      <th>Exam</th>
+                      <th>Max Mark</th>
+                      <th>Pass</th>
+                      <th>Fail</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedClassOverview.rows.length ? selectedClassOverview.rows.map(row => (
+                      <tr key={row.id}>
+                        <td>{row.teacherName}</td>
+                        <td>{row.subjectName}</td>
+                        <td>
+                          <div style={s.cellTitle}>{row.examTitle}</div>
+                          <div style={s.cellSub}>{row.examType}</div>
+                        </td>
+                        <td>{row.maxMarks}</td>
+                        <td><span style={s.goodPill}>{row.passCount}</span></td>
+                        <td>
+                          <span style={row.failCount > 0 ? s.failPill : s.absentPill}>
+                            {row.failCount}
+                          </span>
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={6} style={s.emptyCell}>No marks found for this class.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <div style={s.emptyPanel}>Select a class above to see the teacher and subject breakdown for that class.</div>
+          )}
         </section>
 
         <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
             <h2 style={s.panelTitle}>Uploaded Marks</h2>
             <div style={s.panelBadgeRow}>
-              {selectedTeacher ? (
-                <span style={s.panelBadge}>{selectedTeacher.name}</span>
+              {selectedClass ? (
+                <span style={s.panelBadge}>{selectedClassLabel}</span>
               ) : (
                 <span style={s.panelBadge}>{overview.marks.length} records</span>
-              )}
-              {selectedTeacher && (
-                <button
-                  type="button"
-                  onClick={() => setFilters(prev => ({ ...prev, teacherId: "" }))}
-                  style={s.clearFilterBtn}
-                >
-                  Clear Teacher
-                </button>
               )}
             </div>
           </div>
           <div style={s.panelNote}>
-            {selectedTeacher
-              ? "Showing the marks uploaded by the selected teacher."
-              : "Click a teacher on the left to narrow the uploaded marks list."}
+            {selectedClass
+              ? "Showing the uploaded marks for the selected class."
+              : "Choose a class above to narrow this list."}
           </div>
 
           <div style={s.tableWrap} className="marks-overview-table-wrap">
@@ -344,9 +456,9 @@ export default function MarksOverview() {
                     {selectedStudent.satCode || "SAT code not set"}
                     {selectedStudent.className ? ` • ${selectedStudent.className}` : ""}
                   </div>
-                  {selectedTeacher && (
+                  {selectedClass && (
                     <div style={s.detailTeacherNote}>
-                      Filtered by {selectedTeacher.name}
+                      Filtered by {selectedClassLabel}
                     </div>
                   )}
                 </div>
@@ -433,7 +545,7 @@ const s = {
   },
   filterBar: {
     display: "grid",
-    gridTemplateColumns: "220px 220px minmax(0, 1fr)",
+    gridTemplateColumns: "220px minmax(0, 1fr)",
     gap: "16px",
     alignItems: "end"
   },
@@ -472,6 +584,53 @@ const s = {
     gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
     gap: "16px"
   },
+  classShelf: {
+    background: "rgba(255,255,255,0.72)",
+    border: "1px solid #e7eef2",
+    borderRadius: "18px",
+    boxShadow: "var(--shadow-sm)",
+    padding: "18px"
+  },
+  classShelfHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "12px",
+    marginBottom: "14px"
+  },
+  classShelfTitle: {
+    margin: 0,
+    fontSize: "1.05rem",
+    color: "var(--navy)",
+    fontFamily: "var(--font-heading)"
+  },
+  classShelfNote: {
+    margin: "6px 0 0",
+    color: "var(--text-muted)",
+    fontSize: "0.84rem"
+  },
+  classGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "12px"
+  },
+  classCard: {
+    minWidth: "180px",
+    flex: "1 1 180px",
+    textAlign: "left",
+    border: "1px solid #e7eef2",
+    background: "#f9fbfb",
+    borderRadius: "14px",
+    padding: "14px 16px",
+    cursor: "pointer"
+  },
+  classCardActive: {
+    borderColor: "var(--gold)",
+    background: "#fffdf5",
+    boxShadow: "0 8px 20px rgba(200,150,12,0.12)"
+  },
+  classCardTitle: { fontWeight: 800, color: "var(--navy)" },
+  classCardMeta: { marginTop: "4px", fontSize: "0.82rem", color: "var(--text-muted)" },
   statCard: {
     background: "var(--white)",
     borderRadius: "18px",
@@ -546,47 +705,12 @@ const s = {
     padding: "7px 10px",
     borderRadius: "999px"
   },
-  teacherList: { display: "flex", flexDirection: "column", gap: "12px", maxHeight: "340px", overflow: "auto" },
-  teacherRow: {
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "14px",
-    padding: "14px 16px",
-    borderRadius: "14px",
-    background: "#f8fbfb",
-    border: "1px solid #edf3f5",
-    textAlign: "left"
-  },
-  teacherRowActive: {
-    borderColor: "var(--gold)",
-    background: "#fffdf5",
-    boxShadow: "0 8px 20px rgba(200,150,12,0.12)"
-  },
-  teacherName: { fontWeight: 800, color: "var(--navy)" },
-  teacherMeta: { marginTop: "4px", fontSize: "0.82rem", color: "var(--text-muted)" },
-  teacherInfoLine: { marginTop: "6px", display: "flex", gap: "6px", flexWrap: "wrap", fontSize: "0.78rem", lineHeight: 1.4 },
-  teacherInfoLabel: { fontWeight: 800, color: "var(--navy-dark)" },
-  teacherInfoValue: { color: "var(--text-muted)" },
-  teacherCount: {
-    width: "42px",
-    height: "42px",
-    borderRadius: "50%",
-    background: "var(--navy)",
-    color: "var(--white)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: 800,
-    flexShrink: 0
-  },
   tableWrap: { overflow: "auto" },
   resultTableWrap: { overflow: "auto", marginTop: "8px" },
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    minWidth: "760px"
+    minWidth: "860px"
   },
   emptyCell: {
     textAlign: "center",
@@ -714,5 +838,27 @@ const s = {
     borderRadius: "14px",
     background: "#fbfcfd",
     padding: "24px"
+  },
+  classOverviewStats: {
+    display: "grid",
+    gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+    gap: "10px",
+    marginBottom: "14px"
+  },
+  classOverviewStat: {
+    background: "#f8fbfb",
+    border: "1px solid #edf3f5",
+    borderRadius: "14px",
+    padding: "12px",
+    textAlign: "center"
+  },
+  classOverviewValue: { fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", lineHeight: 1.1 },
+  classOverviewLabel: {
+    marginTop: "4px",
+    fontSize: "0.74rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "var(--text-muted)",
+    fontWeight: 700
   }
 };

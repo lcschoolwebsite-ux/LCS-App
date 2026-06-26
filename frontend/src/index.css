@@ -538,9 +538,25 @@ input, select, textarea {
     border-radius: 14px !important;
   }
 
+  .marks-overview-class-shelf {
+    padding: 16px !important;
+  }
+
+  .marks-overview-class-grid {
+    flex-direction: column !important;
+  }
+
+  .marks-overview-class-grid > button {
+    width: 100%;
+  }
+
   .marks-overview-table-wrap,
   .marks-overview-result-wrap {
     margin-top: 12px;
+  }
+
+  .marks-overview-class-overview-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   .marks-overview-student-header {
