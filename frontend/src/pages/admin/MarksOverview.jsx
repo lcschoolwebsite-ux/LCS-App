@@ -99,8 +99,8 @@ export default function MarksOverview() {
   }
 
   return (
-    <div style={s.page}>
-      <div style={s.hero}>
+    <div style={s.page} className="marks-overview-page">
+      <div style={s.hero} className="marks-overview-hero">
         <div>
           <p style={{ ...s.eyebrow, color: "var(--white)" }}>Evaluation</p>
           <h1 style={{ ...s.title, color: "var(--white)" }}>Marks Overview</h1>
@@ -118,7 +118,7 @@ export default function MarksOverview() {
         </button>
       </div>
 
-      <div style={s.filterBar}>
+      <div style={s.filterBar} className="marks-overview-filters">
         <label style={s.field}>
           <span style={s.label}>Class</span>
           <select
@@ -165,7 +165,7 @@ export default function MarksOverview() {
         </label>
       </div>
 
-      <div style={s.statsGrid}>
+      <div style={s.statsGrid} className="marks-overview-stats">
         {summaryCards.map(card => (
           <div key={card.title} style={s.statCard}>
             <div style={{ ...s.statIcon, color: card.color, background: `${card.color}14` }}>
@@ -179,14 +179,14 @@ export default function MarksOverview() {
         ))}
       </div>
 
-      <div style={s.panelGrid}>
-        <section style={s.panel}>
+      <div style={s.panelGrid} className="marks-overview-panels">
+        <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
             <h2 style={s.panelTitle}>Teachers Who Uploaded Marks</h2>
             <span style={s.panelBadge}>{overview.teachers.length} teachers</span>
           </div>
 
-          <div style={s.teacherList}>
+          <div style={s.teacherList} className="marks-overview-teacher-list">
             {overview.teachers.length ? overview.teachers.map(teacher => (
               <div key={teacher.id} style={s.teacherRow}>
                 <div>
@@ -199,13 +199,13 @@ export default function MarksOverview() {
           </div>
         </section>
 
-        <section style={s.panel}>
+        <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
             <h2 style={s.panelTitle}>Failed Students and Subjects</h2>
             <span style={s.panelBadge}>{overview.failedBreakdown.length} entries</span>
           </div>
 
-          <div style={s.tableWrap}>
+          <div style={s.tableWrap} className="marks-overview-table-wrap">
             <table style={s.table}>
               <thead>
                 <tr>
@@ -246,14 +246,14 @@ export default function MarksOverview() {
         </section>
       </div>
 
-      <div style={s.bottomGrid}>
-        <section style={s.panel}>
+      <div style={s.bottomGrid} className="marks-overview-bottom-grid">
+        <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
             <h2 style={s.panelTitle}>Students</h2>
             <span style={s.panelBadge}>{overview.students.length} students</span>
           </div>
 
-          <div style={s.studentList}>
+          <div style={s.studentList} className="marks-overview-student-list">
             {overview.students.length ? overview.students.map(student => {
               const isSelected = student.studentId === selectedStudent.studentId;
               return (
@@ -284,7 +284,7 @@ export default function MarksOverview() {
           </div>
         </section>
 
-        <section style={s.panel}>
+        <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
             <h2 style={s.panelTitle}>Individual Student Marks</h2>
             <span style={s.panelBadge}>{selectedStudent.name || "Select a student"}</span>
@@ -292,7 +292,7 @@ export default function MarksOverview() {
 
           {selectedStudent.studentId ? (
             <>
-              <div style={s.studentDetailHeader}>
+              <div style={s.studentDetailHeader} className="marks-overview-student-header">
                 <div>
                   <div style={s.detailName}>{selectedStudent.name}</div>
                   <div style={s.detailMeta}>
@@ -310,7 +310,7 @@ export default function MarksOverview() {
                 </div>
               </div>
 
-              <div style={s.resultTableWrap}>
+              <div style={s.resultTableWrap} className="marks-overview-result-wrap">
                 <table style={s.table}>
                   <thead>
                     <tr>

@@ -515,6 +515,47 @@ input, select, textarea {
     grid-template-columns: 1fr !important;
   }
 
+  .marks-overview-stats,
+  .marks-overview-panels,
+  .marks-overview-bottom-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .marks-overview-filters {
+    grid-template-columns: 1fr !important;
+  }
+
+  .marks-overview-hero {
+    flex-direction: column !important;
+  }
+
+  .marks-overview-hero button {
+    width: 100%;
+  }
+
+  .marks-overview-panel {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .marks-overview-table-wrap,
+  .marks-overview-result-wrap {
+    margin-top: 12px;
+  }
+
+  .marks-overview-student-header {
+    grid-template-columns: 1fr !important;
+  }
+
+  .marks-overview-teacher-list,
+  .marks-overview-student-list {
+    max-height: none !important;
+  }
+
+  .marks-overview-page table {
+    min-width: 640px;
+  }
+
   .teacher-class-card,
   .teacher-attendance-card {
     border-radius: 14px !important;
@@ -851,6 +892,9 @@ table {
   .admin-dashboard-split,
   .teacher-dashboard-grid,
   .teacher-quick-grid,
+  .marks-overview-stats,
+  .marks-overview-panels,
+  .marks-overview-bottom-grid,
   .student-dashboard-grid,
   .student-quick-grid,
   .student-news-grid,
@@ -862,15 +906,25 @@ table {
   }
 
   .admin-hero-banner,
-  .teacher-hero-banner {
+  .teacher-hero-banner,
+  .marks-overview-hero {
     align-items: stretch !important;
   }
 
   .admin-hero-actions,
   .teacher-class-actions,
+  .marks-overview-filters,
   .student-fee-stats,
   .student-fee-progress {
     flex-wrap: wrap !important;
+  }
+
+  .marks-overview-filters {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .marks-overview-filters > :last-child {
+    grid-column: 1 / -1;
   }
 }
 
