@@ -49,6 +49,7 @@ export default function MarksOverview() {
     () => (selectedClass ? overview.marks : []),
     [overview.marks, selectedClass]
   );
+  const [selectedClassGroupKey, setSelectedClassGroupKey] = useState("");
   const selectedClassOverview = useMemo(() => {
     const grouped = new Map();
     const teacherSet = new Set();
@@ -67,15 +68,19 @@ export default function MarksOverview() {
       const key = [
         mark.teacherId || mark.teacherName,
         mark.subjectName,
-        mark.examTitle
+        mark.examId || mark.examTitle
       ].join("::");
       const current = grouped.get(key) || {
         id: key,
+        teacherId: mark.teacherId || "",
         teacherName: mark.teacherName || "Teacher",
         subjectName: mark.subjectName || "Subject",
         examTitle: mark.examTitle || "Exam",
         examType: mark.examType || "Exam",
+        date: mark.date || "",
+        examId: mark.examId || "",
         maxMarks: Number(mark.maxMarks || 0),
+        minMarks: Number(mark.passMark || 0),
         passCount: 0,
         failCount: 0,
         absentCount: 0,
@@ -84,6 +89,8 @@ export default function MarksOverview() {
 
       current.marksCount += 1;
       current.maxMarks = Math.max(current.maxMarks, Number(mark.maxMarks || 0));
+      current.minMarks = Math.max(current.minMarks, Number(mark.passMark || 0));
+      if (mark.date && !current.date) current.date = mark.date;
       if (mark.status === "Pass") current.passCount += 1;
       else if (mark.status === "Absent") current.absentCount += 1;
       else current.failCount += 1;
@@ -94,6 +101,7 @@ export default function MarksOverview() {
       rows: [...grouped.values()].sort((a, b) => {
         if (a.teacherName !== b.teacherName) return a.teacherName.localeCompare(b.teacherName);
         if (a.subjectName !== b.subjectName) return a.subjectName.localeCompare(b.subjectName);
+        if (a.date !== b.date) return String(b.date || "").localeCompare(String(a.date || ""));
         return a.examTitle.localeCompare(b.examTitle);
       }),
       teacherCount: teacherSet.size,
@@ -104,6 +112,33 @@ export default function MarksOverview() {
       totalMarks: selectedClassMarks.length
     };
   }, [selectedClassMarks]);
+
+  useEffect(() => {
+    if (!selectedClass) {
+      setSelectedClassGroupKey("");
+      return;
+    }
+
+    setSelectedClassGroupKey(prev => {
+      if (selectedClassOverview.rows.some(row => row.id === prev)) return prev;
+      return selectedClassOverview.rows[0]?.id || "";
+    });
+  }, [selectedClass, selectedClassOverview.rows]);
+
+  const selectedClassGroup = useMemo(
+    () => selectedClassOverview.rows.find(row => row.id === selectedClassGroupKey) || selectedClassOverview.rows[0] || null,
+    [selectedClassOverview.rows, selectedClassGroupKey]
+  );
+
+  const selectedClassGroupMarks = useMemo(() => {
+    if (!selectedClass || !selectedClassGroup) return [];
+    return selectedClassMarks.filter(mark => {
+      const teacherMatch = (mark.teacherId || "") === (selectedClassGroup.teacherId || "");
+      const subjectMatch = mark.subjectName === selectedClassGroup.subjectName;
+      const examMatch = (mark.examId || mark.examTitle) === (selectedClassGroup.examId || selectedClassGroup.examTitle);
+      return teacherMatch && subjectMatch && examMatch;
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }, [selectedClass, selectedClassGroup, selectedClassMarks]);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -304,22 +339,28 @@ export default function MarksOverview() {
                     <tr>
                       <th style={s.classTableHead}>Teacher</th>
                       <th style={s.classTableHead}>Subject</th>
-                      <th style={s.classTableHead}>Exam</th>
+                      <th style={s.classTableHead}>Date</th>
                       <th style={s.classTableHead}>Max Mark</th>
+                      <th style={s.classTableHead}>Min Mark</th>
                       <th style={s.classTableHead}>Pass</th>
                       <th style={s.classTableHead}>Fail</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedClassOverview.rows.length ? selectedClassOverview.rows.map(row => (
-                      <tr key={row.id}>
+                      <tr
+                        key={row.id}
+                        onClick={() => setSelectedClassGroupKey(row.id)}
+                        style={{ ...s.classTableRow, ...(selectedClassGroup?.id === row.id ? s.classTableRowActive : {}) }}
+                      >
                         <td style={s.classTableCell}>{row.teacherName}</td>
-                        <td style={s.classTableCell}>{row.subjectName}</td>
-                        <td>
-                          <div style={s.cellTitle}>{row.examTitle}</div>
-                          <div style={s.cellSub}>{row.examType}</div>
+                        <td style={s.classTableCell}>
+                          <div style={s.cellTitle}>{row.subjectName}</div>
+                          <div style={s.cellSub}>{row.examTitle}</div>
                         </td>
+                        <td style={s.classTableCell}>{row.date || "-"}</td>
                         <td style={s.classTableCell}>{row.maxMarks}</td>
+                        <td style={s.classTableCell}>{row.minMarks}</td>
                         <td><span style={s.goodPill}>{row.passCount}</span></td>
                         <td style={s.classTableCell}>
                           <span style={row.failCount > 0 ? s.failPill : s.absentPill}>
@@ -343,58 +384,51 @@ export default function MarksOverview() {
 
         <section style={s.panel} className="marks-overview-panel">
           <div style={s.panelHeader}>
-            <h2 style={s.panelTitle}>Uploaded Marks</h2>
+            <h2 style={s.panelTitle}>
+              {selectedClassGroup ? `${selectedClassGroup.subjectName} Marks` : "Class Marks"}
+            </h2>
             <div style={s.panelBadgeRow}>
-              {selectedClass ? (
-                <span style={s.panelBadge}>{selectedClassLabel}</span>
+              {selectedClassGroup ? (
+                <span style={s.panelBadge}>{selectedClassGroup.examTitle}</span>
               ) : (
-                <span style={s.panelBadge}>{overview.marks.length} records</span>
+                <span style={s.panelBadge}>{selectedClassOverview.totalMarks} records</span>
               )}
             </div>
           </div>
           <div style={s.panelNote}>
-            {selectedClass
-              ? "Showing the uploaded marks for the selected class."
-              : "Choose a class above to narrow this list."}
+            {selectedClassGroup
+              ? `${selectedClassGroup.teacherName} uploaded this subject on ${selectedClassGroup.date || "N/A"}. Max mark ${selectedClassGroup.maxMarks}, min mark ${selectedClassGroup.minMarks}.`
+              : "Choose a class above, then click a subject row on the left to see its student marks."}
           </div>
 
           <div style={s.tableWrap} className="marks-overview-table-wrap">
-            <table style={s.table}>
+            <table style={{ ...s.table, minWidth: 0 }}>
               <thead>
                 <tr>
                   <th>Student</th>
-                  <th>Class</th>
-                  <th>Subject</th>
-                  <th>Exam</th>
-                  <th>Score</th>
-                  <th>Grade</th>
-                  <th>Teacher</th>
+                  <th>Marks</th>
                 </tr>
               </thead>
               <tbody>
-                {overview.marks.length ? overview.marks.map((row, idx) => (
-                  <tr key={`${row.studentId}-${row.examTitle}-${row.subjectName}-${row.teacherName}-${idx}`}>
+                {selectedClassGroupMarks.length ? selectedClassGroupMarks.map((row, idx) => (
+                  <tr key={`${row.studentId}-${row.examId || row.examTitle}-${idx}`}>
                     <td>
                       <div style={s.cellTitle}>{row.name}</div>
                       <div style={s.cellSub}>{row.satCode || "SAT code not set"}</div>
-                    </td>
-                    <td>{row.className}</td>
-                    <td>{row.subjectName}</td>
-                    <td>
-                      <div style={s.cellTitle}>{row.examTitle}</div>
-                      <div style={s.cellSub}>{row.examType}</div>
                     </td>
                     <td>
                       <span style={row.status === "Pass" ? s.goodPill : row.status === "Absent" ? s.absentPill : s.failPill}>
                         {row.marksObtained === "AB" ? "Absent" : `${row.marksObtained}/${row.maxMarks}`}
                       </span>
                     </td>
-                    <td>{row.grade || "-"}</td>
-                    <td>{row.teacherName}</td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={7} style={s.emptyCell}>No marks uploaded for the current filter.</td>
+                    <td colSpan={2} style={s.emptyCell}>
+                      {selectedClassGroup
+                        ? "No student marks found for the selected subject."
+                        : "Select a class and subject to view student marks."}
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -726,6 +760,13 @@ const s = {
     textTransform: "uppercase",
     letterSpacing: "0.08em",
     fontSize: "0.72rem"
+  },
+  classTableRow: {
+    cursor: "pointer",
+    transition: "background 0.2s ease"
+  },
+  classTableRowActive: {
+    background: "#fff8e7"
   },
   classTableCell: {
     color: "var(--navy-dark)",
