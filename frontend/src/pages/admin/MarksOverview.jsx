@@ -302,26 +302,26 @@ export default function MarksOverview() {
                 <table style={s.table}>
                   <thead>
                     <tr>
-                      <th>Teacher</th>
-                      <th>Subject</th>
-                      <th>Exam</th>
-                      <th>Max Mark</th>
-                      <th>Pass</th>
-                      <th>Fail</th>
+                      <th style={s.classTableHead}>Teacher</th>
+                      <th style={s.classTableHead}>Subject</th>
+                      <th style={s.classTableHead}>Exam</th>
+                      <th style={s.classTableHead}>Max Mark</th>
+                      <th style={s.classTableHead}>Pass</th>
+                      <th style={s.classTableHead}>Fail</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedClassOverview.rows.length ? selectedClassOverview.rows.map(row => (
                       <tr key={row.id}>
-                        <td>{row.teacherName}</td>
-                        <td>{row.subjectName}</td>
+                        <td style={s.classTableCell}>{row.teacherName}</td>
+                        <td style={s.classTableCell}>{row.subjectName}</td>
                         <td>
                           <div style={s.cellTitle}>{row.examTitle}</div>
                           <div style={s.cellSub}>{row.examType}</div>
                         </td>
-                        <td>{row.maxMarks}</td>
+                        <td style={s.classTableCell}>{row.maxMarks}</td>
                         <td><span style={s.goodPill}>{row.passCount}</span></td>
-                        <td>
+                        <td style={s.classTableCell}>
                           <span style={row.failCount > 0 ? s.failPill : s.absentPill}>
                             {row.failCount}
                           </span>
@@ -720,6 +720,17 @@ const s = {
   tableHead: {},
   cellTitle: { fontWeight: 800, color: "var(--navy)" },
   cellSub: { fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px" },
+  classTableHead: {
+    color: "var(--teal-dark)",
+    fontWeight: 900,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    fontSize: "0.72rem"
+  },
+  classTableCell: {
+    color: "var(--navy-dark)",
+    fontWeight: 700
+  },
   failPill: {
     display: "inline-flex",
     alignItems: "center",
