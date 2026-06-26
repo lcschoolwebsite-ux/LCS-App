@@ -496,12 +496,12 @@ const s = {
   statLabel: { fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "4px", fontWeight: 700 },
   panelGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
     gap: "16px"
   },
   bottomGrid: {
     display: "grid",
-    gridTemplateColumns: "1.05fr 0.95fr",
+    gridTemplateColumns: "minmax(0, 1.05fr) minmax(0, 0.95fr)",
     gap: "16px"
   },
   panel: {
@@ -586,7 +586,7 @@ const s = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    minWidth: "920px"
+    minWidth: "760px"
   },
   emptyCell: {
     textAlign: "center",
