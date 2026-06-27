@@ -532,7 +532,7 @@ const s = {
   sendBtn: {
     width: "100%",
     padding: "16px",
-    background: "linear-gradient(135deg, var(--gold), var(--gold-dark))",
+    background: "linear-gradient(135deg, #16a34a, #15803d)",
     color: "var(--white)",
     border: "none",
     borderRadius: "12px",
