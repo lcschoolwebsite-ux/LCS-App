@@ -108,7 +108,7 @@ export default function Classes() {
 
       <Table
         loading={loading}
-        headers={["Class Name", "Section", "Academic Year", "Class Teacher", "Actions"]}
+        headers={["Class Name", "Section", "Academic Year", "Class Teacher", "Class Teacher Subject", "Actions"]}
         data={classes}
         renderRow={(c) => (
           <>
@@ -116,6 +116,7 @@ export default function Classes() {
             <td style={s.td}>{c.section}</td>
             <td style={s.td}>{c.academicYear?.year}</td>
             <td style={s.td}>{c.classTeacher?.name || <span style={{opacity: 0.5}}>Not Assigned</span>}</td>
+            <td style={s.td}>{c.classTeacherSubject?.name || <span style={{opacity: 0.5}}>Not Assigned</span>}</td>
             <td style={s.td}>
               <div style={s.actions}>
                 <button style={s.actionBtn} onClick={() => openEditModal(c)}>

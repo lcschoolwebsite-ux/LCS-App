@@ -58,6 +58,7 @@ export default function Classes() {
               <h3 style={s.title}>{formatClassLabel(cls)}</h3>
               <p style={s.meta}>Academic Year: {cls.academicYear?.year || "N/A"}</p>
               <p style={s.meta}>Class Teacher: {cls.classTeacher?.name || "Not set"}</p>
+              <p style={s.meta}>Class Teacher Subject: {cls.classTeacherSubject?.name || "Not set"}</p>
             </button>
           ))}
         </div>
@@ -103,4 +104,3 @@ const s = {
     fontWeight: "800"
   }
 };
-

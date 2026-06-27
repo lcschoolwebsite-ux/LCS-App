@@ -98,10 +98,49 @@ const syncClassTeacher = async (classId, nextTeacherId, previousTeacherId = null
   await syncTeacherClassAccess(normalizedPreviousTeacherId);
 };
 
+const syncClassTeacherSubjectAssignment = async (
+  classId,
+  nextTeacherId,
+  nextSubjectId,
+  previousTeacherId = null,
+  previousSubjectId = null
+) => {
+  const normalizedClassId = classId?.toString();
+  const normalizedNextTeacherId = nextTeacherId ? nextTeacherId.toString() : null;
+  const normalizedNextSubjectId = nextSubjectId ? nextSubjectId.toString() : null;
+  const normalizedPreviousTeacherId = previousTeacherId ? previousTeacherId.toString() : null;
+  const normalizedPreviousSubjectId = previousSubjectId ? previousSubjectId.toString() : null;
+
+  if (!normalizedClassId) return;
+
+  if (
+    normalizedPreviousTeacherId &&
+    normalizedPreviousSubjectId &&
+    (
+      normalizedPreviousTeacherId !== normalizedNextTeacherId ||
+      normalizedPreviousSubjectId !== normalizedNextSubjectId
+    )
+  ) {
+    await Teacher.findByIdAndUpdate(normalizedPreviousTeacherId, {
+      $pull: { assignedSubjects: normalizedPreviousSubjectId }
+    });
+  }
+
+  if (normalizedNextTeacherId && normalizedNextSubjectId) {
+    await Teacher.findByIdAndUpdate(normalizedNextTeacherId, {
+      $addToSet: {
+        assignedClasses: normalizedClassId,
+        assignedSubjects: normalizedNextSubjectId
+      }
+    });
+  }
+};
+
 module.exports = {
   normalizeIdList,
   filterExistingClassIds,
   syncTeacherClassAccess,
   syncTeacherAssignments,
-  syncClassTeacher
+  syncClassTeacher,
+  syncClassTeacherSubjectAssignment
 };

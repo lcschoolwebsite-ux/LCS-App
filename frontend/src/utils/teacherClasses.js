@@ -43,13 +43,25 @@ export const getTeacherAssignedClasses = (user, classes = []) => {
 export const isClassTeacher = (user, cls) =>
   String(cls?.classTeacher?._id || cls?.classTeacher || "") === String(user?.id || user?._id || "");
 
-export const getTeacherSubjectForClass = (user, classId, subjects = []) => {
+export const getTeacherSubjectForClass = (user, classId, subjects = [], classes = []) => {
   const normalizedClassId = String(classId || "");
+  const classInfo = Array.isArray(classes)
+    ? classes.find(cls => String(getClassId(cls)) === normalizedClassId)
+    : null;
   const subjectList = Array.isArray(subjects) && subjects.length > 0
     ? subjects
     : Array.isArray(user?.assignedSubjects)
       ? user.assignedSubjects
       : [];
+
+  const classTeacherSubjectId = String(classInfo?.classTeacherSubject?._id || classInfo?.classTeacherSubject || "");
+  if (classTeacherSubjectId) {
+    const directMatch = subjectList.find(subject =>
+      String(subject?._id || subject?.id || subject) === classTeacherSubjectId
+    );
+    if (directMatch) return directMatch;
+    return { _id: classTeacherSubjectId, name: classInfo?.classTeacherSubject?.name || "" };
+  }
 
   const matches = subjectList.filter(subject => {
     const subjectClassId = String(subject?.class?._id || subject?.class || subject?.classId || "");

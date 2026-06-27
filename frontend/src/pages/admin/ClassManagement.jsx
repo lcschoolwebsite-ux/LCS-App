@@ -13,6 +13,7 @@ export default function ClassManagement() {
   const [saving, setSaving] = useState(false);
   const [data, setData] = useState(null);
   const [classTeacherId, setClassTeacherId] = useState("");
+  const [classTeacherSubjectId, setClassTeacherSubjectId] = useState("");
   const [subjectModalOpen, setSubjectModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
   const [subjectForm, setSubjectForm] = useState({ name: "", teacher: "" });
@@ -24,6 +25,7 @@ export default function ClassManagement() {
       const { data: payload } = await api.get(`/classes/${classId}/management`);
       setData(payload);
       setClassTeacherId(payload.class?.classTeacher?._id || "");
+      setClassTeacherSubjectId(payload.class?.classTeacherSubject?._id || "");
     } catch (e) {
       console.error("Failed to load class management data", e);
     } finally {
@@ -118,7 +120,7 @@ export default function ClassManagement() {
     }
   };
 
-  const handleClassTeacherSave = async (nextTeacherId) => {
+  const handleClassTeacherSave = async (nextTeacherId, nextSubjectId = classTeacherSubjectId) => {
     if (!currentClass) return;
     setSaving(true);
     try {
@@ -126,7 +128,8 @@ export default function ClassManagement() {
         name: currentClass.name,
         section: currentClass.section,
         academicYear: currentClass.academicYear?._id || currentClass.academicYear,
-        classTeacher: nextTeacherId || ""
+        classTeacher: nextTeacherId || "",
+        classTeacherSubject: nextTeacherId ? (nextSubjectId || "") : ""
       });
       await loadData();
     } catch (e) {
@@ -174,6 +177,10 @@ export default function ClassManagement() {
           <div style={s.cardValue}>{currentClass.classTeacher?.name || "Not assigned"}</div>
         </div>
         <div style={s.infoCard}>
+          <div style={s.cardLabel}>Class Teacher Subject</div>
+          <div style={s.cardValue}>{currentClass.classTeacherSubject?.name || "Not assigned"}</div>
+        </div>
+        <div style={s.infoCard}>
           <div style={s.cardLabel}>Subjects</div>
           <div style={s.cardValue}>{subjects.length}</div>
         </div>
@@ -200,6 +207,9 @@ export default function ClassManagement() {
               <div style={s.teacherMeta}>
                 Phone: {currentClass.classTeacher?.phone || "Optional"}
               </div>
+              <div style={s.teacherMeta}>
+                Subject: {currentClass.classTeacherSubject?.name || "Not assigned"}
+              </div>
             </div>
           </div>
 
@@ -217,11 +227,25 @@ export default function ClassManagement() {
               ))}
             </select>
 
+            <select
+              style={s.select}
+              value={classTeacherSubjectId}
+              onChange={(e) => setClassTeacherSubjectId(e.target.value)}
+              disabled={!classTeacherId && !currentClass.classTeacher}
+            >
+              <option value="">Select class teacher subject</option>
+              {subjects.map((subject) => (
+                <option key={subject._id} value={subject._id}>
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+
             <div style={s.buttonRow}>
-              <button style={s.primaryBtn} onClick={() => handleClassTeacherSave(classTeacherId)} disabled={saving}>
+              <button style={s.primaryBtn} onClick={() => handleClassTeacherSave(classTeacherId, classTeacherSubjectId)} disabled={saving}>
                 {currentClass.classTeacher ? "Change Class Teacher" : "Assign Class Teacher"}
               </button>
-              <button style={s.dangerBtn} onClick={() => handleClassTeacherSave("")} disabled={saving || !currentClass.classTeacher}>
+              <button style={s.dangerBtn} onClick={() => handleClassTeacherSave("", "")} disabled={saving || !currentClass.classTeacher}>
                 Remove Class Teacher
               </button>
             </div>
@@ -249,7 +273,12 @@ export default function ClassManagement() {
               <div key={subject._id} style={s.subjectCard}>
                 <div style={s.subjectMain}>
                   <div>
-                    <div style={s.subjectName}>{subject.name}</div>
+                    <div style={s.subjectNameRow}>
+                      <div style={s.subjectName}>{subject.name}</div>
+                      {String(classTeacherSubjectId) === String(subject._id) && (
+                        <span style={s.subjectBadge}>Class Teacher Subject</span>
+                      )}
+                    </div>
                     <div style={s.subjectTeacher}>
                       Teacher: {subject.teacher?.name || <span style={s.muted}>Not assigned</span>}
                     </div>
@@ -346,7 +375,9 @@ const s = {
   subjectList: { display: "grid", gap: "12px" },
   subjectCard: { border: "1px solid var(--border)", borderRadius: "14px", padding: "16px", background: "var(--light-bg)" },
   subjectMain: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" },
+  subjectNameRow: { display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" },
   subjectName: { fontSize: "1rem", fontWeight: "900", color: "var(--navy)" },
+  subjectBadge: { display: "inline-flex", alignItems: "center", padding: "4px 8px", borderRadius: "999px", background: "var(--gold-pale)", color: "var(--navy-dark)", fontSize: "0.68rem", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.06em" },
   subjectTeacher: { marginTop: "6px", color: "var(--text)", fontWeight: "700" },
   subjectMeta: { marginTop: "4px", color: "var(--text-muted)", fontSize: "0.8rem" },
   subjectActions: { display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" },

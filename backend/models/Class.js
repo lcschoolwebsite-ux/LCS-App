@@ -5,6 +5,7 @@ const classSchema = new mongoose.Schema({
   section:       { type: String, required: true },      // "A"
   academicYear:  { type: mongoose.Schema.Types.ObjectId, ref: "AcademicYear", required: true },
   classTeacher:  { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
+  classTeacherSubject: { type: mongoose.Schema.Types.ObjectId, ref: "Subject" },
 }, { timestamps: true });
 
 classSchema.index({ academicYear: 1, name: 1, section: 1 }, { unique: true });

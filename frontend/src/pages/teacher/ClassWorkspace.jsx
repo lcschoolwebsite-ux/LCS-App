@@ -40,7 +40,7 @@ export default function ClassWorkspace() {
   const myClasses = useMemo(() => getTeacherAssignedClasses(user, classes), [user, classes]);
   const selectedClass = myClasses.find(item => String(item._id) === String(classId));
   const firstExamId = exams[0]?._id || "";
-  const selectedTeacherSubject = getTeacherSubjectForClass(user, classId);
+  const selectedTeacherSubject = getTeacherSubjectForClass(user, classId, [], classes);
 
   if (!classId) {
     return (
@@ -91,7 +91,7 @@ export default function ClassWorkspace() {
             <ActionCard
               title="Exams"
               desc="Open scheduled exams for this class."
-              onClick={() => navigate(`/teacher/exams?classId=${classId}${selectedTeacherSubject?._id ? `&subjectId=${selectedTeacherSubject._id}` : ""}`)}
+            onClick={() => navigate(`/teacher/exams?classId=${classId}${selectedTeacherSubject?._id ? `&subjectId=${selectedTeacherSubject._id}` : ""}`)}
               icon="fa-file-lines"
             />
             <ActionCard title="Marks" desc="Enter marks for the latest exam." onClick={() => navigate(`/teacher/marks${firstExamId ? `?examId=${firstExamId}` : `?classId=${classId}`}`)} icon="fa-pen-to-square" />

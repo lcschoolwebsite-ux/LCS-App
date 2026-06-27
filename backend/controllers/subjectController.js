@@ -1,4 +1,5 @@
 const Subject = require("../models/Subject");
+const Class = require("../models/Class");
 const Teacher = require("../models/Teacher");
 const { getTeacherAccessState, canAccessClass } = require("../utils/teacherAccess");
 const { syncTeacherClassAccess } = require("../utils/classAssignmentSync");
@@ -85,6 +86,14 @@ exports.update = async (req, res) => {
     if (!subject) return res.status(404).json({ message: "Subject not found" });
 
     await syncTeacherSubjectAssignment(subject, payload.teacher || null, previousSubject.teacher || null);
+
+    if (String(previousSubject.class) !== String(subject.class)) {
+      await Class.updateMany(
+        { classTeacherSubject: subject._id, _id: previousSubject.class },
+        { $unset: { classTeacherSubject: "" } }
+      );
+    }
+
     res.json(await populateSubject(Subject.findById(subject._id)));
   }
   catch (e) { res.status(400).json({ message: e.message }); }
@@ -94,6 +103,12 @@ exports.remove = async (req, res) => {
   try {
     const subject = await Subject.findById(req.params.id).select("_id class teacher").lean();
     if (!subject) return res.status(404).json({ message: "Subject not found" });
+
+    await Class.updateMany(
+      { classTeacherSubject: subject._id },
+      { $unset: { classTeacherSubject: "" } }
+    );
+
     await Subject.findByIdAndDelete(req.params.id);
     await Teacher.updateMany(
       { assignedSubjects: subject._id },

@@ -6,7 +6,8 @@ const Attendance = require("../models/Attendance");
 const FeeStructure = require("../models/FeeStructure");
 const Teacher = require("../models/Teacher");
 const {
-  syncClassTeacher
+  syncClassTeacher,
+  syncClassTeacherSubjectAssignment
 } = require("../utils/classAssignmentSync");
 
 const normalizeClassPayload = body => {
@@ -19,10 +20,33 @@ const normalizeClassPayload = body => {
 const duplicateClassMessage = () =>
   "A class with the same academic year, name, and section already exists.";
 
+const populateClass = query =>
+  query
+    .populate("academicYear", "year")
+    .populate("classTeacher", "name phone username")
+    .populate("classTeacherSubject", "name");
+
+const normalizeOptionalObjectId = value => {
+  if (value === "" || value === null || typeof value === "undefined") return undefined;
+  return value;
+};
+
+const validateClassTeacherSubject = async (classId, subjectId) => {
+  if (!subjectId) return null;
+  const subject = await Subject.findById(subjectId).select("_id class").lean();
+  if (!subject) {
+    return "Selected subject was not found.";
+  }
+  if (String(subject.class) !== String(classId)) {
+    return "Selected subject must belong to this class.";
+  }
+  return null;
+};
+
 exports.getAll = async (req, res) => {
   const { academicYear } = req.query;
   const q = academicYear ? { academicYear } : {};
-  res.json(await Class.find(q).populate("academicYear","year").populate("classTeacher","name phone"));
+  res.json(await populateClass(Class.find(q)));
 };
 
 exports.getManagement = async (req, res) => {
@@ -30,6 +54,7 @@ exports.getManagement = async (req, res) => {
     const classDoc = await Class.findById(req.params.id)
       .populate("academicYear", "year")
       .populate("classTeacher", "name phone username")
+      .populate("classTeacherSubject", "name")
       .lean();
 
     if (!classDoc) {
@@ -60,15 +85,16 @@ exports.getManagement = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const payload = normalizeClassPayload(req.body);
+    if (payload.classTeacher === "") delete payload.classTeacher;
+    if (payload.classTeacherSubject === "") delete payload.classTeacherSubject;
     const created = await Class.create(payload);
     if (created.classTeacher) {
       await syncClassTeacher(created._id, created.classTeacher);
     }
-    res.status(201).json(
-      await Class.findById(created._id)
-        .populate("academicYear", "year")
-        .populate("classTeacher", "name")
-    );
+    if (created.classTeacherSubject && created.classTeacher) {
+      await syncClassTeacherSubjectAssignment(created._id, created.classTeacher, created.classTeacherSubject);
+    }
+    res.status(201).json(await populateClass(Class.findById(created._id)));
   }
   catch (e) {
     if (e?.code === 11000) {
@@ -81,24 +107,60 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const payload = normalizeClassPayload(req.body);
-    const existing = await Class.findById(req.params.id).select("classTeacher");
+    const setPayload = {};
+    const unsetPayload = {};
+
+    ["name", "section", "academicYear", "classTeacher", "classTeacherSubject"].forEach(field => {
+      if (!Object.prototype.hasOwnProperty.call(payload, field)) return;
+      const value = normalizeOptionalObjectId(payload[field]);
+      if (value === undefined) {
+        unsetPayload[field] = "";
+      } else {
+        setPayload[field] = value;
+      }
+    });
+
+    if (Object.prototype.hasOwnProperty.call(setPayload, "classTeacherSubject")) {
+      const validationError = await validateClassTeacherSubject(req.params.id, setPayload.classTeacherSubject);
+      if (validationError) {
+        return res.status(400).json({ message: validationError });
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(unsetPayload, "classTeacher")) {
+      unsetPayload.classTeacherSubject = "";
+    }
+
+    const existing = await Class.findById(req.params.id).select("classTeacher classTeacherSubject");
     if (!existing) return res.status(404).json({ message: "Class not found" });
 
-    const updated = await Class.findByIdAndUpdate(req.params.id, payload, {
+    const update = {};
+    if (Object.keys(setPayload).length > 0) update.$set = setPayload;
+    if (Object.keys(unsetPayload).length > 0) update.$unset = unsetPayload;
+
+    const updated = await Class.findByIdAndUpdate(req.params.id, update, {
       new: true,
       runValidators: true
     });
 
     if (!updated) return res.status(404).json({ message: "Class not found" });
-    if (Object.prototype.hasOwnProperty.call(payload, "classTeacher")) {
-      await syncClassTeacher(updated._id, payload.classTeacher || null, existing.classTeacher || null);
+    if (Object.prototype.hasOwnProperty.call(setPayload, "classTeacher")) {
+      await syncClassTeacher(updated._id, setPayload.classTeacher || null, existing.classTeacher || null);
+    } else if (Object.prototype.hasOwnProperty.call(unsetPayload, "classTeacher")) {
+      await syncClassTeacher(updated._id, null, existing.classTeacher || null);
     } else if (updated.classTeacher) {
       await syncClassTeacher(updated._id, updated.classTeacher, existing.classTeacher || null);
     }
 
-    const refreshed = await Class.findById(updated._id)
-      .populate("academicYear", "year")
-      .populate("classTeacher", "name");
+    await syncClassTeacherSubjectAssignment(
+      updated._id,
+      updated.classTeacher,
+      updated.classTeacherSubject,
+      existing.classTeacher,
+      existing.classTeacherSubject
+    );
+
+    const refreshed = await populateClass(Class.findById(updated._id));
 
     res.json(refreshed);
   }
@@ -148,6 +210,13 @@ exports.remove = async (req, res) => {
       { assignedClasses: classDoc._id },
       { $pull: { assignedClasses: classDoc._id } }
     );
+
+    if (classDoc.classTeacherSubject) {
+      await Teacher.updateMany(
+        { assignedSubjects: classDoc.classTeacherSubject },
+        { $pull: { assignedSubjects: classDoc.classTeacherSubject } }
+      );
+    }
 
     if (classDoc.classTeacher) {
       await Teacher.findByIdAndUpdate(classDoc.classTeacher, {

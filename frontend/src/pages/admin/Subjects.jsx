@@ -82,6 +82,13 @@ export default function Subjects() {
                   </span>
                 </div>
 
+                <div style={s.metaRow}>
+                  <span style={s.metaLabel}>Class Teacher Subject</span>
+                  <span style={s.metaValue}>
+                    {cls.classTeacherSubject?.name || <span style={s.muted}>Not assigned</span>}
+                  </span>
+                </div>
+
                 <div style={s.badgeRow}>
                   <span style={s.badge}>{subjectCount} Subjects</span>
                   <span style={s.linkText}>Open Management</span>

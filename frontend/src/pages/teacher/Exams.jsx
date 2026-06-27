@@ -55,7 +55,7 @@ export default function Exams() {
 
   const openScheduleModal = () => {
     const nextClassId = classFilter || searchParams.get("classId") || "";
-    const teacherSubject = getTeacherSubjectForClass(user, nextClassId, subjects);
+    const teacherSubject = getTeacherSubjectForClass(user, nextClassId, subjects, classes);
     const nextSubjectId = preselectedSubjectId || teacherSubject?._id || "";
     setForm(prev => ({
       ...prev,
@@ -135,7 +135,7 @@ export default function Exams() {
               value={form.class}
               onChange={e => {
                 const nextClassId = e.target.value;
-                const teacherSubject = getTeacherSubjectForClass(user, nextClassId, subjects);
+                const teacherSubject = getTeacherSubjectForClass(user, nextClassId, subjects, classes);
                 setForm({
                   ...form,
                   class: nextClassId,
