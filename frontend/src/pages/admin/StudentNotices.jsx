@@ -69,7 +69,9 @@ export default function StudentNotices() {
     setSelectedStudents(selectedStudents.filter(s => s._id !== studentId));
   };
 
-  const handleSend = async () => {
+  const handleSend = async (e) => {
+    e?.preventDefault?.();
+
     if (!title.trim() || !message.trim()) {
       setFeedback({ type: "error", message: "Title and message are required" });
       return;
@@ -125,7 +127,7 @@ export default function StudentNotices() {
 
   return (
     <div style={s.container}>
-      <div style={s.card}>
+      <form style={s.card} onSubmit={handleSend}>
         <h2 style={s.title}>
           <i className="fa-solid fa-paper-plane" style={{ marginRight: "12px", color: "var(--gold)" }}></i>
           Send Student Notice
@@ -276,28 +278,32 @@ export default function StudentNotices() {
           </div>
         )}
 
-        {/* Send Button */}
-        <button
-          onClick={handleSend}
-          disabled={loading}
-          style={{
-            ...s.sendBtn,
-            ...(loading ? s.sendBtnDisabled : {})
-          }}
-        >
-          {loading ? (
-            <>
-              <i className="fa-solid fa-circle-notch fa-spin" style={{ marginRight: "8px" }}></i>
-              Sending...
-            </>
-          ) : (
-            <>
-              <i className="fa-solid fa-paper-plane" style={{ marginRight: "8px" }}></i>
-              Send Notice
-            </>
-          )}
-        </button>
-      </div>
+        <div style={s.actionBar}>
+          <div style={s.actionNote}>
+            This will upload the notice to the student notice board and send notifications where available.
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              ...s.sendBtn,
+              ...(loading ? s.sendBtnDisabled : {})
+            }}
+          >
+            {loading ? (
+              <>
+                <i className="fa-solid fa-circle-notch fa-spin" style={{ marginRight: "8px" }}></i>
+                Uploading...
+              </>
+            ) : (
+              <>
+                <i className="fa-solid fa-cloud-arrow-up" style={{ marginRight: "8px" }}></i>
+                Upload Notice
+              </>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -311,7 +317,10 @@ const s = {
     background: "var(--white)",
     borderRadius: "16px",
     padding: "32px",
-    boxShadow: "var(--shadow-md)"
+    boxShadow: "var(--shadow-md)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0"
   },
   title: {
     margin: "0 0 24px",
@@ -506,6 +515,19 @@ const s = {
     background: "#f8d7da",
     color: "#721c24",
     border: "1px solid #f5c6cb"
+  },
+  actionBar: {
+    marginTop: "8px",
+    paddingTop: "18px",
+    borderTop: "1px solid var(--border)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px"
+  },
+  actionNote: {
+    fontSize: "0.85rem",
+    color: "var(--text-muted)",
+    lineHeight: 1.5
   },
   sendBtn: {
     width: "100%",
