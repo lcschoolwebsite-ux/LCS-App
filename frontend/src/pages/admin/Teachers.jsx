@@ -3,6 +3,10 @@ import api from "../../api/axios";
 import Table from "../../components/Table";
 import Modal from "../../components/Modal";
 
+const formatClassName = cls => [cls?.name, cls?.section].filter(Boolean).join(" ") || "";
+const getClassTeacherClass = (teacherId, classes = []) =>
+  classes.find(cls => String(cls.classTeacher?._id || cls.classTeacher || "") === String(teacherId || "")) || null;
+
 export default function Teachers() {
   const [teachers, setTeachers] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -161,7 +165,7 @@ export default function Teachers() {
 
       <Table
         loading={loading}
-        headers={["Teacher Name", "Username", "Email", "Assigned Classes", "Status", "Actions"]}
+        headers={["Teacher Name", "Username", "Email", "Assigned Classes", "Class Teacher", "Status", "Actions"]}
         data={teachers}
         renderRow={(t) => (
           <>
@@ -170,6 +174,14 @@ export default function Teachers() {
             <td style={s.td}>{t.email}</td>
             <td style={s.td}>
               {t.assignedClasses?.map(c => `${c.name}${c.section}`).join(", ") || <span style={{opacity: 0.5}}>None</span>}
+            </td>
+            <td style={s.td}>
+              {(() => {
+                const classTeacherClass = getClassTeacherClass(t._id, classes);
+                return classTeacherClass
+                  ? formatClassName(classTeacherClass)
+                  : <span style={{opacity: 0.5}}>None</span>;
+              })()}
             </td>
             <td style={s.td}>
               <span style={{ ...s.badge, background: t.isActive ? "var(--success-bg)" : "var(--danger-bg)", color: t.isActive ? "var(--success-text)" : "var(--danger-text)" }}>

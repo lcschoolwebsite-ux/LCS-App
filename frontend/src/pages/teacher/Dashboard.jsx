@@ -4,9 +4,7 @@ import { useAuth } from "../../context/useAuth";
 import api from "../../api/axios";
 import StatCard from "../../components/StatCard";
 import SectionTitle from "../../components/SectionTitle";
-import { getTeacherAssignedClasses, isClassTeacher } from "../../utils/teacherClasses";
-
-const formatClassName = cls => [cls?.name, cls?.section].filter(Boolean).join(" ") || "Class";
+import { getTeacherAssignedClassIds, isClassTeacher, formatClassLabel } from "../../utils/teacherClasses";
 const getLocalDate = () => {
   const date = new Date();
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
@@ -21,7 +19,7 @@ export default function Dashboard() {
   const [attendanceSaving, setAttendanceSaving] = useState(false);
   const [attendanceMessage, setAttendanceMessage] = useState("");
   const [stats, setStats] = useState({
-    myStudents: 0, attendanceMarked: false, pendingMarks: 0, announcements: 0,
+    myStudents: 0, attendanceMarked: false, pendingMarks: 0, announcements: 0, assignedSubjects: 0,
     classes: [], quickAttendance: [], selectedClassId: ""
   });
 
@@ -29,13 +27,32 @@ export default function Dashboard() {
     const loadDashboard = async () => {
       setLoading(true);
       try {
-        const [classesRes, examsRes, announcementsRes] = await Promise.all([
+        const [classesRes, subjectsRes, examsRes, announcementsRes] = await Promise.all([
           api.get("/classes"),
+          api.get("/subjects"),
           api.get("/exams"),
           api.get("/announcements")
         ]);
 
-        const classList = getTeacherAssignedClasses(user, classesRes.data || []);
+        const userId = String(user?.id || user?._id || "");
+        const directClassIds = new Set(getTeacherAssignedClassIds(user).map(String));
+        const teacherSubjectIds = new Set(
+          (Array.isArray(user?.assignedSubjects) ? user.assignedSubjects : [])
+            .map(subject => subject?._id || subject?.id || subject)
+            .filter(Boolean)
+            .map(String)
+        );
+        const teacherSubjects = (subjectsRes.data || []).filter(subject => {
+          const subjectTeacherId = String(subject.teacher?._id || subject.teacher || "");
+          return subjectTeacherId === userId || teacherSubjectIds.has(String(subject._id));
+        });
+
+        teacherSubjects.forEach(subject => {
+          const classId = String(subject.class?._id || subject.class || "");
+          if (classId) directClassIds.add(classId);
+        });
+
+        const classList = (classesRes.data || []).filter(cls => directClassIds.has(String(cls._id)));
         const studentResponses = await Promise.all(classList.map(cls => api.get(`/students?classId=${cls._id}`)));
         const classTeacherClasses = classList.filter(cls => isClassTeacher(user, cls));
         const firstAttendanceClassId = classTeacherClasses[0]?._id || "";
@@ -45,19 +62,31 @@ export default function Dashboard() {
 
         const exams = examsRes.data || [];
         const studentResponseByClassId = new Map(
-          assignedClasses.map((cls, index) => [String(cls._id), studentResponses[index]?.data || []])
+          classList.map((cls, index) => [String(cls._id), studentResponses[index]?.data || []])
         );
+        const subjectsByClassId = teacherSubjects.reduce((map, subject) => {
+          const classId = String(subject.class?._id || subject.class || "");
+          if (!classId) return map;
+          const next = map.get(classId) || [];
+          next.push(subject);
+          map.set(classId, next);
+          return map;
+        }, new Map());
 
         const classCards = classList.map((cls) => {
           const students = studentResponseByClassId.get(String(cls._id)) || [];
           const classExams = exams.filter(exam => exam.class?._id === cls._id);
+          const assignedSubjects = subjectsByClassId.get(String(cls._id)) || [];
+          const classTeacher = isClassTeacher(user, cls);
           return {
             id: cls._id,
-            name: formatClassName(cls),
+            name: formatClassLabel(cls),
             students: students.length,
             examCount: classExams.length,
             firstExamId: classExams[0]?._id || "",
-            canTakeAttendance: isClassTeacher(user, cls)
+            canTakeAttendance: classTeacher,
+            classTeacher,
+            assignedSubjects: assignedSubjects.map(subject => subject.name).filter(Boolean)
           };
         });
 
@@ -73,6 +102,7 @@ export default function Dashboard() {
           attendanceMarked: Boolean(attendanceRes.data.alreadyMarked),
           pendingMarks: exams.length,
           announcements: announcementsRes.data?.length || 0,
+          assignedSubjects: teacherSubjects.length,
           classes: classCards,
           quickAttendance,
           selectedClassId: firstAttendanceClassId
@@ -176,6 +206,7 @@ export default function Dashboard() {
       {/* 4 Stat Cards */}
       <div style={s.grid4} className="teacher-dashboard-grid">
         <StatCard title="My Students" value={stats.myStudents} icon={<i className="fa-solid fa-users"></i>} color="navy" />
+        <StatCard title="Assigned Subjects" value={stats.assignedSubjects} icon={<i className="fa-solid fa-book-open"></i>} color="gold" />
         <StatCard
           title="Today's Attendance"
           value={!attendanceClasses.length ? "Restricted" : stats.attendanceMarked ? "Marked" : "Pending"}
@@ -201,24 +232,44 @@ export default function Dashboard() {
                 key={cls.id}
                 role="button"
                 tabIndex={0}
-                style={s.classCard}
+                style={{ ...s.classCard, ...(cls.classTeacher ? s.classTeacherCard : s.subjectTeacherCard) }}
                 className="teacher-class-card"
                 onClick={() => goToClass(cls.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") goToClass(cls.id); }}
               >
-                <div style={s.classGradientTop}></div>
-                <h3 style={s.className}>{cls.name}</h3>
-                <p style={s.classSub}>{cls.students} Students</p>
+                <div style={{ ...s.classGradientTop, ...(cls.classTeacher ? s.classTeacherGradientTop : {}) }}></div>
+                <div style={s.classCardHeader}>
+                  <div>
+                    <h3 style={{ ...s.className, ...(cls.classTeacher ? s.classNameLight : {}) }}>{cls.name}</h3>
+                    <p style={{ ...s.classSub, ...(cls.classTeacher ? s.classSubLight : {}) }}>{cls.students} Students</p>
+                  </div>
+                  <span style={{ ...s.rolePill, ...(cls.classTeacher ? s.rolePillDark : s.rolePillLight) }}>
+                    {cls.classTeacher ? "Class Teacher" : "Subject Teacher"}
+                  </span>
+                </div>
                 
                 <div style={s.progressWrap}>
                   <div style={s.progressLabels}>
-                    <span>Scheduled Exams</span>
-                    <span>{cls.examCount}</span>
+                    <span style={cls.classTeacher ? s.lightText : undefined}>Scheduled Exams</span>
+                    <span style={cls.classTeacher ? s.lightText : undefined}>{cls.examCount}</span>
                   </div>
                   <div style={s.progressBar}>
                     <div style={{...s.progressFill, width: `${Math.min(cls.examCount * 20, 100)}%`, background: cls.examCount ? 'var(--gold)' : 'var(--border)'}}></div>
                   </div>
                 </div>
+
+                {cls.assignedSubjects.length > 0 && (
+                  <div style={s.subjectWrap}>
+                    <div style={{ ...s.subjectLabel, ...(cls.classTeacher ? s.lightText : {}) }}>Assigned subjects</div>
+                    <div style={s.subjectChips}>
+                      {cls.assignedSubjects.map(subject => (
+                        <span key={`${cls.id}-${subject}`} style={{ ...s.subjectChip, ...(cls.classTeacher ? s.subjectChipDark : {}) }}>
+                          {subject}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div style={s.classActions} className="teacher-class-actions">
                   <button
@@ -311,10 +362,25 @@ const s = {
   empty: { padding: "28px 24px", background: "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95))", border: "1.5px dashed rgba(200,150,12,0.35)", borderRadius: "16px", color: "var(--navy)", fontWeight: "700", textAlign: "center", fontSize: "0.95rem", lineHeight: 1.5, boxShadow: "inset 0 0 24px rgba(200,150,12,0.08)" },
   
   classList: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" },
-  classCard: { background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))", borderRadius: "20px", padding: "28px", position: "relative", overflow: "hidden", border: "1px solid rgba(200,150,12,0.15)", boxShadow: "0 8px 28px rgba(14,107,107,0.1)", transition: "transform 0.3s ease, box-shadow 0.3s ease", cursor: "pointer" },
+  classCard: { borderRadius: "20px", padding: "28px", position: "relative", overflow: "hidden", border: "1px solid rgba(200,150,12,0.15)", boxShadow: "0 8px 28px rgba(14,107,107,0.1)", transition: "transform 0.3s ease, box-shadow 0.3s ease", cursor: "pointer" },
+  classTeacherCard: { background: "linear-gradient(135deg, #2b0202 0%, #7a1010 52%, #4d0909 100%)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 12px 32px rgba(93, 15, 15, 0.35)" },
+  subjectTeacherCard: { background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))" },
   classGradientTop: { position: "absolute", top: 0, left: 0, right: 0, height: "8px", background: "linear-gradient(90deg, var(--gold), var(--gold-light))", borderRadius: "20px 20px 0 0" },
+  classTeacherGradientTop: { background: "linear-gradient(90deg, #ffcf63, #ffd98c)" },
+  classCardHeader: { display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" },
   className: { fontFamily: "var(--font-heading)", color: "var(--navy-dark)", fontSize: "1.5rem", margin: "0 0 6px 0", fontWeight: "700", letterSpacing: "-0.01em" },
+  classNameLight: { color: "var(--white)" },
   classSub: { color: "var(--text-muted)", fontSize: "0.95rem", margin: "0 0 24px 0", fontWeight: "600" },
+  classSubLight: { color: "rgba(255,255,255,0.82)" },
+  rolePill: { display: "inline-flex", alignItems: "center", borderRadius: "999px", padding: "5px 10px", fontSize: "0.68rem", fontWeight: "900", textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" },
+  rolePillDark: { background: "rgba(255,255,255,0.12)", color: "var(--gold-light)", border: "1px solid rgba(255,255,255,0.16)" },
+  rolePillLight: { background: "rgba(200,150,12,0.12)", color: "var(--navy)", border: "1px solid rgba(200,150,12,0.2)" },
+  subjectWrap: { marginBottom: "20px" },
+  subjectLabel: { fontSize: "0.72rem", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" },
+  subjectChips: { display: "flex", gap: "8px", flexWrap: "wrap" },
+  subjectChip: { background: "rgba(14,107,107,0.08)", color: "var(--navy-dark)", border: "1px solid rgba(14,107,107,0.12)", borderRadius: "999px", padding: "6px 10px", fontSize: "0.74rem", fontWeight: "700" },
+  subjectChipDark: { background: "rgba(255,255,255,0.1)", color: "var(--white)", border: "1px solid rgba(255,255,255,0.14)" },
+  lightText: { color: "rgba(255,255,255,0.86)" },
   
   progressWrap: { marginBottom: "28px", background: "rgba(9,79,79,0.03)", padding: "18px", borderRadius: "14px", border: "1px solid rgba(200,150,12,0.1)" },
   progressLabels: { display: "flex", justifyContent: "space-between", fontSize: "0.85rem", fontWeight: "800", color: "var(--navy-dark)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" },

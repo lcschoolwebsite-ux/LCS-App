@@ -114,7 +114,9 @@ export default function ClassWorkspace() {
           <div style={s.actionGrid}>
             <ActionCard title="Students" desc="View and edit the students in this class." onClick={() => navigate(`/teacher/students?classId=${classId}`)} icon="fa-users" />
             <ActionCard title="Add Student" desc="Register a new student directly into this class." onClick={() => navigate(`/teacher/students/add?classId=${classId}`)} icon="fa-user-plus" />
-            <ActionCard title="Attendance" desc={canTakeAttendance ? "Mark or update attendance for class days." : "Attendance is available only to the class teacher."} onClick={() => canTakeAttendance && navigate(`/teacher/attendance?classId=${classId}`)} icon="fa-clipboard-user" disabled={!canTakeAttendance} />
+            {canTakeAttendance && (
+              <ActionCard title="Attendance" desc="Mark or update attendance for class days." onClick={() => navigate(`/teacher/attendance?classId=${classId}`)} icon="fa-clipboard-user" />
+            )}
             <ActionCard title="Exams" desc="Open scheduled exams for this class." onClick={() => navigate(`/teacher/exams?classId=${classId}`)} icon="fa-file-lines" />
             <ActionCard title="Marks" desc="Enter marks for the latest exam." onClick={() => navigate(`/teacher/marks${firstExamId ? `?examId=${firstExamId}` : `?classId=${classId}`}`)} icon="fa-pen-to-square" />
           </div>
@@ -212,4 +214,3 @@ const s = {
     fontWeight: "800"
   }
 };
-
