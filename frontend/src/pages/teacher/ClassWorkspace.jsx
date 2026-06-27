@@ -3,13 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
 import SectionTitle from "../../components/SectionTitle";
 import { useAuth } from "../../context/useAuth";
-import { formatClassLabel, getTeacherAssignedClasses, isClassTeacher } from "../../utils/teacherClasses";
-
-const getLocalDate = () => {
-  const date = new Date();
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return date.toISOString().split("T")[0];
-};
+import { formatClassLabel, getTeacherAssignedClasses, getTeacherSubjectForClass } from "../../utils/teacherClasses";
 
 export default function ClassWorkspace() {
   const { classId } = useParams();
@@ -18,7 +12,6 @@ export default function ClassWorkspace() {
   const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
   const [exams, setExams] = useState([]);
-  const [attendanceState, setAttendanceState] = useState({ alreadyMarked: false, count: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,21 +27,6 @@ export default function ClassWorkspace() {
         setClasses(classesRes.data || []);
         setStudents(studentsRes.data?.data || studentsRes.data || []);
         setExams(examsRes.data || []);
-
-        const selectedClass = (classesRes.data || []).find(item => String(item._id) === String(classId));
-        if (selectedClass && isClassTeacher(user, selectedClass)) {
-          try {
-            const attendanceRes = await api.get(`/attendance?classId=${classId}&date=${getLocalDate()}`);
-            setAttendanceState({
-              alreadyMarked: Boolean(attendanceRes.data.alreadyMarked),
-              count: attendanceRes.data.students?.length || 0
-            });
-          } catch (e) {
-            console.error("Failed to load attendance status", e);
-          }
-        } else {
-          setAttendanceState({ alreadyMarked: false, count: 0 });
-        }
       } catch (e) {
         console.error("Failed to load class workspace", e);
       } finally {
@@ -62,7 +40,7 @@ export default function ClassWorkspace() {
   const myClasses = useMemo(() => getTeacherAssignedClasses(user, classes), [user, classes]);
   const selectedClass = myClasses.find(item => String(item._id) === String(classId));
   const firstExamId = exams[0]?._id || "";
-  const canTakeAttendance = isClassTeacher(user, selectedClass);
+  const selectedTeacherSubject = getTeacherSubjectForClass(user, classId);
 
   if (!classId) {
     return (
@@ -83,7 +61,7 @@ export default function ClassWorkspace() {
           <p style={s.eyebrow}>Class Workspace</p>
           <h1 style={s.title}>{selectedClass ? formatClassLabel(selectedClass) : "Loading..."}</h1>
           <p style={s.subtitle}>
-            Open the class once and jump to the full toolset for students, attendance, marks, and exams.
+            Open the class once and jump to the full toolset for students, marks, and exams.
           </p>
         </div>
         <button style={s.backBtn} onClick={() => navigate("/teacher/classes")}>
@@ -105,19 +83,17 @@ export default function ClassWorkspace() {
               <span style={s.statLabel}>Exams</span>
               <strong style={s.statValue}>{exams.length}</strong>
             </div>
-            <div style={s.statCard}>
-              <span style={s.statLabel}>Attendance</span>
-              <strong style={s.statValue}>{canTakeAttendance ? (attendanceState.alreadyMarked ? "Marked" : "Open") : "Restricted"}</strong>
-            </div>
           </div>
 
           <div style={s.actionGrid}>
             <ActionCard title="Students" desc="View and edit the students in this class." onClick={() => navigate(`/teacher/students?classId=${classId}`)} icon="fa-users" />
             <ActionCard title="Add Student" desc="Register a new student directly into this class." onClick={() => navigate(`/teacher/students/add?classId=${classId}`)} icon="fa-user-plus" />
-            {canTakeAttendance && (
-              <ActionCard title="Attendance" desc="Mark or update attendance for class days." onClick={() => navigate(`/teacher/attendance?classId=${classId}`)} icon="fa-clipboard-user" />
-            )}
-            <ActionCard title="Exams" desc="Open scheduled exams for this class." onClick={() => navigate(`/teacher/exams?classId=${classId}`)} icon="fa-file-lines" />
+            <ActionCard
+              title="Exams"
+              desc="Open scheduled exams for this class."
+              onClick={() => navigate(`/teacher/exams?classId=${classId}${selectedTeacherSubject?._id ? `&subjectId=${selectedTeacherSubject._id}` : ""}`)}
+              icon="fa-file-lines"
+            />
             <ActionCard title="Marks" desc="Enter marks for the latest exam." onClick={() => navigate(`/teacher/marks${firstExamId ? `?examId=${firstExamId}` : `?classId=${classId}`}`)} icon="fa-pen-to-square" />
           </div>
         </>

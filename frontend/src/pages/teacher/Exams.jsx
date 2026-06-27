@@ -4,7 +4,7 @@ import api from "../../api/axios";
 import Modal from "../../components/Modal";
 import { useAuth } from "../../context/useAuth";
 import SectionTitle from "../../components/SectionTitle";
-import { getTeacherAssignedClasses } from "../../utils/teacherClasses";
+import { getTeacherAssignedClasses, getTeacherSubjectForClass } from "../../utils/teacherClasses";
 
 export default function Exams() {
   const { user } = useAuth();
@@ -17,6 +17,7 @@ export default function Exams() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ title: "", class: "", subject: "", maxMarks: 100, passMark: 35, examType: "Unit Test", date: "" });
+  const preselectedSubjectId = searchParams.get("subjectId") || "";
 
   const getSubjectYearId = subjectId => {
     const selectedSubject = subjects.find(subject => subject._id === subjectId);
@@ -52,6 +53,18 @@ export default function Exams() {
     setSearchParams(next, { replace: true });
   };
 
+  const openScheduleModal = () => {
+    const nextClassId = classFilter || searchParams.get("classId") || "";
+    const teacherSubject = getTeacherSubjectForClass(user, nextClassId, subjects);
+    const nextSubjectId = preselectedSubjectId || teacherSubject?._id || "";
+    setForm(prev => ({
+      ...prev,
+      class: nextClassId,
+      subject: nextSubjectId
+    }));
+    setIsModalOpen(true);
+  };
+
   const handleCreate = async () => {
     try {
       const payload = {
@@ -77,7 +90,7 @@ export default function Exams() {
     <div>
       <div style={s.header}>
         <SectionTitle title="All Exams" subtitle="View scheduled examination cycles for your assigned classes." />
-        <button style={s.btn} onClick={() => setIsModalOpen(true)}>Schedule Exam</button>
+        <button style={s.btn} onClick={openScheduleModal}>Schedule Exam</button>
       </div>
 
       <div style={s.filterRow}>
@@ -117,7 +130,19 @@ export default function Exams() {
         <div style={s.form}>
           <input style={s.input} placeholder="Exam Title (e.g. Q1 Algebra)" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
           <div style={s.row}>
-            <select style={s.input} value={form.class} onChange={e => setForm({ ...form, class: e.target.value, subject: "" })}>
+            <select
+              style={s.input}
+              value={form.class}
+              onChange={e => {
+                const nextClassId = e.target.value;
+                const teacherSubject = getTeacherSubjectForClass(user, nextClassId, subjects);
+                setForm({
+                  ...form,
+                  class: nextClassId,
+                  subject: teacherSubject?._id || ""
+                });
+              }}
+            >
               <option value="">Select Class</option>
               {classes.map(c => <option key={c._id} value={c._id}>{c.name}{c.section}</option>)}
             </select>
