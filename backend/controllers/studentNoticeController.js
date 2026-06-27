@@ -1,6 +1,17 @@
 const Student = require("../models/Student");
 const Class = require("../models/Class");
+const Announcement = require("../models/Announcement");
 const { notifyStudentById, notifyClassStudents } = require("../utils/pushNotification");
+
+const persistStudentNotice = async ({ title, message, createdBy, classId = null }) => {
+  return Announcement.create({
+    title: title.trim(),
+    content: message.trim(),
+    audience: "student",
+    class: classId || undefined,
+    createdBy
+  });
+};
 
 /**
  * Search students by name, SAT code, or mobile number
@@ -82,11 +93,34 @@ exports.sendToStudents = async (req, res) => {
       return res.status(400).json({ message: "Message is required" });
     }
 
+    const targetStudents = await Student.find({
+      _id: { $in: studentIds },
+      isActive: true
+    })
+      .select("class")
+      .populate("class", "_id")
+      .lean();
+
+    const classGroups = new Map();
+    let ungroupedCount = 0;
+    for (const student of targetStudents) {
+      const classId = student.class?._id?.toString();
+      if (!classId) {
+        ungroupedCount += 1;
+        continue;
+      }
+
+      const current = classGroups.get(classId) || [];
+      current.push(student._id.toString());
+      classGroups.set(classId, current);
+    }
+
     const results = {
       total: studentIds.length,
       sent: 0,
       failed: 0,
-      errors: []
+      errors: [],
+      noticesSaved: 0
     };
 
     for (const studentId of studentIds) {
@@ -112,8 +146,32 @@ exports.sendToStudents = async (req, res) => {
       }
     }
 
+    const createdBy = req.user.name || req.user.id || "admin";
+    if (classGroups.size > 0) {
+      await Promise.all(
+        [...classGroups.keys()].map(classId =>
+          persistStudentNotice({
+            title,
+            message,
+            createdBy,
+            classId
+          })
+        )
+      );
+      results.noticesSaved += classGroups.size;
+    }
+
+    if (ungroupedCount > 0) {
+      await persistStudentNotice({
+        title,
+        message,
+        createdBy
+      });
+      results.noticesSaved += 1;
+    }
+
     res.json({
-      message: `Notice sent to ${results.sent} out of ${results.total} students`,
+      message: `Notice sent to ${results.sent} out of ${results.total} students and saved for the student notice board`,
       results
     });
   } catch (e) {
@@ -162,8 +220,15 @@ exports.sendToClass = async (req, res) => {
         }
       );
 
+      await persistStudentNotice({
+        title,
+        message,
+        createdBy: req.user.name || req.user.id || "admin",
+        classId
+      });
+
       res.json({
-        message: `Notice sent to class (${studentCount} students)`,
+        message: `Notice sent to class (${studentCount} students) and saved for the student notice board`,
         studentCount
       });
     } catch (err) {
