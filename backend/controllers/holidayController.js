@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Holiday = require("../models/Holiday");
 const { getHolidayCalendar, resolveAcademicYear, isSunday } = require("../utils/holidayUtils");
 
@@ -28,9 +29,23 @@ exports.createHoliday = async (req, res) => {
       return res.status(400).json({ message: "No active academic year found" });
     }
 
+    const createdBy = mongoose.Types.ObjectId.isValid(req.user?.id)
+      ? req.user.id
+      : undefined;
+
+    const update = {
+      academicYear: academicYear._id,
+      date,
+      eventName: eventName.trim()
+    };
+
+    if (createdBy) {
+      update.createdBy = createdBy;
+    }
+
     const holiday = await Holiday.findOneAndUpdate(
       { academicYear: academicYear._id, date },
-      { academicYear: academicYear._id, date, eventName: eventName.trim(), createdBy: req.user?.id },
+      update,
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
