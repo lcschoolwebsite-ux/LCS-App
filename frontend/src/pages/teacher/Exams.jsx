@@ -13,10 +13,11 @@ export default function Exams() {
   const [exams, setExams] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [examTypes, setExamTypes] = useState([]);
   const [classFilter, setClassFilter] = useState(searchParams.get("classId") || "");
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", class: "", subject: "", maxMarks: 100, passMark: 35, examType: "Unit Test", date: "" });
+  const [form, setForm] = useState({ title: "", class: "", subject: "", maxMarks: 100, passMark: 35, examType: "", date: "" });
   const preselectedSubjectId = searchParams.get("subjectId") || "";
 
   const getSubjectYearId = subjectId => {
@@ -26,16 +27,20 @@ export default function Exams() {
 
   const fetchData = async () => {
     try {
-      const [eRes, cRes, sRes, yRes] = await Promise.all([
+      const [eRes, cRes, sRes, tRes, yRes] = await Promise.all([
         api.get(`/exams${classFilter ? `?classId=${classFilter}` : ""}`),
         api.get("/classes"),
         api.get("/subjects"),
+        api.get("/exam-types"),
         api.get("/academic-years/active")
       ]);
       setExams(eRes.data);
       setClasses(getTeacherAssignedClasses(user, cRes.data));
       setSubjects(sRes.data);
-      if (yRes.data) setForm(f => ({ ...f, academicYear: yRes.data._id }));
+      setExamTypes(tRes.data || []);
+      if (yRes.data) {
+        setForm(f => ({ ...f, academicYear: yRes.data._id, examType: f.examType || tRes.data?.[0]?.name || "" }));
+      }
     } catch (e) {
       console.error("Error fetching data", e);
     } finally {
@@ -57,11 +62,12 @@ export default function Exams() {
     const nextClassId = classFilter || searchParams.get("classId") || "";
     const teacherSubject = getTeacherSubjectForClass(user, nextClassId, subjects, classes);
     const nextSubjectId = preselectedSubjectId || teacherSubject?._id || "";
-    setForm(prev => ({
-      ...prev,
-      class: nextClassId,
-      subject: nextSubjectId
-    }));
+      setForm(prev => ({
+        ...prev,
+        class: nextClassId,
+        subject: nextSubjectId,
+        examType: prev.examType || examTypes[0]?.name || ""
+      }));
     setIsModalOpen(true);
   };
 
@@ -71,6 +77,11 @@ export default function Exams() {
         ...form,
         academicYear: form.academicYear || getSubjectYearId(form.subject)
       };
+
+      if (!payload.examType) {
+        alert("Please select an exam type.");
+        return;
+      }
 
       if (!payload.academicYear) {
         alert("Please set an active academic year before creating an exam.");
@@ -129,6 +140,21 @@ export default function Exams() {
       >
         <div style={s.form}>
           <input style={s.input} placeholder="Exam Title (e.g. Q1 Algebra)" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+          <div style={s.formItem}>
+            <label style={s.label}>Exam Type</label>
+            <select
+              style={s.input}
+              value={form.examType}
+              onChange={e => setForm({ ...form, examType: e.target.value })}
+            >
+              <option value="">Select Exam Type</option>
+              {examTypes.map(type => (
+                <option key={type._id} value={type.name}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div style={s.row}>
             <select
               style={s.input}
@@ -183,6 +209,8 @@ const s = {
   examFooter: { marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8rem", fontWeight: "600", color: "#64748b" },
   statsBtn: { background: "none", border: "none", color: "#4f46e5", cursor: "pointer", fontWeight: "700" },
   form: { display: "flex", flexDirection: "column", gap: "1rem" },
+  formItem: { display: "flex", flexDirection: "column", gap: "0.45rem" },
+  label: { fontSize: "0.72rem", fontWeight: "800", color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.08em" },
   row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" },
   input: { width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "0.95rem", boxSizing: "border-box" },
   submitBtn: { padding: "0.75rem 1.25rem", background: "#4f46e5", color: "#fff", borderRadius: "8px", border: "none", fontWeight: "600", cursor: "pointer", width: "100%" }
