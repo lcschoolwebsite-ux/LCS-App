@@ -10,6 +10,8 @@ import { isNativeAndroidApp } from "../services/nativeBridge";
 
 // Lazy pages
 const Dashboard = lazy(() => import("../pages/teacher/Dashboard"));
+const Classes = lazy(() => import("../pages/teacher/Classes"));
+const ClassWorkspace = lazy(() => import("../pages/teacher/ClassWorkspace"));
 const Students = lazy(() => import("../pages/teacher/Students"));
 const AddStudent = lazy(() => import("../pages/teacher/AddStudent"));
 const Attendance = lazy(() => import("../pages/teacher/Attendance"));
@@ -30,6 +32,7 @@ const MENU_GROUPS = [
   {
     label: "MY CLASSES",
     items: [
+      { label: "My Classes", path: "/teacher/classes", icon: "fa-solid fa-school" },
       { label: "My Students", path: "/teacher/students", icon: "fa-solid fa-users" },
       { label: "Add Student", path: "/teacher/students/add", icon: "fa-solid fa-user-plus" },
       { label: "Attendance", path: "/teacher/attendance", icon: "fa-solid fa-clipboard-user" },
@@ -79,7 +82,12 @@ export default function TeacherLayout() {
   };
 
   const allMenuItems = MENU_GROUPS.flatMap(g => g.items);
-  const currentPathLabel = allMenuItems.find(i => i.path === location.pathname)?.label || "Dashboard";
+  const currentPathLabel =
+    allMenuItems.find(i => i.path === location.pathname)?.label ||
+    [...allMenuItems]
+      .sort((a, b) => b.path.length - a.path.length)
+      .find(i => location.pathname.startsWith(i.path))?.label ||
+    "Dashboard";
   const bottomBarItems = [
     { label: "Dashboard", shortLabel: "Home", path: "/teacher", icon: "fa-solid fa-chart-line" },
     { label: "Notices", shortLabel: "Notices", path: "/teacher/announcements", icon: "fa-solid fa-bullhorn" },
@@ -190,6 +198,8 @@ export default function TeacherLayout() {
           <Suspense fallback={<div style={s.loading}><i className="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/classes" element={<Classes />} />
+              <Route path="/classes/:classId" element={<ClassWorkspace />} />
               <Route path="/students" element={<Students />} />
               <Route path="/students/add" element={<AddStudent />} />
               <Route path="/attendance" element={<Attendance />} />

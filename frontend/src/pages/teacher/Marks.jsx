@@ -2,11 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import SectionTitle from "../../components/SectionTitle";
+import { useAuth } from "../../context/useAuth";
+import { getTeacherAssignedClasses } from "../../utils/teacherClasses";
 
 export default function Marks() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [exams, setExams] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [selectedExamId, setSelectedExamId] = useState(searchParams.get("examId") || "");
+  const [classFilter, setClassFilter] = useState(searchParams.get("classId") || "");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -17,7 +22,13 @@ export default function Marks() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const { data } = await api.get("/exams");
+        const [examRes, classRes] = await Promise.all([
+          api.get(`/exams${classFilter ? `?classId=${classFilter}` : ""}`),
+          api.get("/classes")
+        ]);
+        const myClasses = getTeacherAssignedClasses(user, classRes.data || []);
+        setClasses(myClasses);
+        const data = examRes.data || [];
         setExams(data);
         const requestedExam = searchParams.get("examId");
         const nextExamId = data.some(exam => exam._id === requestedExam) ? requestedExam : data[0]?._id;
@@ -29,7 +40,7 @@ export default function Marks() {
       }
     };
     fetchExams();
-  }, [searchParams]);
+  }, [classFilter, searchParams, user]);
 
   const handleExamChange = (examId) => {
     setSelectedExamId(examId);
@@ -37,6 +48,16 @@ export default function Marks() {
     if (examId) next.set("examId", examId);
     else next.delete("examId");
     setSearchParams(next, { replace: true });
+  };
+
+  const handleClassChange = (classId) => {
+    setClassFilter(classId);
+    const next = new URLSearchParams(searchParams);
+    if (classId) next.set("classId", classId);
+    else next.delete("classId");
+    next.delete("examId");
+    setSearchParams(next, { replace: true });
+    setSelectedExamId("");
   };
 
   useEffect(() => {
@@ -124,6 +145,18 @@ export default function Marks() {
       {readOnly && (
         <div style={s.readOnlyBanner}>
           You can view this exam, but editing is restricted to the assigned subject teacher or class teacher.
+        </div>
+      )}
+
+      {classes.length > 0 && (
+        <div style={s.selectorRow}>
+          <label style={s.selectorLabel}>Select Class</label>
+          <select style={s.examSelect} value={classFilter} onChange={e => handleClassChange(e.target.value)}>
+            <option value="">All My Classes</option>
+            {classes.map(item => (
+              <option key={item._id} value={item._id}>{item.name}{item.section}</option>
+            ))}
+          </select>
         </div>
       )}
 

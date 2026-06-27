@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import SectionTitle from "../../components/SectionTitle";
+import { getTeacherAssignedClasses, isClassTeacher } from "../../utils/teacherClasses";
 
 const getLocalDate = () => {
   const d = new Date();
@@ -54,7 +55,8 @@ export default function Attendance() {
     fetchClasses();
   }, []);
 
-  const allowedClasses = classes.filter(c => String(c.classTeacher?._id || c.classTeacher) === String(user?.id || ""));
+  const assignedClasses = useMemo(() => getTeacherAssignedClasses(user, classes), [user, classes]);
+  const allowedClasses = useMemo(() => assignedClasses.filter(c => isClassTeacher(user, c)), [assignedClasses, user]);
 
   useEffect(() => {
     if (searchParams.get("classId")) return;

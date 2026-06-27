@@ -4,6 +4,7 @@ import { useAuth } from "../../context/useAuth";
 import api from "../../api/axios";
 import StatCard from "../../components/StatCard";
 import SectionTitle from "../../components/SectionTitle";
+import { getTeacherAssignedClasses, isClassTeacher } from "../../utils/teacherClasses";
 
 const formatClassName = cls => [cls?.name, cls?.section].filter(Boolean).join(" ") || "Class";
 const getLocalDate = () => {
@@ -25,21 +26,18 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const assignedClasses = user?.assignedClasses || [];
-    const assignedClassIds = new Set(assignedClasses.map(cls => cls?._id || cls?.id || cls).filter(Boolean).map(String));
-
     const loadDashboard = async () => {
       setLoading(true);
       try {
-        const [classesRes, studentResponses, examsRes, announcementsRes] = await Promise.all([
+        const [classesRes, examsRes, announcementsRes] = await Promise.all([
           api.get("/classes"),
-          Promise.all(assignedClasses.map(cls => api.get(`/students?classId=${cls._id}`))),
           api.get("/exams"),
           api.get("/announcements")
         ]);
 
-        const classList = (classesRes.data || []).filter(cls => assignedClassIds.has(String(cls._id)));
-        const classTeacherClasses = classList.filter(cls => String(cls.classTeacher?._id || cls.classTeacher) === String(user?.id || ""));
+        const classList = getTeacherAssignedClasses(user, classesRes.data || []);
+        const studentResponses = await Promise.all(classList.map(cls => api.get(`/students?classId=${cls._id}`)));
+        const classTeacherClasses = classList.filter(cls => isClassTeacher(user, cls));
         const firstAttendanceClassId = classTeacherClasses[0]?._id || "";
         const attendanceRes = firstAttendanceClassId
           ? await api.get(`/attendance?classId=${firstAttendanceClassId}&date=${getLocalDate()}`)
@@ -59,7 +57,7 @@ export default function Dashboard() {
             students: students.length,
             examCount: classExams.length,
             firstExamId: classExams[0]?._id || "",
-            canTakeAttendance: String(cls.classTeacher?._id || cls.classTeacher) === String(user?.id || "")
+            canTakeAttendance: isClassTeacher(user, cls)
           };
         });
 
@@ -86,7 +84,7 @@ export default function Dashboard() {
       }
     };
 
-    if (assignedClasses.length) loadDashboard();
+    if (user) loadDashboard();
     else {
       setStats(prev => ({ ...prev, classes: [], quickAttendance: [], selectedClassId: "" }));
       setLoading(false);
@@ -111,6 +109,7 @@ export default function Dashboard() {
   const goToAttendance = classId => navigate(`/teacher/attendance${classId ? `?classId=${classId}` : ""}`);
   const goToMarks = examId => navigate(`/teacher/marks${examId ? `?examId=${examId}` : ""}`);
   const goToExams = classId => navigate(`/teacher/exams${classId ? `?classId=${classId}` : ""}`);
+  const goToClass = classId => navigate(`/teacher/classes/${classId}`);
 
   const handleQuickClassChange = async (classId) => {
     setAttendanceMessage("");
@@ -198,7 +197,15 @@ export default function Dashboard() {
               <div style={s.empty}>No classes are assigned yet. Ask the admin to assign classes to your teacher profile.</div>
             )}
             {stats.classes.map(cls => (
-              <div key={cls.id} style={s.classCard} className="teacher-class-card">
+              <div
+                key={cls.id}
+                role="button"
+                tabIndex={0}
+                style={s.classCard}
+                className="teacher-class-card"
+                onClick={() => goToClass(cls.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") goToClass(cls.id); }}
+              >
                 <div style={s.classGradientTop}></div>
                 <h3 style={s.className}>{cls.name}</h3>
                 <p style={s.classSub}>{cls.students} Students</p>
@@ -216,15 +223,15 @@ export default function Dashboard() {
                 <div style={s.classActions} className="teacher-class-actions">
                   <button
                     style={{ ...s.btnGold, opacity: cls.canTakeAttendance ? 1 : 0.55, cursor: cls.canTakeAttendance ? "pointer" : "not-allowed" }}
-                    onClick={() => cls.canTakeAttendance && goToAttendance(cls.id)}
+                    onClick={(e) => { e.stopPropagation(); cls.canTakeAttendance && goToAttendance(cls.id); }}
                     disabled={!cls.canTakeAttendance}
                   >
                     {cls.canTakeAttendance ? "Mark Attendance" : "Attendance Locked"}
                   </button>
-                  <button style={s.btnOutline} onClick={() => cls.firstExamId ? goToMarks(cls.firstExamId) : goToExams(cls.id)}>
+                  <button style={s.btnOutline} onClick={(e) => { e.stopPropagation(); cls.firstExamId ? goToMarks(cls.firstExamId) : goToExams(cls.id); }}>
                     {cls.firstExamId ? "Enter Marks" : "Schedule Exam"}
                   </button>
-                  <button style={s.btnOutline} onClick={() => goToStudents(cls.id)}>View Students</button>
+                  <button style={s.btnOutline} onClick={(e) => { e.stopPropagation(); goToStudents(cls.id); }}>View Students</button>
                 </div>
               </div>
             ))}
@@ -304,7 +311,7 @@ const s = {
   empty: { padding: "28px 24px", background: "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95))", border: "1.5px dashed rgba(200,150,12,0.35)", borderRadius: "16px", color: "var(--navy)", fontWeight: "700", textAlign: "center", fontSize: "0.95rem", lineHeight: 1.5, boxShadow: "inset 0 0 24px rgba(200,150,12,0.08)" },
   
   classList: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" },
-  classCard: { background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))", borderRadius: "20px", padding: "28px", position: "relative", overflow: "hidden", border: "1px solid rgba(200,150,12,0.15)", boxShadow: "0 8px 28px rgba(14,107,107,0.1)", transition: "transform 0.3s ease, box-shadow 0.3s ease" },
+  classCard: { background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))", borderRadius: "20px", padding: "28px", position: "relative", overflow: "hidden", border: "1px solid rgba(200,150,12,0.15)", boxShadow: "0 8px 28px rgba(14,107,107,0.1)", transition: "transform 0.3s ease, box-shadow 0.3s ease", cursor: "pointer" },
   classGradientTop: { position: "absolute", top: 0, left: 0, right: 0, height: "8px", background: "linear-gradient(90deg, var(--gold), var(--gold-light))", borderRadius: "20px 20px 0 0" },
   className: { fontFamily: "var(--font-heading)", color: "var(--navy-dark)", fontSize: "1.5rem", margin: "0 0 6px 0", fontWeight: "700", letterSpacing: "-0.01em" },
   classSub: { color: "var(--text-muted)", fontSize: "0.95rem", margin: "0 0 24px 0", fontWeight: "600" },

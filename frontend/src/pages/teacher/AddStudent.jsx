@@ -3,6 +3,7 @@ import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SectionTitle from "../../components/SectionTitle";
+import { getTeacherAssignedClasses } from "../../utils/teacherClasses";
 
 export default function AddStudent() {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ export default function AddStudent() {
   const [loading, setLoading] = useState(false);
   const [permissionLoading, setPermissionLoading] = useState(true);
   const [allowTeacherStudentCreation, setAllowTeacherStudentCreation] = useState(true);
+  const [classes, setClasses] = useState([]);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
   const [photoError, setPhotoError] = useState("");
@@ -27,8 +29,12 @@ export default function AddStudent() {
   useEffect(() => {
     const fetchPermission = async () => {
       try {
-        const { data } = await api.get("/settings/student-registration");
-        setAllowTeacherStudentCreation(Boolean(data.allowTeacherStudentCreation));
+        const [permissionRes, classesRes] = await Promise.all([
+          api.get("/settings/student-registration"),
+          api.get("/classes")
+        ]);
+        setAllowTeacherStudentCreation(Boolean(permissionRes.data.allowTeacherStudentCreation));
+        setClasses(classesRes.data || []);
       } catch (e) {
         alert(e.response?.data?.message || "Unable to check student registration permission");
       } finally {
@@ -38,6 +44,8 @@ export default function AddStudent() {
 
     fetchPermission();
   }, []);
+
+  const myClasses = getTeacherAssignedClasses(user, classes);
 
   useEffect(() => {
     return () => {
@@ -199,7 +207,7 @@ export default function AddStudent() {
                 <label style={s.label}>Class Assignment</label>
                 <select style={s.input} value={form.class} onChange={e => setForm({...form, class: e.target.value})} required>
                   <option value="">Select one of your classes...</option>
-                  {user?.assignedClasses?.map(c => <option key={c._id} value={c._id}>{c.name}{c.section}</option>)}
+                  {myClasses.map(c => <option key={c._id} value={c._id}>{c.name}{c.section}</option>)}
                 </select>
               </div>
               <div style={s.row}>

@@ -4,6 +4,7 @@ import api from "../../api/axios";
 import Modal from "../../components/Modal";
 import { useAuth } from "../../context/useAuth";
 import SectionTitle from "../../components/SectionTitle";
+import { getTeacherAssignedClasses } from "../../utils/teacherClasses";
 
 export default function Exams() {
   const { user } = useAuth();
@@ -31,8 +32,7 @@ export default function Exams() {
         api.get("/academic-years/active")
       ]);
       setExams(eRes.data);
-      const assignedIds = new Set(user?.assignedClasses?.map(c => c._id) || []);
-      setClasses(assignedIds.size ? cRes.data.filter(c => assignedIds.has(c._id)) : cRes.data);
+      setClasses(getTeacherAssignedClasses(user, cRes.data));
       setSubjects(sRes.data);
       if (yRes.data) setForm(f => ({ ...f, academicYear: yRes.data._id }));
     } catch (e) {

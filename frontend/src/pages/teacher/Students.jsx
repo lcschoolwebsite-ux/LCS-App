@@ -5,11 +5,13 @@ import Table from "../../components/Table";
 import Modal from "../../components/Modal";
 import { useAuth } from "../../context/useAuth";
 import SectionTitle from "../../components/SectionTitle";
+import { getTeacherAssignedClasses } from "../../utils/teacherClasses";
 
 export default function Students() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -32,13 +34,15 @@ export default function Students() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [studentsRes, settingsRes] = await Promise.all([
+      const [studentsRes, settingsRes, classesRes] = await Promise.all([
         api.get("/students", { params: { search, classId: classFilter, page, limit: 25 } }),
-        api.get("/settings/student-registration")
+        api.get("/settings/student-registration"),
+        api.get("/classes")
       ]);
       setStudents(studentsRes.data.data || studentsRes.data);
       setPagination(studentsRes.data.pagination || { page: 1, limit: studentsRes.data.length, total: studentsRes.data.length, totalPages: 1 });
       setAllowTeacherStudentCreation(Boolean(settingsRes.data.allowTeacherStudentCreation));
+      setClasses(classesRes.data || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -62,6 +66,8 @@ export default function Students() {
     else next.delete("classId");
     setSearchParams(next, { replace: true });
   };
+
+  const myClasses = getTeacherAssignedClasses(user, classes);
 
   const handleOpenEdit = (s) => {
     setSelectedStudent(s);
@@ -179,7 +185,7 @@ export default function Students() {
         </div>
         <select style={s.select} value={classFilter} onChange={e => handleClassFilterChange(e.target.value)}>
           <option value="">All My Classes</option>
-          {user?.assignedClasses?.map(c => <option key={c._id} value={c._id}>{c.name}{c.section}</option>)}
+          {myClasses.map(c => <option key={c._id} value={c._id}>{c.name}{c.section}</option>)}
         </select>
       </div>
 
@@ -284,7 +290,7 @@ export default function Students() {
               <label style={st.label}>Class</label>
               <select style={st.input} value={form.class} onChange={e => setForm({...form, class: e.target.value})}>
                 <option value="">Select Class</option>
-                {user?.assignedClasses?.map(c => <option key={c._id} value={c._id}>{c.name}{c.section}</option>)}
+                {myClasses.map(c => <option key={c._id} value={c._id}>{c.name}{c.section}</option>)}
               </select>
             </div>
           </div>
