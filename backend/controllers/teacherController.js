@@ -1,4 +1,6 @@
 const Teacher = require("../models/Teacher");
+const Class = require("../models/Class");
+const Subject = require("../models/Subject");
 const {
   normalizeIdList,
   syncTeacherAssignments,
@@ -75,8 +77,22 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    await Teacher.findByIdAndUpdate(req.params.id, { isActive: false });
-    res.json({ message: "Deactivated" });
+    const teacher = await Teacher.findById(req.params.id).select("_id").lean();
+    if (!teacher) return res.status(404).json({ message: "Teacher not found" });
+
+    await Promise.all([
+      Class.updateMany(
+        { classTeacher: teacher._id },
+        { $unset: { classTeacher: "", classTeacherSubject: "" } }
+      ),
+      Subject.updateMany(
+        { teacher: teacher._id },
+        { $unset: { teacher: "" } }
+      )
+    ]);
+
+    await Teacher.findByIdAndDelete(teacher._id);
+    res.json({ message: "Deleted" });
   } catch (e) { res.status(500).json({ message: e.message }); }
 };
 
