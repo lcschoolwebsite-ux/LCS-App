@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import api from "../../api/axios";
 import SectionTitle from "../../components/SectionTitle";
 import Table from "../../components/Table";
+import MonthDatePicker from "../../components/MonthDatePicker";
 
 const getLocalDate = () => {
   const d = new Date();
@@ -79,6 +80,8 @@ export default function Attendance() {
   const absentCount = alreadyMarked ? absentStudents.length : 0;
   const today = getLocalDate();
   const pastDateOptions = markedDates.filter(record => record.date !== today);
+  const selectedClassInfo = classes.find(c => String(c._id) === String(selectedClass));
+  const availableDates = [today, ...pastDateOptions.map(record => record.date)];
 
   return (
     <div>
@@ -100,20 +103,25 @@ export default function Attendance() {
                 ))}
               </select>
             </div>
+            {selectedClassInfo && (
+              <div style={s.classMetaRow}>
+                <span style={s.classMetaLabel}>Class Teacher</span>
+                <span style={s.classMetaValue}>{selectedClassInfo.classTeacher?.name || "Not assigned"}</span>
+              </div>
+            )}
           </div>
           <div style={{flex: 1}}>
             <label style={s.label}>Select Ledger Date</label>
-            <div style={s.inputWrap}>
-              <i className="fa-solid fa-calendar-check" style={s.inputIcon}></i>
-              <select style={s.inputWithIcon} value={selectedDate} onChange={e => setSelectedDate(e.target.value)}>
-                <option value={today}>Today - Latest Attendance ({formatAttendanceDate(today)})</option>
-                {pastDateOptions.map(record => (
-                  <option key={record.date} value={record.date}>
-                    {formatAttendanceDate(record.date)} - Attendance Visible ({record.absentCount} absent)
-                  </option>
-                ))}
-              </select>
-            </div>
+            <MonthDatePicker
+              value={selectedDate}
+              onChange={setSelectedDate}
+              allowedDates={availableDates}
+              inputStyle={s.inputPicker}
+              wrapperStyle={{ gap: "6px" }}
+              labelStyle={{ display: "none" }}
+              rowStyle={s.datePickerRow}
+              helperText="Choose the month first, then an available attendance date."
+            />
           </div>
         </div>
 
@@ -209,6 +217,11 @@ const s = {
   inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
   inputIcon: { position: 'absolute', left: '16px', color: 'var(--navy)', fontSize: '1.1rem', zIndex: 5 },
   inputWithIcon: { width: "100%", padding: "14px 14px 14px 48px", borderRadius: "12px", border: "2px solid var(--border)", fontFamily: "var(--font-body)", fontSize: "1rem", background: "var(--white)", boxSizing: "border-box", fontWeight: '700' },
+  inputPicker: { padding: "12px 14px" },
+  datePickerRow: { gridTemplateColumns: "1.25fr 0.9fr 0.8fr" },
+  classMetaRow: { display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", padding: "10px 12px", borderRadius: "10px", background: "rgba(14,107,107,0.04)", border: "1px solid rgba(14,107,107,0.1)" },
+  classMetaLabel: { fontSize: "0.72rem", fontWeight: "900", color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.08em" },
+  classMetaValue: { fontSize: "0.92rem", fontWeight: "800", color: "var(--navy)" },
   
   statsSummary: { display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "20px", borderTop: "1px solid var(--border)" },
   statItem: { display: "flex", alignItems: "center", gap: "12px" },

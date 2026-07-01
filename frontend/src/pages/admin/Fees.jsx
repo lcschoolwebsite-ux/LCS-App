@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../../api/axios";
 import SectionTitle from "../../components/SectionTitle";
 import Modal from "../../components/Modal";
+import MonthDatePicker from "../../components/MonthDatePicker";
 
 export default function Fees() {
   const [stats, setStats] = useState(null);
@@ -328,7 +329,13 @@ export default function Fees() {
           </div>
           <div style={s.formGroup}>
             <label style={s.fLabel}>Date of Payment</label>
-            <input type="date" style={s.input} value={paymentForm.paidDate} onChange={e => setPaymentForm({...paymentForm, paidDate: e.target.value})} />
+            <MonthDatePicker
+              value={paymentForm.paidDate}
+              onChange={paidDate => setPaymentForm(prev => ({ ...prev, paidDate }))}
+              inputStyle={s.input}
+              labelStyle={{ display: "none" }}
+              helperText="Pick the month first, then the payment day."
+            />
           </div>
         </div>
       </Modal>

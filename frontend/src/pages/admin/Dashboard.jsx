@@ -13,7 +13,7 @@ export default function Dashboard() {
   const { academicYearLabel } = useActiveAcademicYear();
   const [stats, setStats] = useState({
     students: 0, teachers: 0, classes: 0, fees: 0, pendingFees: 0,
-    studentsByClass: [], todayAttendance: { present: 0, absent: 0, unmarked: 0, unmarkedClasses: [], isHoliday: false }, recentActivity: [], upcomingExams: []
+    studentsByClass: [], todayAttendance: { present: 0, absent: 0, unmarked: 0, unmarkedClasses: [], unmarkedClassDetails: [], isHoliday: false }, recentActivity: [], upcomingExams: []
   });
 
   useEffect(() => {
@@ -99,9 +99,26 @@ export default function Dashboard() {
           </div>
           <div style={s.attnSummary}>
             <p><strong>{stats.classes - (stats.todayAttendance.unmarkedClasses?.length || 0)}</strong> classes marked today / {stats.classes} total</p>
-            {stats.todayAttendance.unmarkedClasses?.length > 0 && (
+            {stats.todayAttendance.unmarkedClassDetails?.length > 0 && (
               <div style={s.unmarkedBox}>
-                <p style={{margin:0, fontSize: '0.85rem', color: 'var(--danger-text)'}}>Unmarked: {stats.todayAttendance.unmarkedClasses.join(", ")}</p>
+                <div style={s.unmarkedHeader}>
+                  <div style={s.unmarkedTitle}>Not yet marked</div>
+                  <div style={s.unmarkedCount}>{stats.todayAttendance.unmarkedClassDetails.length} class{stats.todayAttendance.unmarkedClassDetails.length === 1 ? "" : "es"}</div>
+                </div>
+                <div style={s.unmarkedList}>
+                  {stats.todayAttendance.unmarkedClassDetails.map(item => (
+                    <div key={item.classId} style={s.unmarkedItem}>
+                      <div style={s.unmarkedClass}>
+                        <i className="fa-solid fa-clipboard-question"></i>
+                        <span>{item.classLabel}</span>
+                      </div>
+                      <div style={s.unmarkedTeacher}>
+                        <i className="fa-solid fa-chalkboard-user"></i>
+                        <span>{item.teacherName}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <button style={s.smallGoldBtn} onClick={() => navigate("/admin/attendance")}>Mark Now</button>
               </div>
             )}
@@ -186,7 +203,14 @@ const s = {
   },
   holidayMeta: { marginTop: "4px", fontSize: "0.8rem", color: "var(--text-muted)" },
   attnSummary: { textAlign: "center", marginTop: "16px" },
-  unmarkedBox: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--danger-bg)", padding: "12px 16px", borderRadius: "8px", marginTop: "12px" },
+  unmarkedBox: { display: "flex", flexDirection: "column", gap: "12px", background: "var(--danger-bg)", padding: "14px 16px", borderRadius: "12px", marginTop: "12px", textAlign: "left" },
+  unmarkedHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" },
+  unmarkedTitle: { fontSize: "0.9rem", fontWeight: "800", color: "var(--danger-text)", textTransform: "uppercase", letterSpacing: "0.04em" },
+  unmarkedCount: { fontSize: "0.8rem", fontWeight: "800", color: "var(--text-muted)", background: "rgba(255,255,255,0.75)", padding: "4px 10px", borderRadius: "999px" },
+  unmarkedList: { display: "grid", gap: "10px" },
+  unmarkedItem: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "14px", padding: "10px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.72)", border: "1px solid rgba(197,48,48,0.12)" },
+  unmarkedClass: { display: "flex", alignItems: "center", gap: "8px", color: "#b91c1c", fontWeight: "800", fontSize: "0.9rem" },
+  unmarkedTeacher: { display: "flex", alignItems: "center", gap: "8px", color: "var(--navy)", fontWeight: "700", fontSize: "0.88rem", textAlign: "right" },
   smallGoldBtn: { background: "var(--gold)", color: "var(--navy-dark)", padding: "6px 12px", borderRadius: "6px", fontWeight: "700", fontSize: "0.75rem" },
 
   activityList: { display: "flex", flexDirection: "column", gap: "20px" },

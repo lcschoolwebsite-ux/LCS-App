@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import useActiveAcademicYear from "../../hooks/useActiveAcademicYear";
+import MonthDatePicker from "../../components/MonthDatePicker";
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const monthLabels = [
@@ -385,15 +386,13 @@ export default function Holidays() {
           </div>
 
           <div style={s.formCard}>
-            <label style={s.field}>
-              <span style={s.label}>Holiday Date</span>
-              <input
-                type="date"
-                value={form.date}
-                onChange={e => setForm(prev => ({ ...prev, date: e.target.value }))}
-                style={s.input}
-              />
-            </label>
+            <MonthDatePicker
+              label="Holiday Date"
+              value={form.date}
+              onChange={date => setForm(prev => ({ ...prev, date }))}
+              inputStyle={s.input}
+              helperText="Pick the month first, then the holiday day."
+            />
             <label style={s.field}>
               <span style={s.label}>Event Name</span>
               <input

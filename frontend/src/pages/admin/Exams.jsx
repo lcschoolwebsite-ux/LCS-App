@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import Modal from "../../components/Modal";
+import MonthDatePicker from "../../components/MonthDatePicker";
 import { useAuth } from "../../context/useAuth";
 
 export default function Exams() {
@@ -598,7 +599,13 @@ export default function Exams() {
           </div>
           <div style={s.formItem}>
             <label style={s.label}>Examination Date</label>
-            <input type="date" style={s.input} value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            <MonthDatePicker
+              value={form.date}
+              onChange={date => setForm({ ...form, date })}
+              inputStyle={s.input}
+              labelStyle={{ display: "none" }}
+              helperText="Pick the month first, then the exam day."
+            />
           </div>
         </div>
       </Modal>

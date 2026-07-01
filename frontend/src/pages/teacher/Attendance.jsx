@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import SectionTitle from "../../components/SectionTitle";
+import MonthDatePicker from "../../components/MonthDatePicker";
 import { getTeacherAssignedClasses, isClassTeacher } from "../../utils/teacherClasses";
 
 const getLocalDate = () => {
@@ -189,19 +190,17 @@ export default function Attendance() {
           </div>
           <div style={{flex: 1}}>
             <label style={s.label}>2. Select Date</label>
-            <div style={s.inputWrap}>
-              <i className="fa-solid fa-calendar-day" style={s.inputIcon}></i>
-              <input
-                type="date"
-                style={s.inputWithIcon}
-                value={selectedDate}
-                max={today}
-                onChange={e => setSelectedDate(e.target.value)}
-              />
-            </div>
-            <div style={s.dateHint}>
-              Pick any past date to enter or update attendance. Current day is prefilled, and previously marked dates are listed below.
-            </div>
+            <MonthDatePicker
+              value={selectedDate}
+              onChange={setSelectedDate}
+              maxDate={today}
+              inputStyle={s.datePickerInput}
+              wrapperStyle={{ gap: "6px" }}
+              labelStyle={{ display: "none" }}
+              rowStyle={s.datePickerRow}
+              fieldStyle={s.dateHint}
+              helperText="Pick a month first, then the day. Current day is prefilled, and previously marked dates are listed below."
+            />
           </div>
         </div>
 
@@ -329,6 +328,8 @@ const s = {
   inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
   inputIcon: { position: 'absolute', left: '16px', color: 'var(--navy)', fontSize: '1.1rem', zIndex: 5 },
   inputWithIcon: { width: "100%", padding: "14px 14px 14px 48px", borderRadius: "12px", border: "2px solid var(--border)", fontFamily: "var(--font-body)", fontSize: "1rem", background: "var(--white)", boxSizing: "border-box", transition: "var(--transition)", cursor: 'pointer', fontWeight: '600' },
+  datePickerInput: { padding: "12px 14px" },
+  datePickerRow: { gridTemplateColumns: "1.2fr 0.9fr 0.8fr" },
   holidayWidget: {
     marginTop: "20px",
     padding: "18px 20px",

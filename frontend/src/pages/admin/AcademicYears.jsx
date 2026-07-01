@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../../api/axios";
 import Table from "../../components/Table";
 import Modal from "../../components/Modal";
+import MonthDatePicker from "../../components/MonthDatePicker";
 
 export default function AcademicYears() {
   const [years, setYears] = useState([]);
@@ -163,11 +164,23 @@ export default function AcademicYears() {
           <div style={s.row}>
             <div style={s.formItem}>
               <label style={s.label}>Session Start Date</label>
-              <input type="date" style={s.input} value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} />
+              <MonthDatePicker
+                value={form.startDate}
+                onChange={startDate => setForm({ ...form, startDate })}
+                inputStyle={s.input}
+                labelStyle={{ display: "none" }}
+                helperText="Pick the month first, then the start day."
+              />
             </div>
             <div style={s.formItem}>
               <label style={s.label}>Session End Date</label>
-              <input type="date" style={s.input} value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} />
+              <MonthDatePicker
+                value={form.endDate}
+                onChange={endDate => setForm({ ...form, endDate })}
+                inputStyle={s.input}
+                labelStyle={{ display: "none" }}
+                helperText="Pick the month first, then the end day."
+              />
             </div>
           </div>
         </div>

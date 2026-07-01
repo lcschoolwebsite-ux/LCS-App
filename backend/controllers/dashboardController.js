@@ -59,6 +59,7 @@ exports.getAdminStats = async (req, res) => {
           present: 0,
           absent: 0,
           unmarkedClasses: [],
+          unmarkedClassDetails: [],
           isHoliday: true,
           holiday: todayHoliday.eventName,
           holidayDate: todayHoliday.date
@@ -70,7 +71,7 @@ exports.getAdminStats = async (req, res) => {
 
     const attendanceRecords = await Attendance.find({ date: today })
       .select("class absentees")
-      .populate("class", "name section")
+      .populate("class", "name section classTeacher")
       .lean();
     
     // We need total students to calculate present count
@@ -85,15 +86,26 @@ exports.getAdminStats = async (req, res) => {
       present: totalStudentsInMarkedClasses - totalAbsentees,
       absent: totalAbsentees,
       unmarkedClasses: [],
+      unmarkedClassDetails: [],
       isHoliday: false
     };
 
     // Find unmarked classes
-    const allClasses = await Class.find({}).select("name section").lean();
+    const allClasses = await Class.find({})
+      .select("name section classTeacher")
+      .populate("classTeacher", "name username")
+      .lean();
     const markedClassIds = attendanceRecords.map(a => a.class?._id.toString()).filter(Boolean);
-    todayAttendance.unmarkedClasses = allClasses
+    todayAttendance.unmarkedClassDetails = allClasses
       .filter(c => !markedClassIds.includes(c._id.toString()))
-      .map(c => `${c.name}${c.section}`);
+      .map(c => ({
+        classId: c._id,
+        className: `${c.name}${c.section}`,
+        classLabel: [c.name, c.section].filter(Boolean).join(" "),
+        teacherId: c.classTeacher?._id || null,
+        teacherName: c.classTeacher?.name || "Not assigned"
+      }));
+    todayAttendance.unmarkedClasses = todayAttendance.unmarkedClassDetails.map(item => item.className);
 
     res.json({
       students: studentCount,

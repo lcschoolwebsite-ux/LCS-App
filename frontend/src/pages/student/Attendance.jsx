@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import SectionTitle from "../../components/SectionTitle";
+import MonthDatePicker from "../../components/MonthDatePicker";
 
 const formatDate = (date) => {
   const year = date.getFullYear();
@@ -181,12 +182,13 @@ export default function Attendance() {
             <button type="button" style={s.arrowBtn} onClick={() => changeWeek(-1)} aria-label="Previous week">
               <i className="fa-solid fa-chevron-left"></i>
             </button>
-            <input
-              type="date"
+            <MonthDatePicker
               value={selectedDate}
-              onChange={e => setSelectedDate(e.target.value)}
-              style={s.dateSearch}
-              aria-label="Search attendance by date"
+              onChange={setSelectedDate}
+              inputStyle={s.dateSearch}
+              wrapperStyle={{ width: "240px" }}
+              label="Search Date"
+              labelStyle={{ display: "none" }}
             />
             <button type="button" style={s.arrowBtn} onClick={() => changeWeek(1)} aria-label="Next week">
               <i className="fa-solid fa-chevron-right"></i>
@@ -257,7 +259,7 @@ const s = {
   weekSub: { margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.82rem", fontWeight: "700" },
   weekControls: { display: "flex", alignItems: "center", gap: "10px" },
   arrowBtn: { width: "36px", height: "36px", borderRadius: "50%", background: "var(--navy)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-sm)" },
-  dateSearch: { height: "36px", border: "1.5px solid var(--border)", borderRadius: "20px", color: "var(--navy)", fontWeight: "800", padding: "0 12px", background: "var(--white)" },
+  dateSearch: { minHeight: "36px", border: "1.5px solid var(--border)", borderRadius: "20px", color: "var(--navy)", fontWeight: "800", padding: "0 12px", background: "var(--white)" },
   
   tableWrap: { overflowX: "auto" },
   table: { width: "100%", borderCollapse: "collapse" },
