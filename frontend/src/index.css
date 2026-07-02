@@ -1098,6 +1098,28 @@ table {
     gap: 8px !important;
   }
 
+  .teacher-mobile-bottom-bar {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 6px !important;
+    border-radius: 18px !important;
+  }
+
+  .teacher-mobile-bottom-bar > button,
+  .teacher-mobile-bottom-bar a {
+    min-width: 0 !important;
+    min-height: 38px !important;
+    padding: 4px 8px !important;
+    font-size: 0.52rem !important;
+    border-radius: 12px !important;
+  }
+
+  .teacher-mobile-bottom-bar > div {
+    gap: 6px !important;
+  }
+
   .teacher-content {
     padding: 16px 14px 24px !important;
     padding-bottom: 104px !important;

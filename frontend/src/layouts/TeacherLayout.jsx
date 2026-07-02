@@ -118,7 +118,7 @@ export default function TeacherLayout() {
       <div style={s.mobileTopbar} className="teacher-mobile-topbar" aria-hidden="true" />
 
       <MobileBottomBar
-        className="mobile-bottom-bar"
+        className="mobile-bottom-bar teacher-mobile-bottom-bar"
         items={bottomBarItems}
         currentPath={location.pathname}
         onMenuClick={() => setMenuOpen(true)}
