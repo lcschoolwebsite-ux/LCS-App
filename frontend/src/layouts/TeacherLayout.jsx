@@ -176,11 +176,11 @@ export default function TeacherLayout() {
       <main style={s.main} className="teacher-main">
         {/* Top Header */}
         <header style={s.header} className="teacher-header">
-          <div style={s.headerBrand}>
-            <img src="/logo.png" alt="LCS Portal" style={s.headerLogo} />
+          <div style={s.headerBrand} className="teacher-header-brand">
+            <img src="/logo.png" alt="LCS Portal" style={s.headerLogo} className="teacher-header-logo" />
             <div>
-              <h2 style={s.pageTitle}>{currentPathLabel}</h2>
-              <div style={s.breadcrumb}>Loretto Central School</div>
+              <h2 style={s.pageTitle} className="teacher-page-title">{currentPathLabel}</h2>
+              <div style={s.breadcrumb} className="teacher-breadcrumb">Loretto Central School</div>
             </div>
           </div>
           
@@ -188,11 +188,11 @@ export default function TeacherLayout() {
             <button style={s.bellBtn}>
               <i className="fa-regular fa-bell"></i>
             </button>
-            <div style={s.headerYearPill}>{academicYearLabel}</div>
+            <div style={s.headerYearPill} className="teacher-header-year-pill">{academicYearLabel}</div>
             <button onClick={handleLogout} style={s.logoutBtn} className="teacher-logout-btn">
               <i className="fa-solid fa-right-from-bracket"></i>
             </button>
-            <div style={s.headerAvatar}>{user?.name?.[0] || 'T'}</div>
+            <div style={s.headerAvatar} className="teacher-header-avatar">{user?.name?.[0] || 'T'}</div>
           </div>
         </header>
 

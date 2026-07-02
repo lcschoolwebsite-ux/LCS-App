@@ -1084,18 +1084,34 @@ table {
   .teacher-header {
     position: sticky !important;
     top: 0 !important;
+    min-height: 48px !important;
     height: auto !important;
-    padding: 12px 14px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
+    padding: 8px 12px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .teacher-headerBrand,
+  .teacher-header-brand {
+    min-width: 0;
+  }
+
+  .teacher-header-brand > div,
+  .teacher-headerBrand > div {
+    min-width: 0;
+  }
+
+  .teacher-header .teacher-header-brand,
+  .teacher-header .teacher-headerBrand {
+    flex: 1;
   }
 
   .teacher-header-right {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 8px !important;
+    width: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 6px !important;
   }
 
   .teacher-mobile-bottom-bar {
@@ -1181,6 +1197,58 @@ table {
 }
 
 @media (max-width: 420px) {
+  .teacher-header {
+    padding: 6px 10px !important;
+    min-height: 44px !important;
+    gap: 6px !important;
+  }
+
+  .teacher-headerBrand,
+  .teacher-header-brand {
+    gap: 8px !important;
+  }
+
+  .teacher-header-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .teacher-header .pageTitle,
+  .teacher-page-title {
+    font-size: 0.95rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .teacher-header .breadcrumb,
+  .teacher-breadcrumb {
+    display: none !important;
+  }
+
+  .teacher-header-right {
+    gap: 5px !important;
+  }
+
+  .teacher-header-right .teacher-logout-btn,
+  .teacher-header-right button {
+    min-width: 0 !important;
+  }
+
+  .teacher-header-right .teacher-logout-btn {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .teacher-header-right .teacher-header-year-pill {
+    padding: 2px 8px !important;
+    font-size: 0.62rem !important;
+  }
+
+  .teacher-header-right .teacher-header-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.75rem !important;
+  }
+
   .student-mobile-topbar {
     padding: 10px 10px calc(10px + var(--safe-area-inset-top));
     min-height: 60px;
