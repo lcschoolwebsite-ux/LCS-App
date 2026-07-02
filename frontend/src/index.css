@@ -475,25 +475,27 @@ input, select, textarea {
   .teacher-header {
     position: sticky !important;
     top: 0 !important;
+    min-height: 40px !important;
     height: auto !important;
-    padding: 12px 14px !important;
+    padding: 6px 10px !important;
     align-items: center !important;
     flex-direction: row !important;
-    gap: 10px !important;
+    gap: 6px !important;
   }
 
   .teacher-header-right {
     flex-wrap: nowrap !important;
     justify-content: flex-end !important;
-    gap: 8px !important;
+    gap: 4px !important;
     margin-left: auto !important;
-    overflow-x: auto !important;
+    overflow: hidden !important;
   }
 
   .teacher-header-right button,
-  .teacher-header-right .headerYearPill,
-  .teacher-header-right .headerAvatar {
-    min-height: 48px;
+  .teacher-header-right .teacher-header-year-pill,
+  .teacher-header-right .teacher-header-avatar {
+    min-height: 30px !important;
+    height: 30px !important;
   }
 
   .teacher-content {
@@ -501,7 +503,7 @@ input, select, textarea {
   }
 
   .teacher-logout-btn {
-    display: block !important;
+    display: none !important;
   }
 
   .teacher-hero-banner {
@@ -1084,17 +1086,18 @@ table {
   .teacher-header {
     position: sticky !important;
     top: 0 !important;
-    min-height: 48px !important;
+    min-height: 36px !important;
     height: auto !important;
-    padding: 8px 12px !important;
+    padding: 4px 8px !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 4px !important;
   }
 
   .teacher-headerBrand,
   .teacher-header-brand {
     min-width: 0;
+    gap: 6px !important;
   }
 
   .teacher-header-brand > div,
@@ -1111,7 +1114,7 @@ table {
     width: auto;
     justify-content: flex-end;
     flex-wrap: nowrap;
-    gap: 6px !important;
+    gap: 4px !important;
   }
 
   .teacher-mobile-bottom-bar {
@@ -1198,9 +1201,9 @@ table {
 
 @media (max-width: 420px) {
   .teacher-header {
-    padding: 6px 10px !important;
-    min-height: 44px !important;
-    gap: 6px !important;
+    padding: 4px 8px !important;
+    min-height: 36px !important;
+    gap: 4px !important;
   }
 
   .teacher-headerBrand,
@@ -1209,13 +1212,13 @@ table {
   }
 
   .teacher-header-logo {
-    width: 28px !important;
-    height: 28px !important;
+    width: 24px !important;
+    height: 24px !important;
   }
 
   .teacher-header .pageTitle,
   .teacher-page-title {
-    font-size: 0.95rem !important;
+    font-size: 0.82rem !important;
     line-height: 1.1 !important;
   }
 
@@ -1225,7 +1228,7 @@ table {
   }
 
   .teacher-header-right {
-    gap: 5px !important;
+    gap: 3px !important;
   }
 
   .teacher-header-right .teacher-logout-btn,
@@ -1234,19 +1237,23 @@ table {
   }
 
   .teacher-header-right .teacher-logout-btn {
-    width: 30px !important;
-    height: 30px !important;
+    display: none !important;
   }
 
   .teacher-header-right .teacher-header-year-pill {
-    padding: 2px 8px !important;
-    font-size: 0.62rem !important;
+    padding: 1px 6px !important;
+    font-size: 0.56rem !important;
   }
 
   .teacher-header-right .teacher-header-avatar {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.75rem !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .teacher-header .teacher-breadcrumb,
+  .teacher-breadcrumb {
+    display: none !important;
   }
 
   .student-mobile-topbar {
