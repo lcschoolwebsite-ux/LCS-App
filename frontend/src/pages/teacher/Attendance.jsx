@@ -160,7 +160,10 @@ export default function Attendance() {
   };
 
   const today = getLocalDate();
-  const pastDateOptions = markedDates.filter(record => record.date !== today);
+  const pastDateOptions = markedDates
+    .filter(record => record.date !== today)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, 3);
   const selectedHoliday = holidayInfo;
   const presentCount = students.filter(s => s.status === 'present').length;
   const absentCount = students.filter(s => s.status === 'absent').length;
@@ -175,7 +178,7 @@ export default function Attendance() {
         <>
 
       <div style={s.headerCard}>
-        <div style={s.controlsRow}>
+        <div style={s.controlsRow} className="teacher-attendance-header">
           <div style={{flex: 1.5}}>
             <label style={s.label}>1. Select Class & Section</label>
             <div style={s.inputWrap}>
@@ -199,6 +202,8 @@ export default function Attendance() {
               labelStyle={{ display: "none" }}
               rowStyle={s.datePickerRow}
               fieldStyle={s.dateHint}
+              className="teacher-attendance-date-picker"
+              rowClassName="teacher-attendance-date-picker-row"
               helperText="Pick a month first, then the day. Current day is prefilled, and previously marked dates are listed below."
             />
           </div>

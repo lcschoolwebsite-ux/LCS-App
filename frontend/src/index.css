@@ -591,6 +591,15 @@ input, select, textarea {
     width: 100%;
   }
 
+  .teacher-attendance-date-picker {
+    width: 100% !important;
+  }
+
+  .teacher-attendance-date-picker-row {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
   .teacher-attendance-list {
     max-height: none !important;
     padding-right: 0 !important;
@@ -1122,6 +1131,16 @@ table {
   .teacher-attendance-header select,
   .teacher-attendance-actions button {
     width: 100%;
+  }
+
+  .teacher-attendance-date-picker {
+    width: 100% !important;
+    margin-top: 4px;
+  }
+
+  .teacher-attendance-date-picker-row {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
   }
 
   .teacher-attendance-list {

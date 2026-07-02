@@ -98,7 +98,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
           <div style={s.attnSummary}>
-            <p><strong>{stats.classes - (stats.todayAttendance.unmarkedClasses?.length || 0)}</strong> classes marked today / {stats.classes} total</p>
+            <p style={s.markedSummary}><strong>{stats.classes - (stats.todayAttendance.unmarkedClasses?.length || 0)}</strong> classes marked today / {stats.classes} total</p>
             {stats.todayAttendance.unmarkedClassDetails?.length > 0 && (
               <div style={s.unmarkedBox}>
                 <div style={s.unmarkedHeader}>
@@ -203,6 +203,7 @@ const s = {
   },
   holidayMeta: { marginTop: "4px", fontSize: "0.8rem", color: "var(--text-muted)" },
   attnSummary: { textAlign: "center", marginTop: "16px" },
+  markedSummary: { color: "#000", margin: 0 },
   unmarkedBox: { display: "flex", flexDirection: "column", gap: "12px", background: "var(--danger-bg)", padding: "14px 16px", borderRadius: "12px", marginTop: "12px", textAlign: "left" },
   unmarkedHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" },
   unmarkedTitle: { fontSize: "0.9rem", fontWeight: "800", color: "var(--danger-text)", textTransform: "uppercase", letterSpacing: "0.04em" },

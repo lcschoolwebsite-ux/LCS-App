@@ -32,7 +32,9 @@ export default function MonthDatePicker({
   wrapperStyle,
   labelStyle,
   rowStyle,
-  fieldStyle
+  fieldStyle,
+  className,
+  rowClassName
 }) {
   const hasValue = typeof value === "string" && value.trim().length > 0;
   const current = hasValue ? parseDate(value) : null;
@@ -119,9 +121,9 @@ export default function MonthDatePicker({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "8px", ...wrapperStyle }}>
+    <div className={className} style={{ display: "flex", flexDirection: "column", gap: "8px", ...wrapperStyle }}>
       {label && <label style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.08em", ...labelStyle }}>{label}</label>}
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr 0.9fr", gap: "10px", ...rowStyle }}>
+      <div className={rowClassName} style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr 0.9fr", gap: "10px", ...rowStyle }}>
         <select style={baseStyle} value={hasValue ? selectedMonth : ""} onChange={handleMonthChange} aria-label={label ? `${label} month` : "Month"}>
           <option value="" disabled>Select Month</option>
           {monthLabels.map((monthName, index) => (
